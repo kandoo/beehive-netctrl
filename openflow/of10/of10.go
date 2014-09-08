@@ -343,23 +343,41 @@ func NewHeader10Conn(c net.Conn) Header10Conn {
 	}
 }
 
-func (c *Header10Conn) Write(pkts []Header10) error {
+func (c *Header10Conn) WriteHeader10(pkt Header10) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *Header10Conn) WriteHeader10s(pkts []Header10) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteHeader10(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *Header10Conn) Read(pkts []Header10) (int, error) {
+func (c *Header10Conn) ReadHeader10() (Header10, error) {
+	pkts := make([]Header10, 1)
+	_, err := c.ReadHeader10s(pkts)
+	if err != nil {
+		return NewHeader10(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *Header10Conn) ReadHeader10s(pkts []Header10) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -384,7 +402,7 @@ func (c *Header10Conn) Read(pkts []Header10) (int, error) {
 		p := NewHeader10WithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -473,23 +491,41 @@ func NewHelloConn(c net.Conn) HelloConn {
 	}
 }
 
-func (c *HelloConn) Write(pkts []Hello) error {
+func (c *HelloConn) WriteHello(pkt Hello) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *HelloConn) WriteHellos(pkts []Hello) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteHello(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *HelloConn) Read(pkts []Hello) (int, error) {
+func (c *HelloConn) ReadHello() (Hello, error) {
+	pkts := make([]Hello, 1)
+	_, err := c.ReadHellos(pkts)
+	if err != nil {
+		return NewHello(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *HelloConn) ReadHellos(pkts []Hello) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -514,7 +550,7 @@ func (c *HelloConn) Read(pkts []Hello) (int, error) {
 		p := NewHelloWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -604,23 +640,41 @@ func NewEchoRequestConn(c net.Conn) EchoRequestConn {
 	}
 }
 
-func (c *EchoRequestConn) Write(pkts []EchoRequest) error {
+func (c *EchoRequestConn) WriteEchoRequest(pkt EchoRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *EchoRequestConn) WriteEchoRequests(pkts []EchoRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteEchoRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *EchoRequestConn) Read(pkts []EchoRequest) (int, error) {
+func (c *EchoRequestConn) ReadEchoRequest() (EchoRequest, error) {
+	pkts := make([]EchoRequest, 1)
+	_, err := c.ReadEchoRequests(pkts)
+	if err != nil {
+		return NewEchoRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *EchoRequestConn) ReadEchoRequests(pkts []EchoRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -645,7 +699,7 @@ func (c *EchoRequestConn) Read(pkts []EchoRequest) (int, error) {
 		p := NewEchoRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -735,23 +789,41 @@ func NewEchoReplyConn(c net.Conn) EchoReplyConn {
 	}
 }
 
-func (c *EchoReplyConn) Write(pkts []EchoReply) error {
+func (c *EchoReplyConn) WriteEchoReply(pkt EchoReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *EchoReplyConn) WriteEchoReplys(pkts []EchoReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteEchoReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *EchoReplyConn) Read(pkts []EchoReply) (int, error) {
+func (c *EchoReplyConn) ReadEchoReply() (EchoReply, error) {
+	pkts := make([]EchoReply, 1)
+	_, err := c.ReadEchoReplys(pkts)
+	if err != nil {
+		return NewEchoReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *EchoReplyConn) ReadEchoReplys(pkts []EchoReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -776,7 +848,7 @@ func (c *EchoReplyConn) Read(pkts []EchoReply) (int, error) {
 		p := NewEchoReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -866,23 +938,41 @@ func NewFeaturesRequestConn(c net.Conn) FeaturesRequestConn {
 	}
 }
 
-func (c *FeaturesRequestConn) Write(pkts []FeaturesRequest) error {
+func (c *FeaturesRequestConn) WriteFeaturesRequest(pkt FeaturesRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FeaturesRequestConn) WriteFeaturesRequests(pkts []FeaturesRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFeaturesRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FeaturesRequestConn) Read(pkts []FeaturesRequest) (int, error) {
+func (c *FeaturesRequestConn) ReadFeaturesRequest() (FeaturesRequest, error) {
+	pkts := make([]FeaturesRequest, 1)
+	_, err := c.ReadFeaturesRequests(pkts)
+	if err != nil {
+		return NewFeaturesRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FeaturesRequestConn) ReadFeaturesRequests(pkts []FeaturesRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -907,7 +997,7 @@ func (c *FeaturesRequestConn) Read(pkts []FeaturesRequest) (int, error) {
 		p := NewFeaturesRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -997,23 +1087,41 @@ func NewGetConfigRequestConn(c net.Conn) GetConfigRequestConn {
 	}
 }
 
-func (c *GetConfigRequestConn) Write(pkts []GetConfigRequest) error {
+func (c *GetConfigRequestConn) WriteGetConfigRequest(pkt GetConfigRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *GetConfigRequestConn) WriteGetConfigRequests(pkts []GetConfigRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteGetConfigRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *GetConfigRequestConn) Read(pkts []GetConfigRequest) (int, error) {
+func (c *GetConfigRequestConn) ReadGetConfigRequest() (GetConfigRequest, error) {
+	pkts := make([]GetConfigRequest, 1)
+	_, err := c.ReadGetConfigRequests(pkts)
+	if err != nil {
+		return NewGetConfigRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *GetConfigRequestConn) ReadGetConfigRequests(pkts []GetConfigRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -1038,7 +1146,7 @@ func (c *GetConfigRequestConn) Read(pkts []GetConfigRequest) (int, error) {
 		p := NewGetConfigRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -1128,23 +1236,41 @@ func NewSwitchGetConfigReplyConn(c net.Conn) SwitchGetConfigReplyConn {
 	}
 }
 
-func (c *SwitchGetConfigReplyConn) Write(pkts []SwitchGetConfigReply) error {
+func (c *SwitchGetConfigReplyConn) WriteSwitchGetConfigReply(pkt SwitchGetConfigReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *SwitchGetConfigReplyConn) WriteSwitchGetConfigReplys(pkts []SwitchGetConfigReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteSwitchGetConfigReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *SwitchGetConfigReplyConn) Read(pkts []SwitchGetConfigReply) (int, error) {
+func (c *SwitchGetConfigReplyConn) ReadSwitchGetConfigReply() (SwitchGetConfigReply, error) {
+	pkts := make([]SwitchGetConfigReply, 1)
+	_, err := c.ReadSwitchGetConfigReplys(pkts)
+	if err != nil {
+		return NewSwitchGetConfigReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *SwitchGetConfigReplyConn) ReadSwitchGetConfigReplys(pkts []SwitchGetConfigReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -1169,7 +1295,7 @@ func (c *SwitchGetConfigReplyConn) Read(pkts []SwitchGetConfigReply) (int, error
 		p := NewSwitchGetConfigReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -1293,23 +1419,41 @@ func NewSwitchSetConfigConn(c net.Conn) SwitchSetConfigConn {
 	}
 }
 
-func (c *SwitchSetConfigConn) Write(pkts []SwitchSetConfig) error {
+func (c *SwitchSetConfigConn) WriteSwitchSetConfig(pkt SwitchSetConfig) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *SwitchSetConfigConn) WriteSwitchSetConfigs(pkts []SwitchSetConfig) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteSwitchSetConfig(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *SwitchSetConfigConn) Read(pkts []SwitchSetConfig) (int, error) {
+func (c *SwitchSetConfigConn) ReadSwitchSetConfig() (SwitchSetConfig, error) {
+	pkts := make([]SwitchSetConfig, 1)
+	_, err := c.ReadSwitchSetConfigs(pkts)
+	if err != nil {
+		return NewSwitchSetConfig(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *SwitchSetConfigConn) ReadSwitchSetConfigs(pkts []SwitchSetConfig) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -1334,7 +1478,7 @@ func (c *SwitchSetConfigConn) Read(pkts []SwitchSetConfig) (int, error) {
 		p := NewSwitchSetConfigWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -1458,23 +1602,41 @@ func NewPhysicalPortConn(c net.Conn) PhysicalPortConn {
 	}
 }
 
-func (c *PhysicalPortConn) Write(pkts []PhysicalPort) error {
+func (c *PhysicalPortConn) WritePhysicalPort(pkt PhysicalPort) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PhysicalPortConn) WritePhysicalPorts(pkts []PhysicalPort) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePhysicalPort(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PhysicalPortConn) Read(pkts []PhysicalPort) (int, error) {
+func (c *PhysicalPortConn) ReadPhysicalPort() (PhysicalPort, error) {
+	pkts := make([]PhysicalPort, 1)
+	_, err := c.ReadPhysicalPorts(pkts)
+	if err != nil {
+		return NewPhysicalPort(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PhysicalPortConn) ReadPhysicalPorts(pkts []PhysicalPort) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -1499,7 +1661,7 @@ func (c *PhysicalPortConn) Read(pkts []PhysicalPort) (int, error) {
 		p := NewPhysicalPortWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -1767,23 +1929,41 @@ func NewFeaturesReplyConn(c net.Conn) FeaturesReplyConn {
 	}
 }
 
-func (c *FeaturesReplyConn) Write(pkts []FeaturesReply) error {
+func (c *FeaturesReplyConn) WriteFeaturesReply(pkt FeaturesReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FeaturesReplyConn) WriteFeaturesReplys(pkts []FeaturesReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFeaturesReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FeaturesReplyConn) Read(pkts []FeaturesReply) (int, error) {
+func (c *FeaturesReplyConn) ReadFeaturesReply() (FeaturesReply, error) {
+	pkts := make([]FeaturesReply, 1)
+	_, err := c.ReadFeaturesReplys(pkts)
+	if err != nil {
+		return NewFeaturesReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FeaturesReplyConn) ReadFeaturesReplys(pkts []FeaturesReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -1808,7 +1988,7 @@ func (c *FeaturesReplyConn) Read(pkts []FeaturesReply) (int, error) {
 		p := NewFeaturesReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -2056,23 +2236,41 @@ func NewPortStatusConn(c net.Conn) PortStatusConn {
 	}
 }
 
-func (c *PortStatusConn) Write(pkts []PortStatus) error {
+func (c *PortStatusConn) WritePortStatus(pkt PortStatus) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PortStatusConn) WritePortStatuss(pkts []PortStatus) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePortStatus(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PortStatusConn) Read(pkts []PortStatus) (int, error) {
+func (c *PortStatusConn) ReadPortStatus() (PortStatus, error) {
+	pkts := make([]PortStatus, 1)
+	_, err := c.ReadPortStatuss(pkts)
+	if err != nil {
+		return NewPortStatus(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PortStatusConn) ReadPortStatuss(pkts []PortStatus) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -2097,7 +2295,7 @@ func (c *PortStatusConn) Read(pkts []PortStatus) (int, error) {
 		p := NewPortStatusWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -2255,23 +2453,41 @@ func NewPortModConn(c net.Conn) PortModConn {
 	}
 }
 
-func (c *PortModConn) Write(pkts []PortMod) error {
+func (c *PortModConn) WritePortMod(pkt PortMod) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PortModConn) WritePortMods(pkts []PortMod) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePortMod(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PortModConn) Read(pkts []PortMod) (int, error) {
+func (c *PortModConn) ReadPortMod() (PortMod, error) {
+	pkts := make([]PortMod, 1)
+	_, err := c.ReadPortMods(pkts)
+	if err != nil {
+		return NewPortMod(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PortModConn) ReadPortMods(pkts []PortMod) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -2296,7 +2512,7 @@ func (c *PortModConn) Read(pkts []PortMod) (int, error) {
 		p := NewPortModWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -2522,23 +2738,41 @@ func NewPacketInConn(c net.Conn) PacketInConn {
 	}
 }
 
-func (c *PacketInConn) Write(pkts []PacketIn) error {
+func (c *PacketInConn) WritePacketIn(pkt PacketIn) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PacketInConn) WritePacketIns(pkts []PacketIn) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePacketIn(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PacketInConn) Read(pkts []PacketIn) (int, error) {
+func (c *PacketInConn) ReadPacketIn() (PacketIn, error) {
+	pkts := make([]PacketIn, 1)
+	_, err := c.ReadPacketIns(pkts)
+	if err != nil {
+		return NewPacketIn(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PacketInConn) ReadPacketIns(pkts []PacketIn) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -2563,7 +2797,7 @@ func (c *PacketInConn) Read(pkts []PacketIn) (int, error) {
 		p := NewPacketInWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -2777,23 +3011,41 @@ func NewActionHeaderConn(c net.Conn) ActionHeaderConn {
 	}
 }
 
-func (c *ActionHeaderConn) Write(pkts []ActionHeader) error {
+func (c *ActionHeaderConn) WriteActionHeader(pkt ActionHeader) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionHeaderConn) WriteActionHeaders(pkts []ActionHeader) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionHeader(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionHeaderConn) Read(pkts []ActionHeader) (int, error) {
+func (c *ActionHeaderConn) ReadActionHeader() (ActionHeader, error) {
+	pkts := make([]ActionHeader, 1)
+	_, err := c.ReadActionHeaders(pkts)
+	if err != nil {
+		return NewActionHeader(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionHeaderConn) ReadActionHeaders(pkts []ActionHeader) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -2818,7 +3070,7 @@ func (c *ActionHeaderConn) Read(pkts []ActionHeader) (int, error) {
 		p := NewActionHeaderWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -2939,23 +3191,41 @@ func NewActionOutputConn(c net.Conn) ActionOutputConn {
 	}
 }
 
-func (c *ActionOutputConn) Write(pkts []ActionOutput) error {
+func (c *ActionOutputConn) WriteActionOutput(pkt ActionOutput) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionOutputConn) WriteActionOutputs(pkts []ActionOutput) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionOutput(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionOutputConn) Read(pkts []ActionOutput) (int, error) {
+func (c *ActionOutputConn) ReadActionOutput() (ActionOutput, error) {
+	pkts := make([]ActionOutput, 1)
+	_, err := c.ReadActionOutputs(pkts)
+	if err != nil {
+		return NewActionOutput(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionOutputConn) ReadActionOutputs(pkts []ActionOutput) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -2980,7 +3250,7 @@ func (c *ActionOutputConn) Read(pkts []ActionOutput) (int, error) {
 		p := NewActionOutputWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -3103,23 +3373,41 @@ func NewActionVlanVidConn(c net.Conn) ActionVlanVidConn {
 	}
 }
 
-func (c *ActionVlanVidConn) Write(pkts []ActionVlanVid) error {
+func (c *ActionVlanVidConn) WriteActionVlanVid(pkt ActionVlanVid) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionVlanVidConn) WriteActionVlanVids(pkts []ActionVlanVid) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionVlanVid(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionVlanVidConn) Read(pkts []ActionVlanVid) (int, error) {
+func (c *ActionVlanVidConn) ReadActionVlanVid() (ActionVlanVid, error) {
+	pkts := make([]ActionVlanVid, 1)
+	_, err := c.ReadActionVlanVids(pkts)
+	if err != nil {
+		return NewActionVlanVid(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionVlanVidConn) ReadActionVlanVids(pkts []ActionVlanVid) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -3144,7 +3432,7 @@ func (c *ActionVlanVidConn) Read(pkts []ActionVlanVid) (int, error) {
 		p := NewActionVlanVidWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -3284,23 +3572,41 @@ func NewActionVlanPcpConn(c net.Conn) ActionVlanPcpConn {
 	}
 }
 
-func (c *ActionVlanPcpConn) Write(pkts []ActionVlanPcp) error {
+func (c *ActionVlanPcpConn) WriteActionVlanPcp(pkt ActionVlanPcp) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionVlanPcpConn) WriteActionVlanPcps(pkts []ActionVlanPcp) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionVlanPcp(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionVlanPcpConn) Read(pkts []ActionVlanPcp) (int, error) {
+func (c *ActionVlanPcpConn) ReadActionVlanPcp() (ActionVlanPcp, error) {
+	pkts := make([]ActionVlanPcp, 1)
+	_, err := c.ReadActionVlanPcps(pkts)
+	if err != nil {
+		return NewActionVlanPcp(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionVlanPcpConn) ReadActionVlanPcps(pkts []ActionVlanPcp) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -3325,7 +3631,7 @@ func (c *ActionVlanPcpConn) Read(pkts []ActionVlanPcp) (int, error) {
 		p := NewActionVlanPcpWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -3465,23 +3771,41 @@ func NewActionDlSrcAddrConn(c net.Conn) ActionDlSrcAddrConn {
 	}
 }
 
-func (c *ActionDlSrcAddrConn) Write(pkts []ActionDlSrcAddr) error {
+func (c *ActionDlSrcAddrConn) WriteActionDlSrcAddr(pkt ActionDlSrcAddr) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionDlSrcAddrConn) WriteActionDlSrcAddrs(pkts []ActionDlSrcAddr) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionDlSrcAddr(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionDlSrcAddrConn) Read(pkts []ActionDlSrcAddr) (int, error) {
+func (c *ActionDlSrcAddrConn) ReadActionDlSrcAddr() (ActionDlSrcAddr, error) {
+	pkts := make([]ActionDlSrcAddr, 1)
+	_, err := c.ReadActionDlSrcAddrs(pkts)
+	if err != nil {
+		return NewActionDlSrcAddr(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionDlSrcAddrConn) ReadActionDlSrcAddrs(pkts []ActionDlSrcAddr) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -3506,7 +3830,7 @@ func (c *ActionDlSrcAddrConn) Read(pkts []ActionDlSrcAddr) (int, error) {
 		p := NewActionDlSrcAddrWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -3663,23 +3987,41 @@ func NewActionDlDstAddrConn(c net.Conn) ActionDlDstAddrConn {
 	}
 }
 
-func (c *ActionDlDstAddrConn) Write(pkts []ActionDlDstAddr) error {
+func (c *ActionDlDstAddrConn) WriteActionDlDstAddr(pkt ActionDlDstAddr) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionDlDstAddrConn) WriteActionDlDstAddrs(pkts []ActionDlDstAddr) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionDlDstAddr(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionDlDstAddrConn) Read(pkts []ActionDlDstAddr) (int, error) {
+func (c *ActionDlDstAddrConn) ReadActionDlDstAddr() (ActionDlDstAddr, error) {
+	pkts := make([]ActionDlDstAddr, 1)
+	_, err := c.ReadActionDlDstAddrs(pkts)
+	if err != nil {
+		return NewActionDlDstAddr(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionDlDstAddrConn) ReadActionDlDstAddrs(pkts []ActionDlDstAddr) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -3704,7 +4046,7 @@ func (c *ActionDlDstAddrConn) Read(pkts []ActionDlDstAddr) (int, error) {
 		p := NewActionDlDstAddrWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -3861,23 +4203,41 @@ func NewActionNwSrcAddrConn(c net.Conn) ActionNwSrcAddrConn {
 	}
 }
 
-func (c *ActionNwSrcAddrConn) Write(pkts []ActionNwSrcAddr) error {
+func (c *ActionNwSrcAddrConn) WriteActionNwSrcAddr(pkt ActionNwSrcAddr) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionNwSrcAddrConn) WriteActionNwSrcAddrs(pkts []ActionNwSrcAddr) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionNwSrcAddr(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionNwSrcAddrConn) Read(pkts []ActionNwSrcAddr) (int, error) {
+func (c *ActionNwSrcAddrConn) ReadActionNwSrcAddr() (ActionNwSrcAddr, error) {
+	pkts := make([]ActionNwSrcAddr, 1)
+	_, err := c.ReadActionNwSrcAddrs(pkts)
+	if err != nil {
+		return NewActionNwSrcAddr(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionNwSrcAddrConn) ReadActionNwSrcAddrs(pkts []ActionNwSrcAddr) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -3902,7 +4262,7 @@ func (c *ActionNwSrcAddrConn) Read(pkts []ActionNwSrcAddr) (int, error) {
 		p := NewActionNwSrcAddrWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -4008,23 +4368,41 @@ func NewActionNwDstAddrConn(c net.Conn) ActionNwDstAddrConn {
 	}
 }
 
-func (c *ActionNwDstAddrConn) Write(pkts []ActionNwDstAddr) error {
+func (c *ActionNwDstAddrConn) WriteActionNwDstAddr(pkt ActionNwDstAddr) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionNwDstAddrConn) WriteActionNwDstAddrs(pkts []ActionNwDstAddr) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionNwDstAddr(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionNwDstAddrConn) Read(pkts []ActionNwDstAddr) (int, error) {
+func (c *ActionNwDstAddrConn) ReadActionNwDstAddr() (ActionNwDstAddr, error) {
+	pkts := make([]ActionNwDstAddr, 1)
+	_, err := c.ReadActionNwDstAddrs(pkts)
+	if err != nil {
+		return NewActionNwDstAddr(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionNwDstAddrConn) ReadActionNwDstAddrs(pkts []ActionNwDstAddr) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -4049,7 +4427,7 @@ func (c *ActionNwDstAddrConn) Read(pkts []ActionNwDstAddr) (int, error) {
 		p := NewActionNwDstAddrWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -4155,23 +4533,41 @@ func NewActionTpSrcPortConn(c net.Conn) ActionTpSrcPortConn {
 	}
 }
 
-func (c *ActionTpSrcPortConn) Write(pkts []ActionTpSrcPort) error {
+func (c *ActionTpSrcPortConn) WriteActionTpSrcPort(pkt ActionTpSrcPort) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionTpSrcPortConn) WriteActionTpSrcPorts(pkts []ActionTpSrcPort) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionTpSrcPort(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionTpSrcPortConn) Read(pkts []ActionTpSrcPort) (int, error) {
+func (c *ActionTpSrcPortConn) ReadActionTpSrcPort() (ActionTpSrcPort, error) {
+	pkts := make([]ActionTpSrcPort, 1)
+	_, err := c.ReadActionTpSrcPorts(pkts)
+	if err != nil {
+		return NewActionTpSrcPort(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionTpSrcPortConn) ReadActionTpSrcPorts(pkts []ActionTpSrcPort) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -4196,7 +4592,7 @@ func (c *ActionTpSrcPortConn) Read(pkts []ActionTpSrcPort) (int, error) {
 		p := NewActionTpSrcPortWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -4336,23 +4732,41 @@ func NewActionTpDstPortConn(c net.Conn) ActionTpDstPortConn {
 	}
 }
 
-func (c *ActionTpDstPortConn) Write(pkts []ActionTpDstPort) error {
+func (c *ActionTpDstPortConn) WriteActionTpDstPort(pkt ActionTpDstPort) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionTpDstPortConn) WriteActionTpDstPorts(pkts []ActionTpDstPort) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionTpDstPort(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionTpDstPortConn) Read(pkts []ActionTpDstPort) (int, error) {
+func (c *ActionTpDstPortConn) ReadActionTpDstPort() (ActionTpDstPort, error) {
+	pkts := make([]ActionTpDstPort, 1)
+	_, err := c.ReadActionTpDstPorts(pkts)
+	if err != nil {
+		return NewActionTpDstPort(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionTpDstPortConn) ReadActionTpDstPorts(pkts []ActionTpDstPort) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -4377,7 +4791,7 @@ func (c *ActionTpDstPortConn) Read(pkts []ActionTpDstPort) (int, error) {
 		p := NewActionTpDstPortWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -4517,23 +4931,41 @@ func NewActionNwTosConn(c net.Conn) ActionNwTosConn {
 	}
 }
 
-func (c *ActionNwTosConn) Write(pkts []ActionNwTos) error {
+func (c *ActionNwTosConn) WriteActionNwTos(pkt ActionNwTos) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionNwTosConn) WriteActionNwToss(pkts []ActionNwTos) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionNwTos(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionNwTosConn) Read(pkts []ActionNwTos) (int, error) {
+func (c *ActionNwTosConn) ReadActionNwTos() (ActionNwTos, error) {
+	pkts := make([]ActionNwTos, 1)
+	_, err := c.ReadActionNwToss(pkts)
+	if err != nil {
+		return NewActionNwTos(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionNwTosConn) ReadActionNwToss(pkts []ActionNwTos) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -4558,7 +4990,7 @@ func (c *ActionNwTosConn) Read(pkts []ActionNwTos) (int, error) {
 		p := NewActionNwTosWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -4698,23 +5130,41 @@ func NewActionVendorHeaderConn(c net.Conn) ActionVendorHeaderConn {
 	}
 }
 
-func (c *ActionVendorHeaderConn) Write(pkts []ActionVendorHeader) error {
+func (c *ActionVendorHeaderConn) WriteActionVendorHeader(pkt ActionVendorHeader) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionVendorHeaderConn) WriteActionVendorHeaders(pkts []ActionVendorHeader) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionVendorHeader(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionVendorHeaderConn) Read(pkts []ActionVendorHeader) (int, error) {
+func (c *ActionVendorHeaderConn) ReadActionVendorHeader() (ActionVendorHeader, error) {
+	pkts := make([]ActionVendorHeader, 1)
+	_, err := c.ReadActionVendorHeaders(pkts)
+	if err != nil {
+		return NewActionVendorHeader(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionVendorHeaderConn) ReadActionVendorHeaders(pkts []ActionVendorHeader) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -4739,7 +5189,7 @@ func (c *ActionVendorHeaderConn) Read(pkts []ActionVendorHeader) (int, error) {
 		p := NewActionVendorHeaderWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -4845,23 +5295,41 @@ func NewPacketOutConn(c net.Conn) PacketOutConn {
 	}
 }
 
-func (c *PacketOutConn) Write(pkts []PacketOut) error {
+func (c *PacketOutConn) WritePacketOut(pkt PacketOut) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PacketOutConn) WritePacketOuts(pkts []PacketOut) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePacketOut(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PacketOutConn) Read(pkts []PacketOut) (int, error) {
+func (c *PacketOutConn) ReadPacketOut() (PacketOut, error) {
+	pkts := make([]PacketOut, 1)
+	_, err := c.ReadPacketOuts(pkts)
+	if err != nil {
+		return NewPacketOut(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PacketOutConn) ReadPacketOuts(pkts []PacketOut) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -4886,7 +5354,7 @@ func (c *PacketOutConn) Read(pkts []PacketOut) (int, error) {
 		p := NewPacketOutWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -5106,23 +5574,41 @@ func NewMatchConn(c net.Conn) MatchConn {
 	}
 }
 
-func (c *MatchConn) Write(pkts []Match) error {
+func (c *MatchConn) WriteMatch(pkt Match) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *MatchConn) WriteMatchs(pkts []Match) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteMatch(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *MatchConn) Read(pkts []Match) (int, error) {
+func (c *MatchConn) ReadMatch() (Match, error) {
+	pkts := make([]Match, 1)
+	_, err := c.ReadMatchs(pkts)
+	if err != nil {
+		return NewMatch(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *MatchConn) ReadMatchs(pkts []Match) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -5147,7 +5633,7 @@ func (c *MatchConn) Read(pkts []Match) (int, error) {
 		p := NewMatchWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -5551,23 +6037,41 @@ func NewFlowModConn(c net.Conn) FlowModConn {
 	}
 }
 
-func (c *FlowModConn) Write(pkts []FlowMod) error {
+func (c *FlowModConn) WriteFlowMod(pkt FlowMod) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FlowModConn) WriteFlowMods(pkts []FlowMod) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFlowMod(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FlowModConn) Read(pkts []FlowMod) (int, error) {
+func (c *FlowModConn) ReadFlowMod() (FlowMod, error) {
+	pkts := make([]FlowMod, 1)
+	_, err := c.ReadFlowMods(pkts)
+	if err != nil {
+		return NewFlowMod(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FlowModConn) ReadFlowMods(pkts []FlowMod) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -5592,7 +6096,7 @@ func (c *FlowModConn) Read(pkts []FlowMod) (int, error) {
 		p := NewFlowModWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -5874,23 +6378,41 @@ func NewFlowRemovedConn(c net.Conn) FlowRemovedConn {
 	}
 }
 
-func (c *FlowRemovedConn) Write(pkts []FlowRemoved) error {
+func (c *FlowRemovedConn) WriteFlowRemoved(pkt FlowRemoved) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FlowRemovedConn) WriteFlowRemoveds(pkts []FlowRemoved) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFlowRemoved(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FlowRemovedConn) Read(pkts []FlowRemoved) (int, error) {
+func (c *FlowRemovedConn) ReadFlowRemoved() (FlowRemoved, error) {
+	pkts := make([]FlowRemoved, 1)
+	_, err := c.ReadFlowRemoveds(pkts)
+	if err != nil {
+		return NewFlowRemoved(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FlowRemovedConn) ReadFlowRemoveds(pkts []FlowRemoved) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -5915,7 +6437,7 @@ func (c *FlowRemovedConn) Read(pkts []FlowRemoved) (int, error) {
 		p := NewFlowRemovedWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -6226,23 +6748,41 @@ func NewErrorMsgConn(c net.Conn) ErrorMsgConn {
 	}
 }
 
-func (c *ErrorMsgConn) Write(pkts []ErrorMsg) error {
+func (c *ErrorMsgConn) WriteErrorMsg(pkt ErrorMsg) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ErrorMsgConn) WriteErrorMsgs(pkts []ErrorMsg) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteErrorMsg(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ErrorMsgConn) Read(pkts []ErrorMsg) (int, error) {
+func (c *ErrorMsgConn) ReadErrorMsg() (ErrorMsg, error) {
+	pkts := make([]ErrorMsg, 1)
+	_, err := c.ReadErrorMsgs(pkts)
+	if err != nil {
+		return NewErrorMsg(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ErrorMsgConn) ReadErrorMsgs(pkts []ErrorMsg) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -6267,7 +6807,7 @@ func (c *ErrorMsgConn) Read(pkts []ErrorMsg) (int, error) {
 		p := NewErrorMsgWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -6430,23 +6970,41 @@ func NewStatsRequestConn(c net.Conn) StatsRequestConn {
 	}
 }
 
-func (c *StatsRequestConn) Write(pkts []StatsRequest) error {
+func (c *StatsRequestConn) WriteStatsRequest(pkt StatsRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *StatsRequestConn) WriteStatsRequests(pkts []StatsRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteStatsRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *StatsRequestConn) Read(pkts []StatsRequest) (int, error) {
+func (c *StatsRequestConn) ReadStatsRequest() (StatsRequest, error) {
+	pkts := make([]StatsRequest, 1)
+	_, err := c.ReadStatsRequests(pkts)
+	if err != nil {
+		return NewStatsRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *StatsRequestConn) ReadStatsRequests(pkts []StatsRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -6471,7 +7029,7 @@ func (c *StatsRequestConn) Read(pkts []StatsRequest) (int, error) {
 		p := NewStatsRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -6595,23 +7153,41 @@ func NewStatsReplyConn(c net.Conn) StatsReplyConn {
 	}
 }
 
-func (c *StatsReplyConn) Write(pkts []StatsReply) error {
+func (c *StatsReplyConn) WriteStatsReply(pkt StatsReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *StatsReplyConn) WriteStatsReplys(pkts []StatsReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteStatsReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *StatsReplyConn) Read(pkts []StatsReply) (int, error) {
+func (c *StatsReplyConn) ReadStatsReply() (StatsReply, error) {
+	pkts := make([]StatsReply, 1)
+	_, err := c.ReadStatsReplys(pkts)
+	if err != nil {
+		return NewStatsReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *StatsReplyConn) ReadStatsReplys(pkts []StatsReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -6636,7 +7212,7 @@ func (c *StatsReplyConn) Read(pkts []StatsReply) (int, error) {
 		p := NewStatsReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -6760,23 +7336,41 @@ func NewDescStatsConn(c net.Conn) DescStatsConn {
 	}
 }
 
-func (c *DescStatsConn) Write(pkts []DescStats) error {
+func (c *DescStatsConn) WriteDescStats(pkt DescStats) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *DescStatsConn) WriteDescStatss(pkts []DescStats) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteDescStats(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *DescStatsConn) Read(pkts []DescStats) (int, error) {
+func (c *DescStatsConn) ReadDescStats() (DescStats, error) {
+	pkts := make([]DescStats, 1)
+	_, err := c.ReadDescStatss(pkts)
+	if err != nil {
+		return NewDescStats(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *DescStatsConn) ReadDescStatss(pkts []DescStats) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -6801,7 +7395,7 @@ func (c *DescStatsConn) Read(pkts []DescStats) (int, error) {
 		p := NewDescStatsWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -7062,23 +7656,41 @@ func NewFlowStatsRequestConn(c net.Conn) FlowStatsRequestConn {
 	}
 }
 
-func (c *FlowStatsRequestConn) Write(pkts []FlowStatsRequest) error {
+func (c *FlowStatsRequestConn) WriteFlowStatsRequest(pkt FlowStatsRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FlowStatsRequestConn) WriteFlowStatsRequests(pkts []FlowStatsRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFlowStatsRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FlowStatsRequestConn) Read(pkts []FlowStatsRequest) (int, error) {
+func (c *FlowStatsRequestConn) ReadFlowStatsRequest() (FlowStatsRequest, error) {
+	pkts := make([]FlowStatsRequest, 1)
+	_, err := c.ReadFlowStatsRequests(pkts)
+	if err != nil {
+		return NewFlowStatsRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FlowStatsRequestConn) ReadFlowStatsRequests(pkts []FlowStatsRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -7103,7 +7715,7 @@ func (c *FlowStatsRequestConn) Read(pkts []FlowStatsRequest) (int, error) {
 		p := NewFlowStatsRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -7262,23 +7874,41 @@ func NewFlowStatsConn(c net.Conn) FlowStatsConn {
 	}
 }
 
-func (c *FlowStatsConn) Write(pkts []FlowStats) error {
+func (c *FlowStatsConn) WriteFlowStats(pkt FlowStats) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FlowStatsConn) WriteFlowStatss(pkts []FlowStats) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFlowStats(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FlowStatsConn) Read(pkts []FlowStats) (int, error) {
+func (c *FlowStatsConn) ReadFlowStats() (FlowStats, error) {
+	pkts := make([]FlowStats, 1)
+	_, err := c.ReadFlowStatss(pkts)
+	if err != nil {
+		return NewFlowStats(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FlowStatsConn) ReadFlowStatss(pkts []FlowStats) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -7303,7 +7933,7 @@ func (c *FlowStatsConn) Read(pkts []FlowStats) (int, error) {
 		p := NewFlowStatsWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -7667,23 +8297,41 @@ func NewFlowStatsReplyConn(c net.Conn) FlowStatsReplyConn {
 	}
 }
 
-func (c *FlowStatsReplyConn) Write(pkts []FlowStatsReply) error {
+func (c *FlowStatsReplyConn) WriteFlowStatsReply(pkt FlowStatsReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *FlowStatsReplyConn) WriteFlowStatsReplys(pkts []FlowStatsReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteFlowStatsReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *FlowStatsReplyConn) Read(pkts []FlowStatsReply) (int, error) {
+func (c *FlowStatsReplyConn) ReadFlowStatsReply() (FlowStatsReply, error) {
+	pkts := make([]FlowStatsReply, 1)
+	_, err := c.ReadFlowStatsReplys(pkts)
+	if err != nil {
+		return NewFlowStatsReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *FlowStatsReplyConn) ReadFlowStatsReplys(pkts []FlowStatsReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -7708,7 +8356,7 @@ func (c *FlowStatsReplyConn) Read(pkts []FlowStatsReply) (int, error) {
 		p := NewFlowStatsReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -7838,23 +8486,41 @@ func NewAggregateStatsRequestConn(c net.Conn) AggregateStatsRequestConn {
 	}
 }
 
-func (c *AggregateStatsRequestConn) Write(pkts []AggregateStatsRequest) error {
+func (c *AggregateStatsRequestConn) WriteAggregateStatsRequest(pkt AggregateStatsRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *AggregateStatsRequestConn) WriteAggregateStatsRequests(pkts []AggregateStatsRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteAggregateStatsRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *AggregateStatsRequestConn) Read(pkts []AggregateStatsRequest) (int, error) {
+func (c *AggregateStatsRequestConn) ReadAggregateStatsRequest() (AggregateStatsRequest, error) {
+	pkts := make([]AggregateStatsRequest, 1)
+	_, err := c.ReadAggregateStatsRequests(pkts)
+	if err != nil {
+		return NewAggregateStatsRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *AggregateStatsRequestConn) ReadAggregateStatsRequests(pkts []AggregateStatsRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -7879,7 +8545,7 @@ func (c *AggregateStatsRequestConn) Read(pkts []AggregateStatsRequest) (int, err
 		p := NewAggregateStatsRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -8038,23 +8704,41 @@ func NewAggregateStatsReplyConn(c net.Conn) AggregateStatsReplyConn {
 	}
 }
 
-func (c *AggregateStatsReplyConn) Write(pkts []AggregateStatsReply) error {
+func (c *AggregateStatsReplyConn) WriteAggregateStatsReply(pkt AggregateStatsReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *AggregateStatsReplyConn) WriteAggregateStatsReplys(pkts []AggregateStatsReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteAggregateStatsReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *AggregateStatsReplyConn) Read(pkts []AggregateStatsReply) (int, error) {
+func (c *AggregateStatsReplyConn) ReadAggregateStatsReply() (AggregateStatsReply, error) {
+	pkts := make([]AggregateStatsReply, 1)
+	_, err := c.ReadAggregateStatsReplys(pkts)
+	if err != nil {
+		return NewAggregateStatsReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *AggregateStatsReplyConn) ReadAggregateStatsReplys(pkts []AggregateStatsReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -8079,7 +8763,7 @@ func (c *AggregateStatsReplyConn) Read(pkts []AggregateStatsReply) (int, error) 
 		p := NewAggregateStatsReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -8255,23 +8939,41 @@ func NewTableStatsConn(c net.Conn) TableStatsConn {
 	}
 }
 
-func (c *TableStatsConn) Write(pkts []TableStats) error {
+func (c *TableStatsConn) WriteTableStats(pkt TableStats) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *TableStatsConn) WriteTableStatss(pkts []TableStats) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteTableStats(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *TableStatsConn) Read(pkts []TableStats) (int, error) {
+func (c *TableStatsConn) ReadTableStats() (TableStats, error) {
+	pkts := make([]TableStats, 1)
+	_, err := c.ReadTableStatss(pkts)
+	if err != nil {
+		return NewTableStats(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *TableStatsConn) ReadTableStatss(pkts []TableStats) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -8296,7 +8998,7 @@ func (c *TableStatsConn) Read(pkts []TableStats) (int, error) {
 		p := NewTableStatsWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -8557,23 +9259,41 @@ func NewPortStatsRequestConn(c net.Conn) PortStatsRequestConn {
 	}
 }
 
-func (c *PortStatsRequestConn) Write(pkts []PortStatsRequest) error {
+func (c *PortStatsRequestConn) WritePortStatsRequest(pkt PortStatsRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PortStatsRequestConn) WritePortStatsRequests(pkts []PortStatsRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePortStatsRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PortStatsRequestConn) Read(pkts []PortStatsRequest) (int, error) {
+func (c *PortStatsRequestConn) ReadPortStatsRequest() (PortStatsRequest, error) {
+	pkts := make([]PortStatsRequest, 1)
+	_, err := c.ReadPortStatsRequests(pkts)
+	if err != nil {
+		return NewPortStatsRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PortStatsRequestConn) ReadPortStatsRequests(pkts []PortStatsRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -8598,7 +9318,7 @@ func (c *PortStatsRequestConn) Read(pkts []PortStatsRequest) (int, error) {
 		p := NewPortStatsRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -8740,23 +9460,41 @@ func NewPortStatsConn(c net.Conn) PortStatsConn {
 	}
 }
 
-func (c *PortStatsConn) Write(pkts []PortStats) error {
+func (c *PortStatsConn) WritePortStats(pkt PortStats) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PortStatsConn) WritePortStatss(pkts []PortStats) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePortStats(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PortStatsConn) Read(pkts []PortStats) (int, error) {
+func (c *PortStatsConn) ReadPortStats() (PortStats, error) {
+	pkts := make([]PortStats, 1)
+	_, err := c.ReadPortStatss(pkts)
+	if err != nil {
+		return NewPortStats(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PortStatsConn) ReadPortStatss(pkts []PortStats) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -8781,7 +9519,7 @@ func (c *PortStatsConn) Read(pkts []PortStats) (int, error) {
 		p := NewPortStatsWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -9127,23 +9865,41 @@ func NewVendorHeaderConn(c net.Conn) VendorHeaderConn {
 	}
 }
 
-func (c *VendorHeaderConn) Write(pkts []VendorHeader) error {
+func (c *VendorHeaderConn) WriteVendorHeader(pkt VendorHeader) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *VendorHeaderConn) WriteVendorHeaders(pkts []VendorHeader) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteVendorHeader(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *VendorHeaderConn) Read(pkts []VendorHeader) (int, error) {
+func (c *VendorHeaderConn) ReadVendorHeader() (VendorHeader, error) {
+	pkts := make([]VendorHeader, 1)
+	_, err := c.ReadVendorHeaders(pkts)
+	if err != nil {
+		return NewVendorHeader(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *VendorHeaderConn) ReadVendorHeaders(pkts []VendorHeader) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -9168,7 +9924,7 @@ func (c *VendorHeaderConn) Read(pkts []VendorHeader) (int, error) {
 		p := NewVendorHeaderWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -9275,23 +10031,41 @@ func NewQueuePropHeaderConn(c net.Conn) QueuePropHeaderConn {
 	}
 }
 
-func (c *QueuePropHeaderConn) Write(pkts []QueuePropHeader) error {
+func (c *QueuePropHeaderConn) WriteQueuePropHeader(pkt QueuePropHeader) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *QueuePropHeaderConn) WriteQueuePropHeaders(pkts []QueuePropHeader) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteQueuePropHeader(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *QueuePropHeaderConn) Read(pkts []QueuePropHeader) (int, error) {
+func (c *QueuePropHeaderConn) ReadQueuePropHeader() (QueuePropHeader, error) {
+	pkts := make([]QueuePropHeader, 1)
+	_, err := c.ReadQueuePropHeaders(pkts)
+	if err != nil {
+		return NewQueuePropHeader(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *QueuePropHeaderConn) ReadQueuePropHeaders(pkts []QueuePropHeader) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -9316,7 +10090,7 @@ func (c *QueuePropHeaderConn) Read(pkts []QueuePropHeader) (int, error) {
 		p := NewQueuePropHeaderWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -9471,23 +10245,41 @@ func NewQueuePropMinRateConn(c net.Conn) QueuePropMinRateConn {
 	}
 }
 
-func (c *QueuePropMinRateConn) Write(pkts []QueuePropMinRate) error {
+func (c *QueuePropMinRateConn) WriteQueuePropMinRate(pkt QueuePropMinRate) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *QueuePropMinRateConn) WriteQueuePropMinRates(pkts []QueuePropMinRate) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteQueuePropMinRate(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *QueuePropMinRateConn) Read(pkts []QueuePropMinRate) (int, error) {
+func (c *QueuePropMinRateConn) ReadQueuePropMinRate() (QueuePropMinRate, error) {
+	pkts := make([]QueuePropMinRate, 1)
+	_, err := c.ReadQueuePropMinRates(pkts)
+	if err != nil {
+		return NewQueuePropMinRate(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *QueuePropMinRateConn) ReadQueuePropMinRates(pkts []QueuePropMinRate) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -9512,7 +10304,7 @@ func (c *QueuePropMinRateConn) Read(pkts []QueuePropMinRate) (int, error) {
 		p := NewQueuePropMinRateWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -9652,23 +10444,41 @@ func NewPacketQueueConn(c net.Conn) PacketQueueConn {
 	}
 }
 
-func (c *PacketQueueConn) Write(pkts []PacketQueue) error {
+func (c *PacketQueueConn) WritePacketQueue(pkt PacketQueue) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PacketQueueConn) WritePacketQueues(pkts []PacketQueue) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WritePacketQueue(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *PacketQueueConn) Read(pkts []PacketQueue) (int, error) {
+func (c *PacketQueueConn) ReadPacketQueue() (PacketQueue, error) {
+	pkts := make([]PacketQueue, 1)
+	_, err := c.ReadPacketQueues(pkts)
+	if err != nil {
+		return NewPacketQueue(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PacketQueueConn) ReadPacketQueues(pkts []PacketQueue) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -9693,7 +10503,7 @@ func (c *PacketQueueConn) Read(pkts []PacketQueue) (int, error) {
 		p := NewPacketQueueWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -9887,23 +10697,41 @@ func NewQueueGetConfigRequestConn(c net.Conn) QueueGetConfigRequestConn {
 	}
 }
 
-func (c *QueueGetConfigRequestConn) Write(pkts []QueueGetConfigRequest) error {
+func (c *QueueGetConfigRequestConn) WriteQueueGetConfigRequest(pkt QueueGetConfigRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *QueueGetConfigRequestConn) WriteQueueGetConfigRequests(pkts []QueueGetConfigRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteQueueGetConfigRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *QueueGetConfigRequestConn) Read(pkts []QueueGetConfigRequest) (int, error) {
+func (c *QueueGetConfigRequestConn) ReadQueueGetConfigRequest() (QueueGetConfigRequest, error) {
+	pkts := make([]QueueGetConfigRequest, 1)
+	_, err := c.ReadQueueGetConfigRequests(pkts)
+	if err != nil {
+		return NewQueueGetConfigRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *QueueGetConfigRequestConn) ReadQueueGetConfigRequests(pkts []QueueGetConfigRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -9928,7 +10756,7 @@ func (c *QueueGetConfigRequestConn) Read(pkts []QueueGetConfigRequest) (int, err
 		p := NewQueueGetConfigRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -10074,23 +10902,41 @@ func NewQueueGetConfigReplyConn(c net.Conn) QueueGetConfigReplyConn {
 	}
 }
 
-func (c *QueueGetConfigReplyConn) Write(pkts []QueueGetConfigReply) error {
+func (c *QueueGetConfigReplyConn) WriteQueueGetConfigReply(pkt QueueGetConfigReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *QueueGetConfigReplyConn) WriteQueueGetConfigReplys(pkts []QueueGetConfigReply) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteQueueGetConfigReply(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *QueueGetConfigReplyConn) Read(pkts []QueueGetConfigReply) (int, error) {
+func (c *QueueGetConfigReplyConn) ReadQueueGetConfigReply() (QueueGetConfigReply, error) {
+	pkts := make([]QueueGetConfigReply, 1)
+	_, err := c.ReadQueueGetConfigReplys(pkts)
+	if err != nil {
+		return NewQueueGetConfigReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *QueueGetConfigReplyConn) ReadQueueGetConfigReplys(pkts []QueueGetConfigReply) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -10115,7 +10961,7 @@ func (c *QueueGetConfigReplyConn) Read(pkts []QueueGetConfigReply) (int, error) 
 		p := NewQueueGetConfigReplyWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -10295,23 +11141,41 @@ func NewActionEnqueueConn(c net.Conn) ActionEnqueueConn {
 	}
 }
 
-func (c *ActionEnqueueConn) Write(pkts []ActionEnqueue) error {
+func (c *ActionEnqueueConn) WriteActionEnqueue(pkt ActionEnqueue) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *ActionEnqueueConn) WriteActionEnqueues(pkts []ActionEnqueue) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteActionEnqueue(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionEnqueueConn) Read(pkts []ActionEnqueue) (int, error) {
+func (c *ActionEnqueueConn) ReadActionEnqueue() (ActionEnqueue, error) {
+	pkts := make([]ActionEnqueue, 1)
+	_, err := c.ReadActionEnqueues(pkts)
+	if err != nil {
+		return NewActionEnqueue(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *ActionEnqueueConn) ReadActionEnqueues(pkts []ActionEnqueue) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -10336,7 +11200,7 @@ func (c *ActionEnqueueConn) Read(pkts []ActionEnqueue) (int, error) {
 		p := NewActionEnqueueWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -10493,23 +11357,41 @@ func NewQueueStatsRequestConn(c net.Conn) QueueStatsRequestConn {
 	}
 }
 
-func (c *QueueStatsRequestConn) Write(pkts []QueueStatsRequest) error {
+func (c *QueueStatsRequestConn) WriteQueueStatsRequest(pkt QueueStatsRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *QueueStatsRequestConn) WriteQueueStatsRequests(pkts []QueueStatsRequest) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteQueueStatsRequest(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *QueueStatsRequestConn) Read(pkts []QueueStatsRequest) (int, error) {
+func (c *QueueStatsRequestConn) ReadQueueStatsRequest() (QueueStatsRequest, error) {
+	pkts := make([]QueueStatsRequest, 1)
+	_, err := c.ReadQueueStatsRequests(pkts)
+	if err != nil {
+		return NewQueueStatsRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *QueueStatsRequestConn) ReadQueueStatsRequests(pkts []QueueStatsRequest) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -10534,7 +11416,7 @@ func (c *QueueStatsRequestConn) Read(pkts []QueueStatsRequest) (int, error) {
 		p := NewQueueStatsRequestWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -10693,23 +11575,41 @@ func NewQueueStatsConn(c net.Conn) QueueStatsConn {
 	}
 }
 
-func (c *QueueStatsConn) Write(pkts []QueueStats) error {
+func (c *QueueStatsConn) WriteQueueStats(pkt QueueStats) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *QueueStatsConn) WriteQueueStatss(pkts []QueueStats) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteQueueStats(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *QueueStatsConn) Read(pkts []QueueStats) (int, error) {
+func (c *QueueStatsConn) ReadQueueStats() (QueueStats, error) {
+	pkts := make([]QueueStats, 1)
+	_, err := c.ReadQueueStatss(pkts)
+	if err != nil {
+		return NewQueueStats(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *QueueStatsConn) ReadQueueStatss(pkts []QueueStats) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -10734,7 +11634,7 @@ func (c *QueueStatsConn) Read(pkts []QueueStats) (int, error) {
 		p := NewQueueStatsWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 

@@ -87,23 +87,41 @@ func NewHeaderConn(c net.Conn) HeaderConn {
 	}
 }
 
-func (c *HeaderConn) Write(pkts []Header) error {
+func (c *HeaderConn) WriteHeader(pkt Header) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *HeaderConn) WriteHeaders(pkts []Header) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteHeader(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *HeaderConn) Read(pkts []Header) (int, error) {
+func (c *HeaderConn) ReadHeader() (Header, error) {
+	pkts := make([]Header, 1)
+	_, err := c.ReadHeaders(pkts)
+	if err != nil {
+		return NewHeader(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *HeaderConn) ReadHeaders(pkts []Header) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -128,7 +146,7 @@ func (c *HeaderConn) Read(pkts []Header) (int, error) {
 		p := NewHeaderWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
@@ -283,23 +301,41 @@ func NewHelloConn(c net.Conn) HelloConn {
 	}
 }
 
-func (c *HelloConn) Write(pkts []Hello) error {
+func (c *HelloConn) WriteHello(pkt Hello) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.Conn.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *HelloConn) WriteHellos(pkts []Hello) error {
 	for _, p := range pkts {
-		s := p.Size()
-		b := p.Buffer()[:s]
-		n := 0
-		for s > 0 {
-			var err error
-			if n, err = c.Conn.Write(b); err != nil {
-				return fmt.Errorf("Error in write: %v", err)
-			}
-			s -= n
+		if err := c.WriteHello(p); err != nil {
+			return err
 		}
 	}
 	return nil
 }
 
-func (c *HelloConn) Read(pkts []Hello) (int, error) {
+func (c *HelloConn) ReadHello() (Hello, error) {
+	pkts := make([]Hello, 1)
+	_, err := c.ReadHellos(pkts)
+	if err != nil {
+		return NewHello(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *HelloConn) ReadHellos(pkts []Hello) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -324,7 +360,7 @@ func (c *HelloConn) Read(pkts []Hello) (int, error) {
 		p := NewHelloWithBuf(c.buf[s:])
 
 		pSize := p.Size()
-		if r < s+pSize {
+		if pSize == 0 || r < s+pSize {
 			break
 		}
 
