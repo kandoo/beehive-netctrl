@@ -1,10 +1,6 @@
 package nom
 
-import (
-	"bytes"
-	"encoding/gob"
-	"encoding/json"
-)
+import "encoding/json"
 
 // Network represents a virtual or physical network in NOM.
 type Network struct {
@@ -26,30 +22,22 @@ func ParseNetworkUID(id UID) NetworkID {
 	return NetworkID(id)
 }
 
-// GOBDecode decodes the network from b using GOB.
-func (n *Network) GOBDecode(b []byte) error {
-	buf := bytes.NewBuffer(b)
-	dec := gob.NewDecoder(buf)
-	return dec.Decode(n)
+// GobDecode decodes the network from the byte slice using Gob.
+func (n *Network) GobDecode(b []byte) error {
+	return ObjGobDecode(n, b)
 }
 
-// GOBEncode encodes the network into a byte array using GOB.
-func (n *Network) GOBEncode() ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(n)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+// GobEncode encodes the network into a byte slice using Gob.
+func (n *Network) GobEncode() ([]byte, error) {
+	return ObjGobEncode(n)
 }
 
-// JSONDecode decodes the network from a byte array using JSON.
+// JSONDecode decodes the network from a byte slice using JSON.
 func (n *Network) JSONDecode(b []byte) error {
 	return json.Unmarshal(b, n)
 }
 
-// JSONEncode encodes the network into a byte array using JSON.
+// JSONEncode encodes the network into a byte slice using JSON.
 func (n *Network) JSONEncode() ([]byte, error) {
 	return json.Marshal(n)
 }
