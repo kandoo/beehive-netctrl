@@ -1,6 +1,8 @@
 package openflow
 
 import (
+	"io"
+
 	"github.com/golang/glog"
 	"github.com/soheilhy/beehive-netctrl/nom"
 	"github.com/soheilhy/beehive-netctrl/openflow/of"
@@ -34,7 +36,13 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 	for {
 		n, err := c.ReadHeaders(pkts)
 		if err != nil {
-			glog.Errorf("Cannot read from the connection: %v", err)
+			if err == io.EOF {
+				glog.Info("Connection closed.")
+			} else {
+				glog.Errorf("Cannot read from the connection: %v", err)
+			}
+
+			c.driver.handleConnClose(c)
 			return
 		}
 
@@ -59,4 +67,9 @@ func (c *ofConn) Stop(ctx bh.RcvContext) {
 func (c *ofConn) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	pkt := msg.Data().(of.Header)
 	return c.WriteHeader(pkt)
+}
+
+func (c *ofConn) NodeUID() nom.UID {
+	node := nom.Node{ID: c.node}
+	return node.UID()
 }

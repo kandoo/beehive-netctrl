@@ -3,6 +3,7 @@ package openflow
 import (
 	"fmt"
 
+	"github.com/soheilhy/beehive-netctrl/nom"
 	"github.com/soheilhy/beehive-netctrl/openflow/of"
 	"github.com/soheilhy/beehive-netctrl/openflow/of10"
 	"github.com/soheilhy/beehive-netctrl/openflow/of12"
@@ -13,6 +14,7 @@ type ofDriver interface {
 	handshake(conn *ofConn) error
 	handlePkt(pkt of.Header, conn *ofConn) error
 	handleMsg(msg bh.Msg, conn *ofConn) error
+	handleConnClose(conn *ofConn)
 }
 
 type of10Driver struct{}
@@ -65,4 +67,21 @@ func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 
 func (d *of12Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 	return nil
+}
+
+func (d *of10Driver) handleConnClose(c *ofConn) {
+	emitNodeDisconnected(c)
+}
+
+func (d *of12Driver) handleConnClose(c *ofConn) {
+	emitNodeDisconnected(c)
+}
+
+func emitNodeDisconnected(c *ofConn) {
+	c.ctx.Emit(nom.NodeDisconnected{
+		ID: c.node,
+		Drivers: []nom.Driver{{
+			BeeID: c.ctx.BeeId(),
+		}},
+	})
 }

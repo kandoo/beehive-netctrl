@@ -79,17 +79,32 @@ func (d *of10Driver) handshake(c *ofConn) error {
 
 	glog.Infof("Handshake completed for switch %016x", frep.DatapathId())
 
-	c.node = nom.NodeID(frep.DatapathId())
-
-	for _, p := range frep.Ports() {
-		glog.Infof("Port (switch=%016x, no=%d, mac=%012x, name=%s)\n",
-			frep.DatapathId(), p.PortNo(), p.HwAddr(), p.Name())
-	}
-
 	glog.Infof("Disabling packet buffers in the switch.")
 	cfg := of10.NewSwitchSetConfig()
 	cfg.SetMissSendLen(0xFFFF)
 	c.WriteHeader(cfg.Header)
+
+	c.node = datapathIDToNodeID(frep.DatapathId())
+
+	c.ctx.Emit(nom.NodeConnected{
+		ID: c.node,
+		Drivers: []nom.Driver{{
+			BeeID: c.ctx.BeeId(),
+			Role:  nom.DriverRoleDefault,
+		}},
+	})
+
+	for _, p := range frep.Ports() {
+		glog.Infof("Port (switch=%016x, no=%d, mac=%012x, name=%s)\n",
+			frep.DatapathId(), p.PortNo(), p.HwAddr(), p.Name())
+		name := p.Name()
+		c.ctx.Emit(nom.Port{
+			ID:      portNoToPortID(uint32(p.PortNo())),
+			Name:    string(name[:]),
+			MACAddr: p.HwAddr(),
+			Node:    c.NodeUID(),
+		})
+	}
 
 	return nil
 }
@@ -119,17 +134,35 @@ func (d *of12Driver) handshake(c *ofConn) error {
 
 	glog.Infof("Handshake completed for switch %016x", frep.DatapathId())
 
-	c.node = nom.NodeID(frep.DatapathId())
-
-	for _, p := range frep.Ports() {
-		glog.Infof("Port (switch=%016x, no=%d, mac=%012x, name=%s)\n",
-			frep.DatapathId(), p.PortNo(), p.HwAddr(), p.Name())
-	}
-
 	glog.Infof("Disabling packet buffers in the switch.")
 	cfg := of12.NewSwitchSetConfig()
 	cfg.SetMissSendLen(0xFFFF)
 	c.WriteHeader(cfg.Header)
+
+	c.node = datapathIDToNodeID(frep.DatapathId())
+
+	c.ctx.Emit(nom.NodeConnected{
+		ID: c.node,
+		Drivers: []nom.Driver{{
+			BeeID: c.ctx.BeeId(),
+			Role:  nom.DriverRoleDefault,
+		}},
+		Capabilities: []nom.NodeCapability{
+			nom.CapDriverRole,
+		},
+	})
+
+	for _, p := range frep.Ports() {
+		glog.Infof("Port (switch=%016x, no=%d, mac=%012x, name=%s)\n",
+			frep.DatapathId(), p.PortNo(), p.HwAddr(), p.Name())
+		name := p.Name()
+		c.ctx.Emit(nom.PortAdded{
+			ID:      portNoToPortID(p.PortNo()),
+			Name:    string(name[:]),
+			MACAddr: p.HwAddr(),
+			Node:    c.NodeUID(),
+		})
+	}
 
 	return nil
 }
