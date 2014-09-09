@@ -23,40 +23,21 @@ func (p Port) UID() UID {
 	return UIDJoin(string(p.Node), string(p.ID))
 }
 
-// ParsePortUID parses a UID of a port and returns the respective network, node,
-// and port IDs.
-func ParsePortUID(id UID) (NetworkID, NodeID, PortID) {
+// ParsePortUID parses a UID of a port and returns the respective node and port
+// IDs.
+func ParsePortUID(id UID) (NodeID, PortID) {
 	s := UIDSplit(id)
-	return NetworkID(s[0]), NodeID(s[1]), PortID(s[2])
+	return NodeID(s[0]), PortID(s[1])
 }
 
-// AddLink adds an outgoing link to the port. Return an error if the link does
-// not belong to this port.
-func (p *Port) AddLink(l Link) error {
-	if l.From != p.UID() {
-		return fmt.Errorf("Link is outgoing from %s not from %s", l.From, p.UID())
-	}
-
-	p.Links = append(p.Links, l.UID())
-	return nil
+// GobDecode decodes the port from b using Gob.
+func (p *Port) GobDecode(b []byte) error {
+	return ObjGobDecode(p, b)
 }
 
-// GOBDecode decodes the port from b using GOB.
-func (p *Port) GOBDecode(b []byte) error {
-	buf := bytes.NewBuffer(b)
-	dec := gob.NewDecoder(buf)
-	return dec.Decode(p)
-}
-
-// GOBEncode encodes the port into a byte array using GOB.
-func (p *Port) GOBEncode() ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(p)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+// GobEncode encodes the port into a byte array using Gob.
+func (p *Port) GobEncode() ([]byte, error) {
+	return ObjGobEncode(p)
 }
 
 // JSONDecode decodes the port from a byte array using JSON.
