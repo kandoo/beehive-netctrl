@@ -1,19 +1,41 @@
 package nom
 
-import (
-	"bytes"
-	"encoding/gob"
-	"encoding/json"
+import "encoding/json"
 
-	"github.com/soheilhy/beehive/bh"
-)
+// NodeConnected is a message emitted when a node connects to a driver.
+type NodeConnected struct {
+	Node   Node
+	Driver Driver
+}
+
+// NodeDisconnected is a message emitted when a node disconnects from its
+// driver.
+type NodeDisconnected struct {
+	Node   Node
+	Driver Driver
+}
+
+// NodeJoined is a message emitted when a node joins the network through the
+// controller. It is always emitted after processing NodeConnected in the
+// controller.
+type NodeJoined Node
+
+// NodeLeft is a message emitted when a node disconnects from its driver. It is
+// always emitted after processing NodeDisconnected in the controller.
+type NodeLeft Node
+
+// NodeRoleChanged is a message emitted when a driver's role is changed for a
+// node.
+type DriverRoleChanged struct {
+	Node   UID
+	Driver Driver
+}
 
 // Node represents a forwarding element, such as switches and routers.
 type Node struct {
-	ID     NodeID
-	Net    UID
-	Ports  map[PortID]Port
-	Driver bh.BeeId
+	ID           NodeID
+	Net          UID
+	Capabilities []NodeCapability
 }
 
 // NodeID is the ID of a node. This must be unique among all nodes in the
@@ -22,32 +44,23 @@ type NodeID string
 
 // UID returns the node's unique ID. This id is in the form of net_id$$node_id.
 func (n Node) UID() UID {
-	return UIDJoin(string(n.Net), string(n.ID))
+	return UID(string(n.ID))
 }
 
-// ParseNodeUID parses a UID of a node and returns the respective network and
-// node IDs.
-func ParseNodeUID(id UID) (NetworkID, NodeID) {
+// ParseNodeUID parses a UID of a node and returns the respective node IDs.
+func ParseNodeUID(id UID) NodeID {
 	s := UIDSplit(id)
-	return NetworkID(s[0]), NodeID(s[1])
+	return NodeID(s[0])
 }
 
-// GOBDecode decodes the node from b using GOB.
-func (n *Node) GOBDecode(b []byte) error {
-	buf := bytes.NewBuffer(b)
-	dec := gob.NewDecoder(buf)
-	return dec.Decode(n)
+// GobDecode decodes the node from b using Gob.
+func (n *Node) GobDecode(b []byte) error {
+	return ObjGobDecode(n, b)
 }
 
-// GOBEncode encodes the node into a byte array using GOB.
-func (n *Node) GOBEncode() ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(n)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+// GobEncode encodes the node into a byte array using Gob.
+func (n *Node) GobEncode() ([]byte, error) {
+	return ObjGobEncode(n)
 }
 
 // JSONDecode decodes the node from a byte array using JSON.
@@ -59,3 +72,21 @@ func (n *Node) JSONDecode(b []byte) error {
 func (n *Node) JSONEncode() ([]byte, error) {
 	return json.Marshal(n)
 }
+
+func (n Node) HasCapability(c NodeCapability) bool {
+	for _, nc := range n.Capabilities {
+		if c == nc {
+			return true
+		}
+	}
+
+	return false
+}
+
+// NodeCapability is a capability of a NOM node.
+type NodeCapability uint32
+
+// Valid values for NodeCapability.
+const (
+	CapDriverRole NodeCapability = 1 << iota // Node can set the driver's role.
+)
