@@ -1,17 +1,28 @@
 package nom
 
-import (
-	"bytes"
-	"encoding/gob"
-	"encoding/json"
-	"fmt"
-)
+import "encoding/json"
+
+// PortAdded is emitted when a port is added to a node (or when the node
+// joins the network for the first time).
+type PortAdded Port
+
+// PortRemoved is emitted when a port is removed (or its node is disconnected
+// from the controller).
+type PortRemoved Port
+
+// PortChanged is emitted when a port's state or configuration is changed.
+type PortChanged Port
 
 // Port is either a physical or a virtual port of a node.
 type Port struct {
-	ID    PortID
-	Node  UID
-	Links []UID
+	ID      PortID      // ID is unique among the ports of this node.
+	Name    string      // Human-readable name of the port.
+	MACAddr MACAddr     // Hardware address of the port.
+	Node    UID         // The node.
+	Link    UID         // The outgoing link.
+	State   PortState   // Is the state of the port.
+	Config  PortConfig  // Is the configuration of the port.
+	Feature PortFeature // Features of this port.
 }
 
 // PortID is the ID of a port and is unique among the ports of a node.
@@ -49,3 +60,48 @@ func (p *Port) JSONDecode(b []byte) error {
 func (p *Port) JSONEncode() ([]byte, error) {
 	return json.Marshal(p)
 }
+
+// PortState is the current state of a port.
+type PortState uint8
+
+// Valid values for PortState.
+const (
+	PortStateUnknown PortState = iota // Port's state is unknown.
+	PortStateDown              = iota // Port is not connected to any link.
+	PortStateUp                = iota // Port is up and forwarding packets.
+	PortStateBlocked           = iota // Port is blocked.
+)
+
+// PortConfig is the NOM specific configuration of the port.
+type PortConfig uint8
+
+// Valid values for PortConfig.
+const (
+	PortConfigDown        PortConfig = 1 << iota // Down.
+	PortConfigDropPackets            = 1 << iota // Drop incoming packets.
+	PortConfigNoForward              = 1 << iota // Do not forward packets.
+	PortConfigNoFlood                = 1 << iota // Do not include in flood.
+	PortConfigNoPacketIn             = 1 << iota // Do not send packet ins.
+	PortConfigDisableStp             = 1 << iota // Disable STP.
+	PortConfigDropStp                = 1 << iota // Drop STP packets.
+)
+
+// PortFeature represents port features.
+type PortFeature uint16
+
+// Valid values for PortFeature
+const (
+	PortFeature10MBHD  PortFeature = 1 << iota // 10MB half-duplex.
+	PortFeature10MBFD              = 1 << iota // 10MB full-duplex.
+	PortFeature100MBHD             = 1 << iota // 100MB half-duplex.
+	PortFeature100MBFD             = 1 << iota // 100MB half-duplex.
+	PortFeature1GBHD               = 1 << iota // 1GB half-duplex.
+	PortFeature1GBFD               = 1 << iota // 1GB half-duplex.
+	PortFeature10GBHD              = 1 << iota // 10GB  half-duplex.
+	PortFeature10GBFD              = 1 << iota // 10GB half-duplex.
+	PortFeatureCopper              = 1 << iota // Copper.
+	PortFeatureFiber               = 1 << iota // Fiber.
+	PortFeatureAutoneg             = 1 << iota // Auto negotiation.
+	PortPause                      = 1 << iota // Pause.
+	PortPauseAsym                  = 1 << iota // Asymmetric pause.
+)
