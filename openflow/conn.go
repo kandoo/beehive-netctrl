@@ -53,6 +53,8 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 			}
 		}
 
+		c.HeaderConn.Flush()
+
 		pkts = pkts[n:]
 		if len(pkts) == 0 {
 			pkts = make([]of.Header, c.cfg.readBufLen)
