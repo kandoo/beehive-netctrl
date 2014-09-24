@@ -11,10 +11,10 @@ import (
 
 // Object is the interface of all structs in the network object model.
 type Object interface {
-	// GobDecode decodes the object from a byte array using the Gob encoding.
-	GobDecode(b []byte) error
-	// GobEncode encodes the object into a byte array using the Gob encoding.
-	GobEncode() ([]byte, error)
+	// GoDecode decodes the object from a byte array using the Gob encoding.
+	GoDecode(b []byte) error
+	// GoEncode encodes the object into a byte array using the Gob encoding.
+	GoEncode() ([]byte, error)
 	// JSONDecode decodes the object from a byte array using the JSON encoding.
 	JSONDecode(b []byte) error
 	// JSONEncode encodes the object into a byte array using the JSON encoding.
@@ -24,15 +24,15 @@ type Object interface {
 	UID() UID
 }
 
-// GobDecode decodes the object from b using Gob.
-func ObjGobDecode(obj interface{}, b []byte) error {
+// GoDecode decodes the object from b using Gob.
+func ObjGoDecode(obj interface{}, b []byte) error {
 	buf := bytes.NewBuffer(b)
 	dec := gob.NewDecoder(buf)
 	return dec.Decode(obj)
 }
 
-// GobEncode encodes the object into a byte array using Gob.
-func ObjGobEncode(obj interface{}) ([]byte, error) {
+// GoEncode encodes the object into a byte array using Gob.
+func ObjGoEncode(obj interface{}) ([]byte, error) {
 	var buf bytes.Buffer
 	enc := gob.NewEncoder(&buf)
 	err := enc.Encode(obj)
@@ -42,13 +42,13 @@ func ObjGobEncode(obj interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func DictGet(d bh.Dictionary, k bh.Key, obj Object) error {
+func DictGet(d bh.Dict, k bh.Key, obj Object) error {
 	v, err := d.Get(k)
 	if err != nil {
 		return err
 	}
 
-	if err = obj.GobDecode(v); err != nil {
+	if err = obj.GoDecode(v); err != nil {
 		glog.Errorf("Error in decoding %s from dictionary %s: %v",
 			reflect.TypeOf(obj).String(), d.Name(), err)
 		return err
@@ -57,8 +57,8 @@ func DictGet(d bh.Dictionary, k bh.Key, obj Object) error {
 	return nil
 }
 
-func DictPut(d bh.Dictionary, k bh.Key, obj Object) error {
-	v, err := obj.GobEncode()
+func DictPut(d bh.Dict, k bh.Key, obj Object) error {
+	v, err := obj.GoEncode()
 	if err != nil {
 		return err
 	}

@@ -22,14 +22,14 @@ func ParseNetworkUID(id UID) NetworkID {
 	return NetworkID(id)
 }
 
-// GobDecode decodes the network from the byte slice using Gob.
-func (n *Network) GobDecode(b []byte) error {
-	return ObjGobDecode(n, b)
+// GoDecode decodes the network from the byte slice using Gob.
+func (n *Network) GoDecode(b []byte) error {
+	return ObjGoDecode(n, b)
 }
 
-// GobEncode encodes the network into a byte slice using Gob.
-func (n *Network) GobEncode() ([]byte, error) {
-	return ObjGobEncode(n)
+// GoEncode encodes the network into a byte slice using Gob.
+func (n *Network) GoEncode() ([]byte, error) {
+	return ObjGoEncode(n)
 }
 
 // JSONDecode decodes the network from a byte slice using JSON.

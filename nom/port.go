@@ -41,14 +41,14 @@ func ParsePortUID(id UID) (NodeID, PortID) {
 	return NodeID(s[0]), PortID(s[1])
 }
 
-// GobDecode decodes the port from b using Gob.
-func (p *Port) GobDecode(b []byte) error {
-	return ObjGobDecode(p, b)
+// GoDecode decodes the port from b using Gob.
+func (p *Port) GoDecode(b []byte) error {
+	return ObjGoDecode(p, b)
 }
 
-// GobEncode encodes the port into a byte array using Gob.
-func (p *Port) GobEncode() ([]byte, error) {
-	return ObjGobEncode(p)
+// GoEncode encodes the port into a byte array using Gob.
+func (p *Port) GoEncode() ([]byte, error) {
+	return ObjGoEncode(p)
 }
 
 // JSONDecode decodes the port from a byte array using JSON.

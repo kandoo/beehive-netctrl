@@ -17,7 +17,7 @@ type ofConn struct {
 	of.HeaderConn
 	cfg    ofConnConfig
 	ctx    bh.RcvContext
-	node   nom.NodeID
+	node   nom.Node
 	driver ofDriver
 }
 
@@ -70,6 +70,5 @@ func (c *ofConn) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 }
 
 func (c *ofConn) NodeUID() nom.UID {
-	node := nom.Node{ID: c.node}
-	return node.UID()
+	return c.node.UID()
 }

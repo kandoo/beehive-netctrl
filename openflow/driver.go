@@ -79,9 +79,9 @@ func (d *of12Driver) handleConnClose(c *ofConn) {
 
 func emitNodeDisconnected(c *ofConn) {
 	c.ctx.Emit(nom.NodeDisconnected{
-		ID: c.node,
-		Drivers: []nom.Driver{{
-			BeeID: c.ctx.BeeId(),
-		}},
+		Node: c.node,
+		Driver: nom.Driver{
+			BeeID: c.ctx.BeeID(),
+		},
 	})
 }

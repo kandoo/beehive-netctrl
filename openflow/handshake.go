@@ -47,7 +47,7 @@ func (c *ofConn) handshake() (ofDriver, error) {
 		return nil, err
 	}
 
-	if c.node == nom.NodeID(0) {
+	if c.node.ID == nom.NodeID(0) {
 		return nil, errors.New("Invalid node after handshake")
 	}
 
@@ -84,14 +84,18 @@ func (d *of10Driver) handshake(c *ofConn) error {
 	cfg.SetMissSendLen(0xFFFF)
 	c.WriteHeader(cfg.Header)
 
-	c.node = datapathIDToNodeID(frep.DatapathId())
+	nodeID := datapathIDToNodeID(frep.DatapathId())
+	c.node = nom.Node{
+		ID:           nodeID,
+		Capabilities: nil,
+	}
 
 	c.ctx.Emit(nom.NodeConnected{
-		ID: c.node,
-		Drivers: []nom.Driver{{
-			BeeID: c.ctx.BeeId(),
+		Node: c.node,
+		Driver: nom.Driver{
+			BeeID: c.ctx.BeeID(),
 			Role:  nom.DriverRoleDefault,
-		}},
+		},
 	})
 
 	for _, p := range frep.Ports() {
@@ -139,16 +143,19 @@ func (d *of12Driver) handshake(c *ofConn) error {
 	cfg.SetMissSendLen(0xFFFF)
 	c.WriteHeader(cfg.Header)
 
-	c.node = datapathIDToNodeID(frep.DatapathId())
-
-	c.ctx.Emit(nom.NodeConnected{
-		ID: c.node,
-		Drivers: []nom.Driver{{
-			BeeID: c.ctx.BeeId(),
-			Role:  nom.DriverRoleDefault,
-		}},
+	nodeID := datapathIDToNodeID(frep.DatapathId())
+	c.node = nom.Node{
+		ID: nodeID,
 		Capabilities: []nom.NodeCapability{
 			nom.CapDriverRole,
+		},
+	}
+
+	c.ctx.Emit(nom.NodeConnected{
+		Node: c.node,
+		Driver: nom.Driver{
+			BeeID: c.ctx.BeeID(),
+			Role:  nom.DriverRoleDefault,
 		},
 	})
 

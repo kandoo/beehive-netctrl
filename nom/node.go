@@ -53,14 +53,14 @@ func ParseNodeUID(id UID) NodeID {
 	return NodeID(s[0])
 }
 
-// GobDecode decodes the node from b using Gob.
-func (n *Node) GobDecode(b []byte) error {
-	return ObjGobDecode(n, b)
+// GoDecode decodes the node from b using Gob.
+func (n *Node) GoDecode(b []byte) error {
+	return ObjGoDecode(n, b)
 }
 
-// GobEncode encodes the node into a byte array using Gob.
-func (n *Node) GobEncode() ([]byte, error) {
-	return ObjGobEncode(n)
+// GoEncode encodes the node into a byte array using Gob.
+func (n *Node) GoEncode() ([]byte, error) {
+	return ObjGoEncode(n)
 }
 
 // JSONDecode decodes the node from a byte array using JSON.

@@ -1,16 +1,13 @@
 package nom
 
-import (
-	"bytes"
-	"encoding/gob"
-	"encoding/json"
-)
+import "encoding/json"
 
 // Link represents an outgoing link from a port.
 type Link struct {
-	ID   LinkID // Link's ID.
-	From UID    // From is the link's port.
-	To   []UID  // To stores the port(s) connected to From using this link.
+	ID    LinkID    // Link's ID.
+	From  UID       // From is the link's port.
+	To    []UID     // To stores the port(s) connected to From using this link.
+	State LinkState // The link's state.
 }
 
 // LinkID is a link's ID which is unique among the outgoing links of a port.
@@ -22,29 +19,20 @@ func (l Link) UID() UID {
 	return UIDJoin(string(l.From), string(l.ID))
 }
 
-// ParseLinkUID parses a link UID into the respetive network, node, port, and
-// link ids.
-func ParseLinkUID(id UID) (NetworkID, NodeID, PortID, LinkID) {
+// ParseLinkUID parses a link UID into the respetive node, port, and link ids.
+func ParseLinkUID(id UID) (NodeID, PortID, LinkID) {
 	s := UIDSplit(id)
-	return NetworkID(s[0]), NodeID(s[1]), PortID(s[2]), LinkID(s[3])
+	return NodeID(s[0]), PortID(s[1]), LinkID(s[2])
 }
 
-// GOBDecode decodes the link from b using GOB.
-func (l *Link) GOBDecode(b []byte) error {
-	buf := bytes.NewBuffer(b)
-	dec := gob.NewDecoder(buf)
-	return dec.Decode(l)
+// GoDecode decodes the link from b using Gob.
+func (l *Link) GoDecode(b []byte) error {
+	return ObjGoDecode(l, b)
 }
 
-// GOBEncode encodes the node into a byte array using GOB.
-func (l *Link) GOBEncode() ([]byte, error) {
-	var buf bytes.Buffer
-	enc := gob.NewEncoder(&buf)
-	err := enc.Encode(l)
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+// GoEncode encodes the node into a byte array using Gob.
+func (l *Link) GoEncode() ([]byte, error) {
+	return ObjGoEncode(l)
 }
 
 // JSONDecode decodes the node from a byte array using JSON.
@@ -56,3 +44,13 @@ func (l *Link) JSONDecode(b []byte) error {
 func (l *Link) JSONEncode() ([]byte, error) {
 	return json.Marshal(l)
 }
+
+// LinkState represents the status of a link.
+type LinkState uint8
+
+// Valid values for LinkState.
+const (
+	LinkStateUnknown LinkState = iota
+	LinkStateUp                = iota
+	LinkStateDown              = iota
+)
