@@ -2,6 +2,7 @@
 package ofmeta
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"

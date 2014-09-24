@@ -8,7 +8,9 @@ import (
 )
 
 func (of *of10Driver) handlePacketIn(in of10.PacketIn, c *ofConn) error {
-	out := of10.NewPacketOut()
+	buf := make([]byte, 32)
+	out := of10.NewPacketOutWithBuf(buf)
+	out.Init()
 	out.SetBufferId(in.BufferId())
 	out.SetInPort(in.InPort())
 

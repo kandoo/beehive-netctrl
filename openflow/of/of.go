@@ -2,6 +2,7 @@
 package of
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"
@@ -76,6 +77,7 @@ func (this Header) Clone() (Header, error) {
 
 type HeaderConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -83,6 +85,7 @@ type HeaderConn struct {
 func NewHeaderConn(c net.Conn) HeaderConn {
 	return HeaderConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -93,7 +96,7 @@ func (c *HeaderConn) WriteHeader(pkt Header) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -109,6 +112,10 @@ func (c *HeaderConn) WriteHeaders(pkts []Header) error {
 		}
 	}
 	return nil
+}
+
+func (c *HeaderConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *HeaderConn) ReadHeader() (Header, error) {
@@ -290,6 +297,7 @@ func (this Hello) Clone() (Hello, error) {
 
 type HelloConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -297,6 +305,7 @@ type HelloConn struct {
 func NewHelloConn(c net.Conn) HelloConn {
 	return HelloConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -307,7 +316,7 @@ func (c *HelloConn) WriteHello(pkt Hello) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -323,6 +332,10 @@ func (c *HelloConn) WriteHellos(pkts []Hello) error {
 		}
 	}
 	return nil
+}
+
+func (c *HelloConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *HelloConn) ReadHello() (Hello, error) {

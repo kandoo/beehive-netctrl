@@ -32,6 +32,7 @@ func (c *ofConn) handshake() (ofDriver, error) {
 	if err = c.WriteHeader(h.Header); err != nil {
 		return nil, err
 	}
+	c.Flush()
 
 	glog.V(2).Info("Sent hello to the switch")
 
@@ -59,6 +60,7 @@ func (d *of10Driver) handshake(c *ofConn) error {
 	if err := c.WriteHeader(freq.Header); err != nil {
 		return err
 	}
+	c.Flush()
 
 	glog.V(2).Info("Sent features request to the switch")
 

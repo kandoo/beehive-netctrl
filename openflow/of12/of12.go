@@ -2,6 +2,7 @@
 package of12
 
 import (
+	"bufio"
 	"bytes"
 	"encoding/binary"
 	"errors"
@@ -409,6 +410,7 @@ func (this Header12) Clone() (Header12, error) {
 
 type Header12Conn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -416,6 +418,7 @@ type Header12Conn struct {
 func NewHeader12Conn(c net.Conn) Header12Conn {
 	return Header12Conn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -426,7 +429,7 @@ func (c *Header12Conn) WriteHeader12(pkt Header12) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -442,6 +445,10 @@ func (c *Header12Conn) WriteHeader12s(pkts []Header12) error {
 		}
 	}
 	return nil
+}
+
+func (c *Header12Conn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *Header12Conn) ReadHeader12() (Header12, error) {
@@ -557,6 +564,7 @@ func (this Hello) Clone() (Hello, error) {
 
 type HelloConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -564,6 +572,7 @@ type HelloConn struct {
 func NewHelloConn(c net.Conn) HelloConn {
 	return HelloConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -574,7 +583,7 @@ func (c *HelloConn) WriteHello(pkt Hello) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -590,6 +599,10 @@ func (c *HelloConn) WriteHellos(pkts []Hello) error {
 		}
 	}
 	return nil
+}
+
+func (c *HelloConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *HelloConn) ReadHello() (Hello, error) {
@@ -706,6 +719,7 @@ func (this EchoRequest) Clone() (EchoRequest, error) {
 
 type EchoRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -713,6 +727,7 @@ type EchoRequestConn struct {
 func NewEchoRequestConn(c net.Conn) EchoRequestConn {
 	return EchoRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -723,7 +738,7 @@ func (c *EchoRequestConn) WriteEchoRequest(pkt EchoRequest) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -739,6 +754,10 @@ func (c *EchoRequestConn) WriteEchoRequests(pkts []EchoRequest) error {
 		}
 	}
 	return nil
+}
+
+func (c *EchoRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *EchoRequestConn) ReadEchoRequest() (EchoRequest, error) {
@@ -855,6 +874,7 @@ func (this EchoReply) Clone() (EchoReply, error) {
 
 type EchoReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -862,6 +882,7 @@ type EchoReplyConn struct {
 func NewEchoReplyConn(c net.Conn) EchoReplyConn {
 	return EchoReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -872,7 +893,7 @@ func (c *EchoReplyConn) WriteEchoReply(pkt EchoReply) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -888,6 +909,10 @@ func (c *EchoReplyConn) WriteEchoReplys(pkts []EchoReply) error {
 		}
 	}
 	return nil
+}
+
+func (c *EchoReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *EchoReplyConn) ReadEchoReply() (EchoReply, error) {
@@ -1004,6 +1029,7 @@ func (this FeaturesRequest) Clone() (FeaturesRequest, error) {
 
 type FeaturesRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -1011,6 +1037,7 @@ type FeaturesRequestConn struct {
 func NewFeaturesRequestConn(c net.Conn) FeaturesRequestConn {
 	return FeaturesRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -1021,7 +1048,7 @@ func (c *FeaturesRequestConn) WriteFeaturesRequest(pkt FeaturesRequest) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -1037,6 +1064,10 @@ func (c *FeaturesRequestConn) WriteFeaturesRequests(pkts []FeaturesRequest) erro
 		}
 	}
 	return nil
+}
+
+func (c *FeaturesRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FeaturesRequestConn) ReadFeaturesRequest() (FeaturesRequest, error) {
@@ -1153,6 +1184,7 @@ func (this GetConfigRequest) Clone() (GetConfigRequest, error) {
 
 type GetConfigRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -1160,6 +1192,7 @@ type GetConfigRequestConn struct {
 func NewGetConfigRequestConn(c net.Conn) GetConfigRequestConn {
 	return GetConfigRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -1170,7 +1203,7 @@ func (c *GetConfigRequestConn) WriteGetConfigRequest(pkt GetConfigRequest) error
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -1186,6 +1219,10 @@ func (c *GetConfigRequestConn) WriteGetConfigRequests(pkts []GetConfigRequest) e
 		}
 	}
 	return nil
+}
+
+func (c *GetConfigRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *GetConfigRequestConn) ReadGetConfigRequest() (GetConfigRequest, error) {
@@ -1302,6 +1339,7 @@ func (this SwitchGetConfigReply) Clone() (SwitchGetConfigReply, error) {
 
 type SwitchGetConfigReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -1309,6 +1347,7 @@ type SwitchGetConfigReplyConn struct {
 func NewSwitchGetConfigReplyConn(c net.Conn) SwitchGetConfigReplyConn {
 	return SwitchGetConfigReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -1319,7 +1358,7 @@ func (c *SwitchGetConfigReplyConn) WriteSwitchGetConfigReply(pkt SwitchGetConfig
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -1335,6 +1374,10 @@ func (c *SwitchGetConfigReplyConn) WriteSwitchGetConfigReplys(pkts []SwitchGetCo
 		}
 	}
 	return nil
+}
+
+func (c *SwitchGetConfigReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *SwitchGetConfigReplyConn) ReadSwitchGetConfigReply() (SwitchGetConfigReply, error) {
@@ -1485,6 +1528,7 @@ func (this SwitchSetConfig) Clone() (SwitchSetConfig, error) {
 
 type SwitchSetConfigConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -1492,6 +1536,7 @@ type SwitchSetConfigConn struct {
 func NewSwitchSetConfigConn(c net.Conn) SwitchSetConfigConn {
 	return SwitchSetConfigConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -1502,7 +1547,7 @@ func (c *SwitchSetConfigConn) WriteSwitchSetConfig(pkt SwitchSetConfig) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -1518,6 +1563,10 @@ func (c *SwitchSetConfigConn) WriteSwitchSetConfigs(pkts []SwitchSetConfig) erro
 		}
 	}
 	return nil
+}
+
+func (c *SwitchSetConfigConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *SwitchSetConfigConn) ReadSwitchSetConfig() (SwitchSetConfig, error) {
@@ -1668,6 +1717,7 @@ func (this Port) Clone() (Port, error) {
 
 type PortConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -1675,6 +1725,7 @@ type PortConn struct {
 func NewPortConn(c net.Conn) PortConn {
 	return PortConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -1685,7 +1736,7 @@ func (c *PortConn) WritePort(pkt Port) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -1701,6 +1752,10 @@ func (c *PortConn) WritePorts(pkts []Port) error {
 		}
 	}
 	return nil
+}
+
+func (c *PortConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PortConn) ReadPort() (Port, error) {
@@ -2097,6 +2152,7 @@ func (this FeaturesReply) Clone() (FeaturesReply, error) {
 
 type FeaturesReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -2104,6 +2160,7 @@ type FeaturesReplyConn struct {
 func NewFeaturesReplyConn(c net.Conn) FeaturesReplyConn {
 	return FeaturesReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -2114,7 +2171,7 @@ func (c *FeaturesReplyConn) WriteFeaturesReply(pkt FeaturesReply) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -2130,6 +2187,10 @@ func (c *FeaturesReplyConn) WriteFeaturesReplys(pkts []FeaturesReply) error {
 		}
 	}
 	return nil
+}
+
+func (c *FeaturesReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FeaturesReplyConn) ReadFeaturesReply() (FeaturesReply, error) {
@@ -2404,6 +2465,7 @@ func (this PortStatus) Clone() (PortStatus, error) {
 
 type PortStatusConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -2411,6 +2473,7 @@ type PortStatusConn struct {
 func NewPortStatusConn(c net.Conn) PortStatusConn {
 	return PortStatusConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -2421,7 +2484,7 @@ func (c *PortStatusConn) WritePortStatus(pkt PortStatus) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -2437,6 +2500,10 @@ func (c *PortStatusConn) WritePortStatuss(pkts []PortStatus) error {
 		}
 	}
 	return nil
+}
+
+func (c *PortStatusConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PortStatusConn) ReadPortStatus() (PortStatus, error) {
@@ -2621,6 +2688,7 @@ func (this PortMod) Clone() (PortMod, error) {
 
 type PortModConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -2628,6 +2696,7 @@ type PortModConn struct {
 func NewPortModConn(c net.Conn) PortModConn {
 	return PortModConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -2638,7 +2707,7 @@ func (c *PortModConn) WritePortMod(pkt PortMod) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -2654,6 +2723,10 @@ func (c *PortModConn) WritePortMods(pkts []PortMod) error {
 		}
 	}
 	return nil
+}
+
+func (c *PortModConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PortModConn) ReadPortMod() (PortMod, error) {
@@ -2906,6 +2979,7 @@ func (this PacketIn) Clone() (PacketIn, error) {
 
 type PacketInConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -2913,6 +2987,7 @@ type PacketInConn struct {
 func NewPacketInConn(c net.Conn) PacketInConn {
 	return PacketInConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -2923,7 +2998,7 @@ func (c *PacketInConn) WritePacketIn(pkt PacketIn) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -2939,6 +3014,10 @@ func (c *PacketInConn) WritePacketIns(pkts []PacketIn) error {
 		}
 	}
 	return nil
+}
+
+func (c *PacketInConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PacketInConn) ReadPacketIn() (PacketIn, error) {
@@ -3179,6 +3258,7 @@ func (this Action) Clone() (Action, error) {
 
 type ActionConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -3186,6 +3266,7 @@ type ActionConn struct {
 func NewActionConn(c net.Conn) ActionConn {
 	return ActionConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -3196,7 +3277,7 @@ func (c *ActionConn) WriteAction(pkt Action) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -3212,6 +3293,10 @@ func (c *ActionConn) WriteActions(pkts []Action) error {
 		}
 	}
 	return nil
+}
+
+func (c *ActionConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *ActionConn) ReadAction() (Action, error) {
@@ -3359,6 +3444,7 @@ func (this ActionOutput) Clone() (ActionOutput, error) {
 
 type ActionOutputConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -3366,6 +3452,7 @@ type ActionOutputConn struct {
 func NewActionOutputConn(c net.Conn) ActionOutputConn {
 	return ActionOutputConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -3376,7 +3463,7 @@ func (c *ActionOutputConn) WriteActionOutput(pkt ActionOutput) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -3392,6 +3479,10 @@ func (c *ActionOutputConn) WriteActionOutputs(pkts []ActionOutput) error {
 		}
 	}
 	return nil
+}
+
+func (c *ActionOutputConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *ActionOutputConn) ReadActionOutput() (ActionOutput, error) {
@@ -3575,6 +3666,7 @@ func (this Instruction) Clone() (Instruction, error) {
 
 type InstructionConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -3582,6 +3674,7 @@ type InstructionConn struct {
 func NewInstructionConn(c net.Conn) InstructionConn {
 	return InstructionConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -3592,7 +3685,7 @@ func (c *InstructionConn) WriteInstruction(pkt Instruction) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -3608,6 +3701,10 @@ func (c *InstructionConn) WriteInstructions(pkts []Instruction) error {
 		}
 	}
 	return nil
+}
+
+func (c *InstructionConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *InstructionConn) ReadInstruction() (Instruction, error) {
@@ -3755,6 +3852,7 @@ func (this ApplyActions) Clone() (ApplyActions, error) {
 
 type ApplyActionsConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -3762,6 +3860,7 @@ type ApplyActionsConn struct {
 func NewApplyActionsConn(c net.Conn) ApplyActionsConn {
 	return ApplyActionsConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -3772,7 +3871,7 @@ func (c *ApplyActionsConn) WriteApplyActions(pkt ApplyActions) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -3788,6 +3887,10 @@ func (c *ApplyActionsConn) WriteApplyActionss(pkts []ApplyActions) error {
 		}
 	}
 	return nil
+}
+
+func (c *ApplyActionsConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *ApplyActionsConn) ReadApplyActions() (ApplyActions, error) {
@@ -3976,6 +4079,7 @@ func (this PacketOut) Clone() (PacketOut, error) {
 
 type PacketOutConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -3983,6 +4087,7 @@ type PacketOutConn struct {
 func NewPacketOutConn(c net.Conn) PacketOutConn {
 	return PacketOutConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -3993,7 +4098,7 @@ func (c *PacketOutConn) WritePacketOut(pkt PacketOut) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -4009,6 +4114,10 @@ func (c *PacketOutConn) WritePacketOuts(pkts []PacketOut) error {
 		}
 	}
 	return nil
+}
+
+func (c *PacketOutConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PacketOutConn) ReadPacketOut() (PacketOut, error) {
@@ -4289,6 +4398,7 @@ func (this OxmField) Clone() (OxmField, error) {
 
 type OxmFieldConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -4296,6 +4406,7 @@ type OxmFieldConn struct {
 func NewOxmFieldConn(c net.Conn) OxmFieldConn {
 	return OxmFieldConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -4306,7 +4417,7 @@ func (c *OxmFieldConn) WriteOxmField(pkt OxmField) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -4322,6 +4433,10 @@ func (c *OxmFieldConn) WriteOxmFields(pkts []OxmField) error {
 		}
 	}
 	return nil
+}
+
+func (c *OxmFieldConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *OxmFieldConn) ReadOxmField() (OxmField, error) {
@@ -4480,6 +4595,7 @@ func (this OxmInPort) Clone() (OxmInPort, error) {
 
 type OxmInPortConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -4487,6 +4603,7 @@ type OxmInPortConn struct {
 func NewOxmInPortConn(c net.Conn) OxmInPortConn {
 	return OxmInPortConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -4497,7 +4614,7 @@ func (c *OxmInPortConn) WriteOxmInPort(pkt OxmInPort) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -4513,6 +4630,10 @@ func (c *OxmInPortConn) WriteOxmInPorts(pkts []OxmInPort) error {
 		}
 	}
 	return nil
+}
+
+func (c *OxmInPortConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *OxmInPortConn) ReadOxmInPort() (OxmInPort, error) {
@@ -4641,6 +4762,7 @@ func (this OxmEthDst) Clone() (OxmEthDst, error) {
 
 type OxmEthDstConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -4648,6 +4770,7 @@ type OxmEthDstConn struct {
 func NewOxmEthDstConn(c net.Conn) OxmEthDstConn {
 	return OxmEthDstConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -4658,7 +4781,7 @@ func (c *OxmEthDstConn) WriteOxmEthDst(pkt OxmEthDst) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -4674,6 +4797,10 @@ func (c *OxmEthDstConn) WriteOxmEthDsts(pkts []OxmEthDst) error {
 		}
 	}
 	return nil
+}
+
+func (c *OxmEthDstConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *OxmEthDstConn) ReadOxmEthDst() (OxmEthDst, error) {
@@ -4819,6 +4946,7 @@ func (this OxmEthDstMasked) Clone() (OxmEthDstMasked, error) {
 
 type OxmEthDstMaskedConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -4826,6 +4954,7 @@ type OxmEthDstMaskedConn struct {
 func NewOxmEthDstMaskedConn(c net.Conn) OxmEthDstMaskedConn {
 	return OxmEthDstMaskedConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -4836,7 +4965,7 @@ func (c *OxmEthDstMaskedConn) WriteOxmEthDstMasked(pkt OxmEthDstMasked) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -4852,6 +4981,10 @@ func (c *OxmEthDstMaskedConn) WriteOxmEthDstMaskeds(pkts []OxmEthDstMasked) erro
 		}
 	}
 	return nil
+}
+
+func (c *OxmEthDstMaskedConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *OxmEthDstMaskedConn) ReadOxmEthDstMasked() (OxmEthDstMasked, error) {
@@ -5031,6 +5164,7 @@ func (this OxmEthSrc) Clone() (OxmEthSrc, error) {
 
 type OxmEthSrcConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -5038,6 +5172,7 @@ type OxmEthSrcConn struct {
 func NewOxmEthSrcConn(c net.Conn) OxmEthSrcConn {
 	return OxmEthSrcConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -5048,7 +5183,7 @@ func (c *OxmEthSrcConn) WriteOxmEthSrc(pkt OxmEthSrc) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -5064,6 +5199,10 @@ func (c *OxmEthSrcConn) WriteOxmEthSrcs(pkts []OxmEthSrc) error {
 		}
 	}
 	return nil
+}
+
+func (c *OxmEthSrcConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *OxmEthSrcConn) ReadOxmEthSrc() (OxmEthSrc, error) {
@@ -5209,6 +5348,7 @@ func (this OxmEthSrcMasked) Clone() (OxmEthSrcMasked, error) {
 
 type OxmEthSrcMaskedConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -5216,6 +5356,7 @@ type OxmEthSrcMaskedConn struct {
 func NewOxmEthSrcMaskedConn(c net.Conn) OxmEthSrcMaskedConn {
 	return OxmEthSrcMaskedConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -5226,7 +5367,7 @@ func (c *OxmEthSrcMaskedConn) WriteOxmEthSrcMasked(pkt OxmEthSrcMasked) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -5242,6 +5383,10 @@ func (c *OxmEthSrcMaskedConn) WriteOxmEthSrcMaskeds(pkts []OxmEthSrcMasked) erro
 		}
 	}
 	return nil
+}
+
+func (c *OxmEthSrcMaskedConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *OxmEthSrcMaskedConn) ReadOxmEthSrcMasked() (OxmEthSrcMasked, error) {
@@ -5421,6 +5566,7 @@ func (this Match) Clone() (Match, error) {
 
 type MatchConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -5428,6 +5574,7 @@ type MatchConn struct {
 func NewMatchConn(c net.Conn) MatchConn {
 	return MatchConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -5438,7 +5585,7 @@ func (c *MatchConn) WriteMatch(pkt Match) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -5454,6 +5601,10 @@ func (c *MatchConn) WriteMatchs(pkts []Match) error {
 		}
 	}
 	return nil
+}
+
+func (c *MatchConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *MatchConn) ReadMatch() (Match, error) {
@@ -5640,6 +5791,7 @@ func (this FlowMod) Clone() (FlowMod, error) {
 
 type FlowModConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -5647,6 +5799,7 @@ type FlowModConn struct {
 func NewFlowModConn(c net.Conn) FlowModConn {
 	return FlowModConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -5657,7 +5810,7 @@ func (c *FlowModConn) WriteFlowMod(pkt FlowMod) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -5673,6 +5826,10 @@ func (c *FlowModConn) WriteFlowMods(pkts []FlowMod) error {
 		}
 	}
 	return nil
+}
+
+func (c *FlowModConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FlowModConn) ReadFlowMod() (FlowMod, error) {
@@ -6081,6 +6238,7 @@ func (this FlowRemoved) Clone() (FlowRemoved, error) {
 
 type FlowRemovedConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -6088,6 +6246,7 @@ type FlowRemovedConn struct {
 func NewFlowRemovedConn(c net.Conn) FlowRemovedConn {
 	return FlowRemovedConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -6098,7 +6257,7 @@ func (c *FlowRemovedConn) WriteFlowRemoved(pkt FlowRemoved) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -6114,6 +6273,10 @@ func (c *FlowRemovedConn) WriteFlowRemoveds(pkts []FlowRemoved) error {
 		}
 	}
 	return nil
+}
+
+func (c *FlowRemovedConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FlowRemovedConn) ReadFlowRemoved() (FlowRemoved, error) {
@@ -6475,6 +6638,7 @@ func (this ErrorMsg) Clone() (ErrorMsg, error) {
 
 type ErrorMsgConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -6482,6 +6646,7 @@ type ErrorMsgConn struct {
 func NewErrorMsgConn(c net.Conn) ErrorMsgConn {
 	return ErrorMsgConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -6492,7 +6657,7 @@ func (c *ErrorMsgConn) WriteErrorMsg(pkt ErrorMsg) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -6508,6 +6673,10 @@ func (c *ErrorMsgConn) WriteErrorMsgs(pkts []ErrorMsg) error {
 		}
 	}
 	return nil
+}
+
+func (c *ErrorMsgConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *ErrorMsgConn) ReadErrorMsg() (ErrorMsg, error) {
@@ -6697,6 +6866,7 @@ func (this StatsRequest) Clone() (StatsRequest, error) {
 
 type StatsRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -6704,6 +6874,7 @@ type StatsRequestConn struct {
 func NewStatsRequestConn(c net.Conn) StatsRequestConn {
 	return StatsRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -6714,7 +6885,7 @@ func (c *StatsRequestConn) WriteStatsRequest(pkt StatsRequest) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -6730,6 +6901,10 @@ func (c *StatsRequestConn) WriteStatsRequests(pkts []StatsRequest) error {
 		}
 	}
 	return nil
+}
+
+func (c *StatsRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *StatsRequestConn) ReadStatsRequest() (StatsRequest, error) {
@@ -6880,6 +7055,7 @@ func (this StatsReply) Clone() (StatsReply, error) {
 
 type StatsReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -6887,6 +7063,7 @@ type StatsReplyConn struct {
 func NewStatsReplyConn(c net.Conn) StatsReplyConn {
 	return StatsReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -6897,7 +7074,7 @@ func (c *StatsReplyConn) WriteStatsReply(pkt StatsReply) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -6913,6 +7090,10 @@ func (c *StatsReplyConn) WriteStatsReplys(pkts []StatsReply) error {
 		}
 	}
 	return nil
+}
+
+func (c *StatsReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *StatsReplyConn) ReadStatsReply() (StatsReply, error) {
@@ -7063,6 +7244,7 @@ func (this DescStats) Clone() (DescStats, error) {
 
 type DescStatsConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -7070,6 +7252,7 @@ type DescStatsConn struct {
 func NewDescStatsConn(c net.Conn) DescStatsConn {
 	return DescStatsConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -7080,7 +7263,7 @@ func (c *DescStatsConn) WriteDescStats(pkt DescStats) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -7096,6 +7279,10 @@ func (c *DescStatsConn) WriteDescStatss(pkts []DescStats) error {
 		}
 	}
 	return nil
+}
+
+func (c *DescStatsConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *DescStatsConn) ReadDescStats() (DescStats, error) {
@@ -7383,6 +7570,7 @@ func (this FlowStatsRequest) Clone() (FlowStatsRequest, error) {
 
 type FlowStatsRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -7390,6 +7578,7 @@ type FlowStatsRequestConn struct {
 func NewFlowStatsRequestConn(c net.Conn) FlowStatsRequestConn {
 	return FlowStatsRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -7400,7 +7589,7 @@ func (c *FlowStatsRequestConn) WriteFlowStatsRequest(pkt FlowStatsRequest) error
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -7416,6 +7605,10 @@ func (c *FlowStatsRequestConn) WriteFlowStatsRequests(pkts []FlowStatsRequest) e
 		}
 	}
 	return nil
+}
+
+func (c *FlowStatsRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FlowStatsRequestConn) ReadFlowStatsRequest() (FlowStatsRequest, error) {
@@ -7618,6 +7811,7 @@ func (this FlowStats) Clone() (FlowStats, error) {
 
 type FlowStatsConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -7625,6 +7819,7 @@ type FlowStatsConn struct {
 func NewFlowStatsConn(c net.Conn) FlowStatsConn {
 	return FlowStatsConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -7635,7 +7830,7 @@ func (c *FlowStatsConn) WriteFlowStats(pkt FlowStats) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -7651,6 +7846,10 @@ func (c *FlowStatsConn) WriteFlowStatss(pkts []FlowStats) error {
 		}
 	}
 	return nil
+}
+
+func (c *FlowStatsConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FlowStatsConn) ReadFlowStats() (FlowStats, error) {
@@ -8065,6 +8264,7 @@ func (this FlowStatsReply) Clone() (FlowStatsReply, error) {
 
 type FlowStatsReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -8072,6 +8272,7 @@ type FlowStatsReplyConn struct {
 func NewFlowStatsReplyConn(c net.Conn) FlowStatsReplyConn {
 	return FlowStatsReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -8082,7 +8283,7 @@ func (c *FlowStatsReplyConn) WriteFlowStatsReply(pkt FlowStatsReply) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -8098,6 +8299,10 @@ func (c *FlowStatsReplyConn) WriteFlowStatsReplys(pkts []FlowStatsReply) error {
 		}
 	}
 	return nil
+}
+
+func (c *FlowStatsReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *FlowStatsReplyConn) ReadFlowStatsReply() (FlowStatsReply, error) {
@@ -8254,6 +8459,7 @@ func (this AggregateStatsRequest) Clone() (AggregateStatsRequest, error) {
 
 type AggregateStatsRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -8261,6 +8467,7 @@ type AggregateStatsRequestConn struct {
 func NewAggregateStatsRequestConn(c net.Conn) AggregateStatsRequestConn {
 	return AggregateStatsRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -8271,7 +8478,7 @@ func (c *AggregateStatsRequestConn) WriteAggregateStatsRequest(pkt AggregateStat
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -8287,6 +8494,10 @@ func (c *AggregateStatsRequestConn) WriteAggregateStatsRequests(pkts []Aggregate
 		}
 	}
 	return nil
+}
+
+func (c *AggregateStatsRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *AggregateStatsRequestConn) ReadAggregateStatsRequest() (AggregateStatsRequest, error) {
@@ -8489,6 +8700,7 @@ func (this AggregateStatsReply) Clone() (AggregateStatsReply, error) {
 
 type AggregateStatsReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -8496,6 +8708,7 @@ type AggregateStatsReplyConn struct {
 func NewAggregateStatsReplyConn(c net.Conn) AggregateStatsReplyConn {
 	return AggregateStatsReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -8506,7 +8719,7 @@ func (c *AggregateStatsReplyConn) WriteAggregateStatsReply(pkt AggregateStatsRep
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -8522,6 +8735,10 @@ func (c *AggregateStatsReplyConn) WriteAggregateStatsReplys(pkts []AggregateStat
 		}
 	}
 	return nil
+}
+
+func (c *AggregateStatsReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *AggregateStatsReplyConn) ReadAggregateStatsReply() (AggregateStatsReply, error) {
@@ -8724,6 +8941,7 @@ func (this TableStats) Clone() (TableStats, error) {
 
 type TableStatsConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -8731,6 +8949,7 @@ type TableStatsConn struct {
 func NewTableStatsConn(c net.Conn) TableStatsConn {
 	return TableStatsConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -8741,7 +8960,7 @@ func (c *TableStatsConn) WriteTableStats(pkt TableStats) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -8757,6 +8976,10 @@ func (c *TableStatsConn) WriteTableStatss(pkts []TableStats) error {
 		}
 	}
 	return nil
+}
+
+func (c *TableStatsConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *TableStatsConn) ReadTableStats() (TableStats, error) {
@@ -9044,6 +9267,7 @@ func (this PortStatsRequest) Clone() (PortStatsRequest, error) {
 
 type PortStatsRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -9051,6 +9275,7 @@ type PortStatsRequestConn struct {
 func NewPortStatsRequestConn(c net.Conn) PortStatsRequestConn {
 	return PortStatsRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -9061,7 +9286,7 @@ func (c *PortStatsRequestConn) WritePortStatsRequest(pkt PortStatsRequest) error
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -9077,6 +9302,10 @@ func (c *PortStatsRequestConn) WritePortStatsRequests(pkts []PortStatsRequest) e
 		}
 	}
 	return nil
+}
+
+func (c *PortStatsRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PortStatsRequestConn) ReadPortStatsRequest() (PortStatsRequest, error) {
@@ -9245,6 +9474,7 @@ func (this PortStats) Clone() (PortStats, error) {
 
 type PortStatsConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -9252,6 +9482,7 @@ type PortStatsConn struct {
 func NewPortStatsConn(c net.Conn) PortStatsConn {
 	return PortStatsConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -9262,7 +9493,7 @@ func (c *PortStatsConn) WritePortStats(pkt PortStats) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -9278,6 +9509,10 @@ func (c *PortStatsConn) WritePortStatss(pkts []PortStats) error {
 		}
 	}
 	return nil
+}
+
+func (c *PortStatsConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PortStatsConn) ReadPortStats() (PortStats, error) {
@@ -9650,6 +9885,7 @@ func (this VendorHeader) Clone() (VendorHeader, error) {
 
 type VendorHeaderConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -9657,6 +9893,7 @@ type VendorHeaderConn struct {
 func NewVendorHeaderConn(c net.Conn) VendorHeaderConn {
 	return VendorHeaderConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -9667,7 +9904,7 @@ func (c *VendorHeaderConn) WriteVendorHeader(pkt VendorHeader) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -9683,6 +9920,10 @@ func (c *VendorHeaderConn) WriteVendorHeaders(pkts []VendorHeader) error {
 		}
 	}
 	return nil
+}
+
+func (c *VendorHeaderConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *VendorHeaderConn) ReadVendorHeader() (VendorHeader, error) {
@@ -9816,6 +10057,7 @@ func (this QueuePropHeader) Clone() (QueuePropHeader, error) {
 
 type QueuePropHeaderConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -9823,6 +10065,7 @@ type QueuePropHeaderConn struct {
 func NewQueuePropHeaderConn(c net.Conn) QueuePropHeaderConn {
 	return QueuePropHeaderConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -9833,7 +10076,7 @@ func (c *QueuePropHeaderConn) WriteQueuePropHeader(pkt QueuePropHeader) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -9849,6 +10092,10 @@ func (c *QueuePropHeaderConn) WriteQueuePropHeaders(pkts []QueuePropHeader) erro
 		}
 	}
 	return nil
+}
+
+func (c *QueuePropHeaderConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *QueuePropHeaderConn) ReadQueuePropHeader() (QueuePropHeader, error) {
@@ -10030,6 +10277,7 @@ func (this QueuePropMinRate) Clone() (QueuePropMinRate, error) {
 
 type QueuePropMinRateConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -10037,6 +10285,7 @@ type QueuePropMinRateConn struct {
 func NewQueuePropMinRateConn(c net.Conn) QueuePropMinRateConn {
 	return QueuePropMinRateConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -10047,7 +10296,7 @@ func (c *QueuePropMinRateConn) WriteQueuePropMinRate(pkt QueuePropMinRate) error
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -10063,6 +10312,10 @@ func (c *QueuePropMinRateConn) WriteQueuePropMinRates(pkts []QueuePropMinRate) e
 		}
 	}
 	return nil
+}
+
+func (c *QueuePropMinRateConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *QueuePropMinRateConn) ReadQueuePropMinRate() (QueuePropMinRate, error) {
@@ -10229,6 +10482,7 @@ func (this PacketQueue) Clone() (PacketQueue, error) {
 
 type PacketQueueConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -10236,6 +10490,7 @@ type PacketQueueConn struct {
 func NewPacketQueueConn(c net.Conn) PacketQueueConn {
 	return PacketQueueConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -10246,7 +10501,7 @@ func (c *PacketQueueConn) WritePacketQueue(pkt PacketQueue) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -10262,6 +10517,10 @@ func (c *PacketQueueConn) WritePacketQueues(pkts []PacketQueue) error {
 		}
 	}
 	return nil
+}
+
+func (c *PacketQueueConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *PacketQueueConn) ReadPacketQueue() (PacketQueue, error) {
@@ -10482,6 +10741,7 @@ func (this QueueGetConfigRequest) Clone() (QueueGetConfigRequest, error) {
 
 type QueueGetConfigRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -10489,6 +10749,7 @@ type QueueGetConfigRequestConn struct {
 func NewQueueGetConfigRequestConn(c net.Conn) QueueGetConfigRequestConn {
 	return QueueGetConfigRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -10499,7 +10760,7 @@ func (c *QueueGetConfigRequestConn) WriteQueueGetConfigRequest(pkt QueueGetConfi
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -10515,6 +10776,10 @@ func (c *QueueGetConfigRequestConn) WriteQueueGetConfigRequests(pkts []QueueGetC
 		}
 	}
 	return nil
+}
+
+func (c *QueueGetConfigRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *QueueGetConfigRequestConn) ReadQueueGetConfigRequest() (QueueGetConfigRequest, error) {
@@ -10687,6 +10952,7 @@ func (this QueueGetConfigReply) Clone() (QueueGetConfigReply, error) {
 
 type QueueGetConfigReplyConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -10694,6 +10960,7 @@ type QueueGetConfigReplyConn struct {
 func NewQueueGetConfigReplyConn(c net.Conn) QueueGetConfigReplyConn {
 	return QueueGetConfigReplyConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -10704,7 +10971,7 @@ func (c *QueueGetConfigReplyConn) WriteQueueGetConfigReply(pkt QueueGetConfigRep
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -10720,6 +10987,10 @@ func (c *QueueGetConfigReplyConn) WriteQueueGetConfigReplys(pkts []QueueGetConfi
 		}
 	}
 	return nil
+}
+
+func (c *QueueGetConfigReplyConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *QueueGetConfigReplyConn) ReadQueueGetConfigReply() (QueueGetConfigReply, error) {
@@ -10926,6 +11197,7 @@ func (this QueueStatsRequest) Clone() (QueueStatsRequest, error) {
 
 type QueueStatsRequestConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -10933,6 +11205,7 @@ type QueueStatsRequestConn struct {
 func NewQueueStatsRequestConn(c net.Conn) QueueStatsRequestConn {
 	return QueueStatsRequestConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -10943,7 +11216,7 @@ func (c *QueueStatsRequestConn) WriteQueueStatsRequest(pkt QueueStatsRequest) er
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -10959,6 +11232,10 @@ func (c *QueueStatsRequestConn) WriteQueueStatsRequests(pkts []QueueStatsRequest
 		}
 	}
 	return nil
+}
+
+func (c *QueueStatsRequestConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *QueueStatsRequestConn) ReadQueueStatsRequest() (QueueStatsRequest, error) {
@@ -11144,6 +11421,7 @@ func (this QueueStats) Clone() (QueueStats, error) {
 
 type QueueStatsConn struct {
 	net.Conn
+	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
@@ -11151,6 +11429,7 @@ type QueueStatsConn struct {
 func NewQueueStatsConn(c net.Conn) QueueStatsConn {
 	return QueueStatsConn{
 		Conn: c,
+		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
@@ -11161,7 +11440,7 @@ func (c *QueueStatsConn) WriteQueueStats(pkt QueueStats) error {
 	n := 0
 	for s > 0 {
 		var err error
-		if n, err = c.Conn.Write(b); err != nil {
+		if n, err = c.w.Write(b); err != nil {
 			return fmt.Errorf("Error in write: %v", err)
 		}
 		s -= n
@@ -11177,6 +11456,10 @@ func (c *QueueStatsConn) WriteQueueStatss(pkts []QueueStats) error {
 		}
 	}
 	return nil
+}
+
+func (c *QueueStatsConn) Flush() error {
+	return c.w.Flush()
 }
 
 func (c *QueueStatsConn) ReadQueueStats() (QueueStats, error) {
