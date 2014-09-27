@@ -44,7 +44,6 @@ func (l *ofListener) startOFConn(conn net.Conn, ctx bh.RcvContext) {
 		cfg: ofConnConfig{
 			readBufLen: l.cfg.ReadBufLen,
 		},
-		ctx: ctx,
 	}
 
 	ctx.StartDetached(ofc)
