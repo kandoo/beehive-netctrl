@@ -171,7 +171,7 @@ func (c *HeaderConn) ReadHeaders(pkts []Header) (int, error) {
 	return n, nil
 }
 
-func (this *Header) Init() {
+func (this Header) Init() {
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
 }
@@ -197,70 +197,70 @@ func IsHeader(p packet.Packet) bool {
 	return true
 }
 
-func (this *Header) Version() uint8 {
+func (this Header) Version() uint8 {
 	offset := this.VersionOffset()
 	res := uint8(this.Buf[offset])
 	return res
 }
 
-func (this *Header) SetVersion(v uint8) {
+func (this Header) SetVersion(v uint8) {
 	offset := this.VersionOffset()
 	this.Buf[offset] = byte(v)
 	offset++
 }
 
-func (this *Header) VersionOffset() int {
+func (this Header) VersionOffset() int {
 	offset := 0
 	return offset
 }
 
-func (this *Header) Type() uint8 {
+func (this Header) Type() uint8 {
 	offset := this.TypeOffset()
 	res := uint8(this.Buf[offset])
 	return res
 }
 
-func (this *Header) SetType(t uint8) {
+func (this Header) SetType(t uint8) {
 	offset := this.TypeOffset()
 	this.Buf[offset] = byte(t)
 	offset++
 }
 
-func (this *Header) TypeOffset() int {
+func (this Header) TypeOffset() int {
 	offset := 1
 	return offset
 }
 
-func (this *Header) Length() uint16 {
+func (this Header) Length() uint16 {
 	offset := this.LengthOffset()
 	res := binary.BigEndian.Uint16(this.Buf[offset:])
 	return res
 }
 
-func (this *Header) SetLength(l uint16) {
+func (this Header) SetLength(l uint16) {
 	offset := this.LengthOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
 }
 
-func (this *Header) LengthOffset() int {
+func (this Header) LengthOffset() int {
 	offset := 2
 	return offset
 }
 
-func (this *Header) Xid() uint32 {
+func (this Header) Xid() uint32 {
 	offset := this.XidOffset()
 	res := binary.BigEndian.Uint32(this.Buf[offset:])
 	return res
 }
 
-func (this *Header) SetXid(x uint32) {
+func (this Header) SetXid(x uint32) {
 	offset := this.XidOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], x)
 	offset += 4
 }
 
-func (this *Header) XidOffset() int {
+func (this Header) XidOffset() int {
 	offset := 4
 	return offset
 }
@@ -391,7 +391,7 @@ func (c *HelloConn) ReadHellos(pkts []Hello) (int, error) {
 	return n, nil
 }
 
-func (this *Hello) Init() {
+func (this Hello) Init() {
 	this.Header.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
