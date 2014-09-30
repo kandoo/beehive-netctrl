@@ -15,11 +15,12 @@ type ofConnConfig struct {
 
 type ofConn struct {
 	of.HeaderConn
-	cfg    ofConnConfig
-	ctx    bh.RcvContext
-	node   nom.Node
-	driver ofDriver
-	wCh    chan of.Header
+	cfg    ofConnConfig  // Configuration of this connection.
+	ctx    bh.RcvContext // RcvContext of the detached bee running the connection.
+	node   nom.Node      // Node that this connection represents.
+	driver ofDriver      // OpenFlow driver of this connection.
+	wCh    chan bh.Msg   // Messages to be written.
+	wErr   error         // Last error in write.
 }
 
 func (c *ofConn) Start(ctx bh.RcvContext) {
@@ -29,7 +30,7 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 	}()
 
 	c.ctx = ctx
-	c.wCh = make(chan of.Header, 4096)
+	c.wCh = make(chan bh.Msg, 4096)
 
 	var err error
 	if c.driver, err = c.handshake(); err != nil {
@@ -57,15 +58,19 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 			}
 		}
 
-		var werr error
 		for {
 			select {
-			case pkt := <-c.wCh:
+			case msg := <-c.wCh:
+				if c.wErr != nil {
+					// Drain the channel.
+					continue
+				}
+
 				// If werr != nil, we loop and drain the wCh.
-				if werr == nil {
-					if werr = c.WriteHeader(pkt); werr != nil {
-						glog.Errorf("ofconn: Cannot write packet: %v", werr)
-					}
+				if err := c.driver.handleMsg(msg, c); err != nil {
+					glog.Errorf("ofconn: Cannot convert NOM message to OpenFlow: %v",
+						err)
+					continue
 				}
 			default:
 				goto flush
@@ -73,7 +78,7 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 		}
 
 	flush:
-		if werr != nil {
+		if c.wErr != nil {
 			return
 		}
 
@@ -91,10 +96,19 @@ func (c *ofConn) Stop(ctx bh.RcvContext) {
 }
 
 func (c *ofConn) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
-	c.wCh <- msg.Data().(of.Header)
+	c.wCh <- msg
 	return nil
 }
 
 func (c *ofConn) NodeUID() nom.UID {
 	return c.node.UID()
+}
+
+func (c *ofConn) WriteHeader(pkt of.Header) error {
+	if c.wErr != nil {
+		return c.wErr
+	}
+
+	c.wErr = c.HeaderConn.WriteHeader(pkt)
+	return c.wErr
 }

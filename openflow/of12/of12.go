@@ -504,7 +504,7 @@ func (c *Header12Conn) ReadHeader12s(pkts []Header12) (int, error) {
 	return n, nil
 }
 
-func (this Header12) Init() {
+func (this *Header12) Init() {
 	this.Header.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -658,7 +658,7 @@ func (c *HelloConn) ReadHellos(pkts []Hello) (int, error) {
 	return n, nil
 }
 
-func (this Hello) Init() {
+func (this *Hello) Init() {
 	this.Hello.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -813,7 +813,7 @@ func (c *EchoRequestConn) ReadEchoRequests(pkts []EchoRequest) (int, error) {
 	return n, nil
 }
 
-func (this EchoRequest) Init() {
+func (this *EchoRequest) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -968,7 +968,7 @@ func (c *EchoReplyConn) ReadEchoReplys(pkts []EchoReply) (int, error) {
 	return n, nil
 }
 
-func (this EchoReply) Init() {
+func (this *EchoReply) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -1123,7 +1123,7 @@ func (c *FeaturesRequestConn) ReadFeaturesRequests(pkts []FeaturesRequest) (int,
 	return n, nil
 }
 
-func (this FeaturesRequest) Init() {
+func (this *FeaturesRequest) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -1278,7 +1278,7 @@ func (c *GetConfigRequestConn) ReadGetConfigRequests(pkts []GetConfigRequest) (i
 	return n, nil
 }
 
-func (this GetConfigRequest) Init() {
+func (this *GetConfigRequest) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -1433,7 +1433,7 @@ func (c *SwitchGetConfigReplyConn) ReadSwitchGetConfigReplys(pkts []SwitchGetCon
 	return n, nil
 }
 
-func (this SwitchGetConfigReply) Init() {
+func (this *SwitchGetConfigReply) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -1468,7 +1468,7 @@ func (this SwitchGetConfigReply) Flags() uint16 {
 	return res
 }
 
-func (this SwitchGetConfigReply) SetFlags(f uint16) {
+func (this *SwitchGetConfigReply) SetFlags(f uint16) {
 	offset := this.FlagsOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], f)
 	offset += 2
@@ -1485,7 +1485,7 @@ func (this SwitchGetConfigReply) MissSendLen() uint16 {
 	return res
 }
 
-func (this SwitchGetConfigReply) SetMissSendLen(m uint16) {
+func (this *SwitchGetConfigReply) SetMissSendLen(m uint16) {
 	offset := this.MissSendLenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], m)
 	offset += 2
@@ -1622,7 +1622,7 @@ func (c *SwitchSetConfigConn) ReadSwitchSetConfigs(pkts []SwitchSetConfig) (int,
 	return n, nil
 }
 
-func (this SwitchSetConfig) Init() {
+func (this *SwitchSetConfig) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -1657,7 +1657,7 @@ func (this SwitchSetConfig) Flags() uint16 {
 	return res
 }
 
-func (this SwitchSetConfig) SetFlags(f uint16) {
+func (this *SwitchSetConfig) SetFlags(f uint16) {
 	offset := this.FlagsOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], f)
 	offset += 2
@@ -1674,7 +1674,7 @@ func (this SwitchSetConfig) MissSendLen() uint16 {
 	return res
 }
 
-func (this SwitchSetConfig) SetMissSendLen(m uint16) {
+func (this *SwitchSetConfig) SetMissSendLen(m uint16) {
 	offset := this.MissSendLenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], m)
 	offset += 2
@@ -1811,7 +1811,7 @@ func (c *PortConn) ReadPorts(pkts []Port) (int, error) {
 	return n, nil
 }
 
-func (this Port) Init() {
+func (this *Port) Init() {
 	// Invariants.
 }
 
@@ -1837,7 +1837,7 @@ func (this Port) PortNo() uint32 {
 	return res
 }
 
-func (this Port) SetPortNo(p uint32) {
+func (this *Port) SetPortNo(p uint32) {
 	offset := this.PortNoOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], p)
 	offset += 4
@@ -1869,7 +1869,7 @@ func (this Port) Pad() [4]uint8 {
 	return res
 }
 
-func (this Port) SetPad(p [4]uint8) {
+func (this *Port) SetPad(p [4]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -1903,7 +1903,7 @@ func (this Port) HwAddr() [6]uint8 {
 	return res
 }
 
-func (this Port) SetHwAddr(h [6]uint8) {
+func (this *Port) SetHwAddr(h [6]uint8) {
 	offset := this.HwAddrOffset()
 	for _, e := range h {
 		this.Buf[offset] = byte(e)
@@ -1937,7 +1937,7 @@ func (this Port) Pad2() [2]uint8 {
 	return res
 }
 
-func (this Port) SetPad2(p [2]uint8) {
+func (this *Port) SetPad2(p [2]uint8) {
 	offset := this.Pad2Offset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -1971,7 +1971,7 @@ func (this Port) Name() [16]byte {
 	return res
 }
 
-func (this Port) SetName(n [16]byte) {
+func (this *Port) SetName(n [16]byte) {
 	offset := this.NameOffset()
 	for _, e := range n {
 		this.Buf[offset] = byte(e)
@@ -1990,7 +1990,7 @@ func (this Port) Config() uint32 {
 	return res
 }
 
-func (this Port) SetConfig(c uint32) {
+func (this *Port) SetConfig(c uint32) {
 	offset := this.ConfigOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], c)
 	offset += 4
@@ -2007,7 +2007,7 @@ func (this Port) State() uint32 {
 	return res
 }
 
-func (this Port) SetState(s uint32) {
+func (this *Port) SetState(s uint32) {
 	offset := this.StateOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], s)
 	offset += 4
@@ -2024,7 +2024,7 @@ func (this Port) Curr() uint32 {
 	return res
 }
 
-func (this Port) SetCurr(c uint32) {
+func (this *Port) SetCurr(c uint32) {
 	offset := this.CurrOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], c)
 	offset += 4
@@ -2041,7 +2041,7 @@ func (this Port) Advertised() uint32 {
 	return res
 }
 
-func (this Port) SetAdvertised(a uint32) {
+func (this *Port) SetAdvertised(a uint32) {
 	offset := this.AdvertisedOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], a)
 	offset += 4
@@ -2058,7 +2058,7 @@ func (this Port) Supported() uint32 {
 	return res
 }
 
-func (this Port) SetSupported(s uint32) {
+func (this *Port) SetSupported(s uint32) {
 	offset := this.SupportedOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], s)
 	offset += 4
@@ -2075,7 +2075,7 @@ func (this Port) Peer() uint32 {
 	return res
 }
 
-func (this Port) SetPeer(p uint32) {
+func (this *Port) SetPeer(p uint32) {
 	offset := this.PeerOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], p)
 	offset += 4
@@ -2092,7 +2092,7 @@ func (this Port) CurrSpeed() uint32 {
 	return res
 }
 
-func (this Port) SetCurrSpeed(c uint32) {
+func (this *Port) SetCurrSpeed(c uint32) {
 	offset := this.CurrSpeedOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], c)
 	offset += 4
@@ -2109,7 +2109,7 @@ func (this Port) MaxSpeed() uint32 {
 	return res
 }
 
-func (this Port) SetMaxSpeed(m uint32) {
+func (this *Port) SetMaxSpeed(m uint32) {
 	offset := this.MaxSpeedOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], m)
 	offset += 4
@@ -2246,7 +2246,7 @@ func (c *FeaturesReplyConn) ReadFeaturesReplys(pkts []FeaturesReply) (int, error
 	return n, nil
 }
 
-func (this FeaturesReply) Init() {
+func (this *FeaturesReply) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -2281,7 +2281,7 @@ func (this FeaturesReply) DatapathId() uint64 {
 	return res
 }
 
-func (this FeaturesReply) SetDatapathId(d uint64) {
+func (this *FeaturesReply) SetDatapathId(d uint64) {
 	offset := this.DatapathIdOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], d)
 	offset += 8
@@ -2298,7 +2298,7 @@ func (this FeaturesReply) NBuffers() uint32 {
 	return res
 }
 
-func (this FeaturesReply) SetNBuffers(n uint32) {
+func (this *FeaturesReply) SetNBuffers(n uint32) {
 	offset := this.NBuffersOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], n)
 	offset += 4
@@ -2315,7 +2315,7 @@ func (this FeaturesReply) NTables() uint8 {
 	return res
 }
 
-func (this FeaturesReply) SetNTables(n uint8) {
+func (this *FeaturesReply) SetNTables(n uint8) {
 	offset := this.NTablesOffset()
 	this.Buf[offset] = byte(n)
 	offset++
@@ -2347,7 +2347,7 @@ func (this FeaturesReply) Pad() [3]uint8 {
 	return res
 }
 
-func (this FeaturesReply) SetPad(p [3]uint8) {
+func (this *FeaturesReply) SetPad(p [3]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -2366,7 +2366,7 @@ func (this FeaturesReply) Capabilities() uint32 {
 	return res
 }
 
-func (this FeaturesReply) SetCapabilities(c uint32) {
+func (this *FeaturesReply) SetCapabilities(c uint32) {
 	offset := this.CapabilitiesOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], c)
 	offset += 4
@@ -2383,7 +2383,7 @@ func (this FeaturesReply) Actions() uint32 {
 	return res
 }
 
-func (this FeaturesReply) SetActions(a uint32) {
+func (this *FeaturesReply) SetActions(a uint32) {
 	offset := this.ActionsOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], a)
 	offset += 4
@@ -2413,11 +2413,11 @@ func (this FeaturesReply) Ports() []Port {
 	return res
 }
 
-func (this FeaturesReply) AddPorts(p Port) {
+func (this *FeaturesReply) AddPorts(p Port) {
 	offset := this.PortsOffset()
 	offset += this.PortsSize()
 	size := p.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], p.Buf[:size])
 	offset += size
@@ -2559,7 +2559,7 @@ func (c *PortStatusConn) ReadPortStatuss(pkts []PortStatus) (int, error) {
 	return n, nil
 }
 
-func (this PortStatus) Init() {
+func (this *PortStatus) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -2594,7 +2594,7 @@ func (this PortStatus) Reason() uint8 {
 	return res
 }
 
-func (this PortStatus) SetReason(r uint8) {
+func (this *PortStatus) SetReason(r uint8) {
 	offset := this.ReasonOffset()
 	this.Buf[offset] = byte(r)
 	offset++
@@ -2626,7 +2626,7 @@ func (this PortStatus) Pad() [7]uint8 {
 	return res
 }
 
-func (this PortStatus) SetPad(p [7]uint8) {
+func (this *PortStatus) SetPad(p [7]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -2645,7 +2645,7 @@ func (this PortStatus) Desc() Port {
 	return res
 }
 
-func (this PortStatus) SetDesc(d Port) {
+func (this *PortStatus) SetDesc(d Port) {
 	offset := this.DescOffset()
 	copy(this.Buf[offset:], d.Buf[:d.Size()])
 	offset += d.Size()
@@ -2782,7 +2782,7 @@ func (c *PortModConn) ReadPortMods(pkts []PortMod) (int, error) {
 	return n, nil
 }
 
-func (this PortMod) Init() {
+func (this *PortMod) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -2817,7 +2817,7 @@ func (this PortMod) PortNo() uint16 {
 	return res
 }
 
-func (this PortMod) SetPortNo(p uint16) {
+func (this *PortMod) SetPortNo(p uint16) {
 	offset := this.PortNoOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -2849,7 +2849,7 @@ func (this PortMod) HwAddr() [6]uint8 {
 	return res
 }
 
-func (this PortMod) SetHwAddr(h [6]uint8) {
+func (this *PortMod) SetHwAddr(h [6]uint8) {
 	offset := this.HwAddrOffset()
 	for _, e := range h {
 		this.Buf[offset] = byte(e)
@@ -2868,7 +2868,7 @@ func (this PortMod) Config() uint32 {
 	return res
 }
 
-func (this PortMod) SetConfig(c uint32) {
+func (this *PortMod) SetConfig(c uint32) {
 	offset := this.ConfigOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], c)
 	offset += 4
@@ -2885,7 +2885,7 @@ func (this PortMod) Mask() uint32 {
 	return res
 }
 
-func (this PortMod) SetMask(m uint32) {
+func (this *PortMod) SetMask(m uint32) {
 	offset := this.MaskOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], m)
 	offset += 4
@@ -2902,7 +2902,7 @@ func (this PortMod) Advertise() uint32 {
 	return res
 }
 
-func (this PortMod) SetAdvertise(a uint32) {
+func (this *PortMod) SetAdvertise(a uint32) {
 	offset := this.AdvertiseOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], a)
 	offset += 4
@@ -2934,7 +2934,7 @@ func (this PortMod) Pad() [4]uint8 {
 	return res
 }
 
-func (this PortMod) SetPad(p [4]uint8) {
+func (this *PortMod) SetPad(p [4]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -3073,7 +3073,7 @@ func (c *PacketInConn) ReadPacketIns(pkts []PacketIn) (int, error) {
 	return n, nil
 }
 
-func (this PacketIn) Init() {
+func (this *PacketIn) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -3108,7 +3108,7 @@ func (this PacketIn) BufferId() uint32 {
 	return res
 }
 
-func (this PacketIn) SetBufferId(b uint32) {
+func (this *PacketIn) SetBufferId(b uint32) {
 	offset := this.BufferIdOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], b)
 	offset += 4
@@ -3125,7 +3125,7 @@ func (this PacketIn) TotalLen() uint16 {
 	return res
 }
 
-func (this PacketIn) SetTotalLen(t uint16) {
+func (this *PacketIn) SetTotalLen(t uint16) {
 	offset := this.TotalLenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], t)
 	offset += 2
@@ -3142,7 +3142,7 @@ func (this PacketIn) InPort() uint16 {
 	return res
 }
 
-func (this PacketIn) SetInPort(i uint16) {
+func (this *PacketIn) SetInPort(i uint16) {
 	offset := this.InPortOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], i)
 	offset += 2
@@ -3159,7 +3159,7 @@ func (this PacketIn) Reason() uint8 {
 	return res
 }
 
-func (this PacketIn) SetReason(r uint8) {
+func (this *PacketIn) SetReason(r uint8) {
 	offset := this.ReasonOffset()
 	this.Buf[offset] = byte(r)
 	offset++
@@ -3176,7 +3176,7 @@ func (this PacketIn) Pad() uint8 {
 	return res
 }
 
-func (this PacketIn) SetPad(p uint8) {
+func (this *PacketIn) SetPad(p uint8) {
 	offset := this.PadOffset()
 	this.Buf[offset] = byte(p)
 	offset++
@@ -3191,26 +3191,14 @@ func (this PacketIn) Data() []uint8 {
 	offset := this.DataOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
-	count := this.Size() - offset
-	var res []uint8
-	for size > 0 && count > 0 && packet_size > offset {
-		elem := uint8(this.Buf[offset])
-		if size < 1 {
-			break
-		}
-		size -= 1
-		offset += 1
-		count--
-		res = append(res, elem)
-	}
-	return res
+	return []uint8(this.Buf[offset : offset+size])
 }
 
-func (this PacketIn) AddData(d uint8) {
+func (this *PacketIn) AddData(d uint8) {
 	offset := this.DataOffset()
 	offset += this.DataSize()
 	size := 1
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	this.Buf[offset] = byte(d)
 	offset++
@@ -3352,7 +3340,7 @@ func (c *ActionConn) ReadActions(pkts []Action) (int, error) {
 	return n, nil
 }
 
-func (this Action) Init() {
+func (this *Action) Init() {
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 }
@@ -3384,7 +3372,7 @@ func (this Action) Type() uint16 {
 	return res
 }
 
-func (this Action) SetType(t uint16) {
+func (this *Action) SetType(t uint16) {
 	offset := this.TypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], t)
 	offset += 2
@@ -3401,7 +3389,7 @@ func (this Action) Len() uint16 {
 	return res
 }
 
-func (this Action) SetLen(l uint16) {
+func (this *Action) SetLen(l uint16) {
 	offset := this.LenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
@@ -3538,7 +3526,7 @@ func (c *ActionOutputConn) ReadActionOutputs(pkts []ActionOutput) (int, error) {
 	return n, nil
 }
 
-func (this ActionOutput) Init() {
+func (this *ActionOutput) Init() {
 	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
@@ -3572,7 +3560,7 @@ func (this ActionOutput) Port() uint32 {
 	return res
 }
 
-func (this ActionOutput) SetPort(p uint32) {
+func (this *ActionOutput) SetPort(p uint32) {
 	offset := this.PortOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], p)
 	offset += 4
@@ -3589,7 +3577,7 @@ func (this ActionOutput) MaxLen() uint16 {
 	return res
 }
 
-func (this ActionOutput) SetMaxLen(m uint16) {
+func (this *ActionOutput) SetMaxLen(m uint16) {
 	offset := this.MaxLenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], m)
 	offset += 2
@@ -3621,7 +3609,7 @@ func (this ActionOutput) Pad() [6]uint8 {
 	return res
 }
 
-func (this ActionOutput) SetPad(p [6]uint8) {
+func (this *ActionOutput) SetPad(p [6]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -3760,7 +3748,7 @@ func (c *InstructionConn) ReadInstructions(pkts []Instruction) (int, error) {
 	return n, nil
 }
 
-func (this Instruction) Init() {
+func (this *Instruction) Init() {
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 }
@@ -3792,7 +3780,7 @@ func (this Instruction) Type() uint16 {
 	return res
 }
 
-func (this Instruction) SetType(t uint16) {
+func (this *Instruction) SetType(t uint16) {
 	offset := this.TypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], t)
 	offset += 2
@@ -3809,7 +3797,7 @@ func (this Instruction) Len() uint16 {
 	return res
 }
 
-func (this Instruction) SetLen(l uint16) {
+func (this *Instruction) SetLen(l uint16) {
 	offset := this.LenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
@@ -3946,7 +3934,7 @@ func (c *ApplyActionsConn) ReadApplyActionss(pkts []ApplyActions) (int, error) {
 	return n, nil
 }
 
-func (this ApplyActions) Init() {
+func (this *ApplyActions) Init() {
 	this.Instruction.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
@@ -3995,7 +3983,7 @@ func (this ApplyActions) Pad() [4]uint8 {
 	return res
 }
 
-func (this ApplyActions) SetPad(p [4]uint8) {
+func (this *ApplyActions) SetPad(p [4]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -4027,11 +4015,11 @@ func (this ApplyActions) Actions() []Action {
 	return res
 }
 
-func (this ApplyActions) AddActions(a Action) {
+func (this *ApplyActions) AddActions(a Action) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLen(uint16(this.Size() + size))
 	copy(this.Buf[offset:], a.Buf[:size])
 	offset += size
@@ -4173,7 +4161,7 @@ func (c *PacketOutConn) ReadPacketOuts(pkts []PacketOut) (int, error) {
 	return n, nil
 }
 
-func (this PacketOut) Init() {
+func (this *PacketOut) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -4208,7 +4196,7 @@ func (this PacketOut) BufferId() uint32 {
 	return res
 }
 
-func (this PacketOut) SetBufferId(b uint32) {
+func (this *PacketOut) SetBufferId(b uint32) {
 	offset := this.BufferIdOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], b)
 	offset += 4
@@ -4225,7 +4213,7 @@ func (this PacketOut) InPort() uint32 {
 	return res
 }
 
-func (this PacketOut) SetInPort(i uint32) {
+func (this *PacketOut) SetInPort(i uint32) {
 	offset := this.InPortOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], i)
 	offset += 4
@@ -4242,7 +4230,7 @@ func (this PacketOut) ActionsLen() uint16 {
 	return res
 }
 
-func (this PacketOut) SetActionsLen(a uint16) {
+func (this *PacketOut) SetActionsLen(a uint16) {
 	offset := this.ActionsLenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], a)
 	offset += 2
@@ -4274,7 +4262,7 @@ func (this PacketOut) Pad() [6]uint8 {
 	return res
 }
 
-func (this PacketOut) SetPad(p [6]uint8) {
+func (this *PacketOut) SetPad(p [6]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -4306,11 +4294,11 @@ func (this PacketOut) Actions() []Action {
 	return res
 }
 
-func (this PacketOut) AddActions(a Action) {
+func (this *PacketOut) AddActions(a Action) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], a.Buf[:size])
 	offset += size
@@ -4330,26 +4318,14 @@ func (this PacketOut) Data() []uint8 {
 	offset := this.DataOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
-	count := this.Size() - offset
-	var res []uint8
-	for size > 0 && count > 0 && packet_size > offset {
-		elem := uint8(this.Buf[offset])
-		if size < 1 {
-			break
-		}
-		size -= 1
-		offset += 1
-		count--
-		res = append(res, elem)
-	}
-	return res
+	return []uint8(this.Buf[offset : offset+size])
 }
 
-func (this PacketOut) AddData(d uint8) {
+func (this *PacketOut) AddData(d uint8) {
 	offset := this.DataOffset()
 	offset += this.DataSize()
 	size := 1
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	this.Buf[offset] = byte(d)
 	offset++
@@ -4492,7 +4468,7 @@ func (c *OxmFieldConn) ReadOxmFields(pkts []OxmField) (int, error) {
 	return n, nil
 }
 
-func (this OxmField) Init() {
+func (this *OxmField) Init() {
 	// Invariants.
 }
 
@@ -4518,7 +4494,7 @@ func (this OxmField) OxmClass() uint16 {
 	return res
 }
 
-func (this OxmField) SetOxmClass(o uint16) {
+func (this *OxmField) SetOxmClass(o uint16) {
 	offset := this.OxmClassOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], o)
 	offset += 2
@@ -4535,7 +4511,7 @@ func (this OxmField) OxmField() uint8 {
 	return res
 }
 
-func (this OxmField) SetOxmField(o uint8) {
+func (this *OxmField) SetOxmField(o uint8) {
 	offset := this.OxmFieldOffset()
 	this.Buf[offset] = byte(o)
 	offset++
@@ -4552,7 +4528,7 @@ func (this OxmField) OxmLength() uint8 {
 	return res
 }
 
-func (this OxmField) SetOxmLength(o uint8) {
+func (this *OxmField) SetOxmLength(o uint8) {
 	offset := this.OxmLengthOffset()
 	this.Buf[offset] = byte(o)
 	offset++
@@ -4689,7 +4665,7 @@ func (c *OxmInPortConn) ReadOxmInPorts(pkts []OxmInPort) (int, error) {
 	return n, nil
 }
 
-func (this OxmInPort) Init() {
+func (this *OxmInPort) Init() {
 	this.OxmField.Init()
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
@@ -4719,7 +4695,7 @@ func (this OxmInPort) InPort() uint32 {
 	return res
 }
 
-func (this OxmInPort) SetInPort(i uint32) {
+func (this *OxmInPort) SetInPort(i uint32) {
 	offset := this.InPortOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], i)
 	offset += 4
@@ -4856,7 +4832,7 @@ func (c *OxmEthDstConn) ReadOxmEthDsts(pkts []OxmEthDst) (int, error) {
 	return n, nil
 }
 
-func (this OxmEthDst) Init() {
+func (this *OxmEthDst) Init() {
 	this.OxmField.Init()
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
@@ -4901,7 +4877,7 @@ func (this OxmEthDst) MacAddr() [6]uint8 {
 	return res
 }
 
-func (this OxmEthDst) SetMacAddr(m [6]uint8) {
+func (this *OxmEthDst) SetMacAddr(m [6]uint8) {
 	offset := this.MacAddrOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -5040,7 +5016,7 @@ func (c *OxmEthDstMaskedConn) ReadOxmEthDstMaskeds(pkts []OxmEthDstMasked) (int,
 	return n, nil
 }
 
-func (this OxmEthDstMasked) Init() {
+func (this *OxmEthDstMasked) Init() {
 	this.OxmField.Init()
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
@@ -5085,7 +5061,7 @@ func (this OxmEthDstMasked) MacAddr() [6]uint8 {
 	return res
 }
 
-func (this OxmEthDstMasked) SetMacAddr(m [6]uint8) {
+func (this *OxmEthDstMasked) SetMacAddr(m [6]uint8) {
 	offset := this.MacAddrOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -5119,7 +5095,7 @@ func (this OxmEthDstMasked) Mask() [6]uint8 {
 	return res
 }
 
-func (this OxmEthDstMasked) SetMask(m [6]uint8) {
+func (this *OxmEthDstMasked) SetMask(m [6]uint8) {
 	offset := this.MaskOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -5258,7 +5234,7 @@ func (c *OxmEthSrcConn) ReadOxmEthSrcs(pkts []OxmEthSrc) (int, error) {
 	return n, nil
 }
 
-func (this OxmEthSrc) Init() {
+func (this *OxmEthSrc) Init() {
 	this.OxmField.Init()
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
@@ -5303,7 +5279,7 @@ func (this OxmEthSrc) MacAddr() [6]uint8 {
 	return res
 }
 
-func (this OxmEthSrc) SetMacAddr(m [6]uint8) {
+func (this *OxmEthSrc) SetMacAddr(m [6]uint8) {
 	offset := this.MacAddrOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -5442,7 +5418,7 @@ func (c *OxmEthSrcMaskedConn) ReadOxmEthSrcMaskeds(pkts []OxmEthSrcMasked) (int,
 	return n, nil
 }
 
-func (this OxmEthSrcMasked) Init() {
+func (this *OxmEthSrcMasked) Init() {
 	this.OxmField.Init()
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
@@ -5487,7 +5463,7 @@ func (this OxmEthSrcMasked) MacAddr() [6]uint8 {
 	return res
 }
 
-func (this OxmEthSrcMasked) SetMacAddr(m [6]uint8) {
+func (this *OxmEthSrcMasked) SetMacAddr(m [6]uint8) {
 	offset := this.MacAddrOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -5521,7 +5497,7 @@ func (this OxmEthSrcMasked) Mask() [6]uint8 {
 	return res
 }
 
-func (this OxmEthSrcMasked) SetMask(m [6]uint8) {
+func (this *OxmEthSrcMasked) SetMask(m [6]uint8) {
 	offset := this.MaskOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -5660,7 +5636,7 @@ func (c *MatchConn) ReadMatchs(pkts []Match) (int, error) {
 	return n, nil
 }
 
-func (this Match) Init() {
+func (this *Match) Init() {
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
 }
@@ -5692,7 +5668,7 @@ func (this Match) Type() uint16 {
 	return res
 }
 
-func (this Match) SetType(t uint16) {
+func (this *Match) SetType(t uint16) {
 	offset := this.TypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], t)
 	offset += 2
@@ -5709,7 +5685,7 @@ func (this Match) Length() uint16 {
 	return res
 }
 
-func (this Match) SetLength(l uint16) {
+func (this *Match) SetLength(l uint16) {
 	offset := this.LengthOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
@@ -5739,11 +5715,11 @@ func (this Match) OxmFields() []OxmField {
 	return res
 }
 
-func (this Match) AddOxmFields(o OxmField) {
+func (this *Match) AddOxmFields(o OxmField) {
 	offset := this.OxmFieldsOffset()
 	offset += this.OxmFieldsSize()
 	size := o.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], o.Buf[:size])
 	offset += size
@@ -5885,7 +5861,7 @@ func (c *FlowModConn) ReadFlowMods(pkts []FlowMod) (int, error) {
 	return n, nil
 }
 
-func (this FlowMod) Init() {
+func (this *FlowMod) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -5920,7 +5896,7 @@ func (this FlowMod) Cookie() uint64 {
 	return res
 }
 
-func (this FlowMod) SetCookie(c uint64) {
+func (this *FlowMod) SetCookie(c uint64) {
 	offset := this.CookieOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], c)
 	offset += 8
@@ -5937,7 +5913,7 @@ func (this FlowMod) CookieMask() uint64 {
 	return res
 }
 
-func (this FlowMod) SetCookieMask(c uint64) {
+func (this *FlowMod) SetCookieMask(c uint64) {
 	offset := this.CookieMaskOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], c)
 	offset += 8
@@ -5954,7 +5930,7 @@ func (this FlowMod) TableId() uint8 {
 	return res
 }
 
-func (this FlowMod) SetTableId(t uint8) {
+func (this *FlowMod) SetTableId(t uint8) {
 	offset := this.TableIdOffset()
 	this.Buf[offset] = byte(t)
 	offset++
@@ -5971,7 +5947,7 @@ func (this FlowMod) Command() uint8 {
 	return res
 }
 
-func (this FlowMod) SetCommand(c uint8) {
+func (this *FlowMod) SetCommand(c uint8) {
 	offset := this.CommandOffset()
 	this.Buf[offset] = byte(c)
 	offset++
@@ -5988,7 +5964,7 @@ func (this FlowMod) IdleTimeout() uint16 {
 	return res
 }
 
-func (this FlowMod) SetIdleTimeout(i uint16) {
+func (this *FlowMod) SetIdleTimeout(i uint16) {
 	offset := this.IdleTimeoutOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], i)
 	offset += 2
@@ -6005,7 +5981,7 @@ func (this FlowMod) HardTimeout() uint16 {
 	return res
 }
 
-func (this FlowMod) SetHardTimeout(h uint16) {
+func (this *FlowMod) SetHardTimeout(h uint16) {
 	offset := this.HardTimeoutOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], h)
 	offset += 2
@@ -6022,7 +5998,7 @@ func (this FlowMod) Priority() uint16 {
 	return res
 }
 
-func (this FlowMod) SetPriority(p uint16) {
+func (this *FlowMod) SetPriority(p uint16) {
 	offset := this.PriorityOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -6039,7 +6015,7 @@ func (this FlowMod) BufferId() uint32 {
 	return res
 }
 
-func (this FlowMod) SetBufferId(b uint32) {
+func (this *FlowMod) SetBufferId(b uint32) {
 	offset := this.BufferIdOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], b)
 	offset += 4
@@ -6056,7 +6032,7 @@ func (this FlowMod) OutPort() uint32 {
 	return res
 }
 
-func (this FlowMod) SetOutPort(o uint32) {
+func (this *FlowMod) SetOutPort(o uint32) {
 	offset := this.OutPortOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], o)
 	offset += 4
@@ -6073,7 +6049,7 @@ func (this FlowMod) OutGroup() uint32 {
 	return res
 }
 
-func (this FlowMod) SetOutGroup(o uint32) {
+func (this *FlowMod) SetOutGroup(o uint32) {
 	offset := this.OutGroupOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], o)
 	offset += 4
@@ -6090,7 +6066,7 @@ func (this FlowMod) Flags() uint16 {
 	return res
 }
 
-func (this FlowMod) SetFlags(f uint16) {
+func (this *FlowMod) SetFlags(f uint16) {
 	offset := this.FlagsOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], f)
 	offset += 2
@@ -6122,7 +6098,7 @@ func (this FlowMod) Pad() [2]uint8 {
 	return res
 }
 
-func (this FlowMod) SetPad(p [2]uint8) {
+func (this *FlowMod) SetPad(p [2]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -6141,14 +6117,14 @@ func (this FlowMod) Match() Match {
 	return res
 }
 
-func (this FlowMod) SetMatch(m Match) {
+func (this *FlowMod) SetMatch(m Match) {
 	offset := this.MatchOffset()
 	if this.MatchSize() != 0 {
 		panic("Repeated field match is already set.")
 	}
 	size := m.Size()
 	this.SetLength(uint16(this.Size() + size))
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	copy(this.Buf[offset:], m.Buf[:m.Size()])
 	offset += m.Size()
 }
@@ -6185,11 +6161,11 @@ func (this FlowMod) Instructions() []Instruction {
 	return res
 }
 
-func (this FlowMod) AddInstructions(i Instruction) {
+func (this *FlowMod) AddInstructions(i Instruction) {
 	offset := this.InstructionsOffset()
 	offset += this.InstructionsSize()
 	size := i.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], i.Buf[:size])
 	offset += size
@@ -6332,7 +6308,7 @@ func (c *FlowRemovedConn) ReadFlowRemoveds(pkts []FlowRemoved) (int, error) {
 	return n, nil
 }
 
-func (this FlowRemoved) Init() {
+func (this *FlowRemoved) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -6367,14 +6343,14 @@ func (this FlowRemoved) Match() Match {
 	return res
 }
 
-func (this FlowRemoved) SetMatch(m Match) {
+func (this *FlowRemoved) SetMatch(m Match) {
 	offset := this.MatchOffset()
 	if this.MatchSize() != 0 {
 		panic("Repeated field match is already set.")
 	}
 	size := m.Size()
 	this.SetLength(uint16(this.Size() + size))
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	copy(this.Buf[offset:], m.Buf[:m.Size()])
 	offset += m.Size()
 }
@@ -6398,7 +6374,7 @@ func (this FlowRemoved) Cookie() uint64 {
 	return res
 }
 
-func (this FlowRemoved) SetCookie(c uint64) {
+func (this *FlowRemoved) SetCookie(c uint64) {
 	offset := this.CookieOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], c)
 	offset += 8
@@ -6416,7 +6392,7 @@ func (this FlowRemoved) Priority() uint16 {
 	return res
 }
 
-func (this FlowRemoved) SetPriority(p uint16) {
+func (this *FlowRemoved) SetPriority(p uint16) {
 	offset := this.PriorityOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -6434,7 +6410,7 @@ func (this FlowRemoved) Reason() uint8 {
 	return res
 }
 
-func (this FlowRemoved) SetReason(r uint8) {
+func (this *FlowRemoved) SetReason(r uint8) {
 	offset := this.ReasonOffset()
 	this.Buf[offset] = byte(r)
 	offset++
@@ -6467,7 +6443,7 @@ func (this FlowRemoved) Pad() [1]uint8 {
 	return res
 }
 
-func (this FlowRemoved) SetPad(p [1]uint8) {
+func (this *FlowRemoved) SetPad(p [1]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -6487,7 +6463,7 @@ func (this FlowRemoved) DurationSec() uint32 {
 	return res
 }
 
-func (this FlowRemoved) SetDurationSec(d uint32) {
+func (this *FlowRemoved) SetDurationSec(d uint32) {
 	offset := this.DurationSecOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], d)
 	offset += 4
@@ -6505,7 +6481,7 @@ func (this FlowRemoved) DurationNsec() uint32 {
 	return res
 }
 
-func (this FlowRemoved) SetDurationNsec(d uint32) {
+func (this *FlowRemoved) SetDurationNsec(d uint32) {
 	offset := this.DurationNsecOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], d)
 	offset += 4
@@ -6523,7 +6499,7 @@ func (this FlowRemoved) IdleTimeout() uint16 {
 	return res
 }
 
-func (this FlowRemoved) SetIdleTimeout(i uint16) {
+func (this *FlowRemoved) SetIdleTimeout(i uint16) {
 	offset := this.IdleTimeoutOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], i)
 	offset += 2
@@ -6556,7 +6532,7 @@ func (this FlowRemoved) Pad2() [2]uint8 {
 	return res
 }
 
-func (this FlowRemoved) SetPad2(p [2]uint8) {
+func (this *FlowRemoved) SetPad2(p [2]uint8) {
 	offset := this.Pad2Offset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -6576,7 +6552,7 @@ func (this FlowRemoved) PacketCount() uint64 {
 	return res
 }
 
-func (this FlowRemoved) SetPacketCount(p uint64) {
+func (this *FlowRemoved) SetPacketCount(p uint64) {
 	offset := this.PacketCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], p)
 	offset += 8
@@ -6594,7 +6570,7 @@ func (this FlowRemoved) ByteCount() uint64 {
 	return res
 }
 
-func (this FlowRemoved) SetByteCount(b uint64) {
+func (this *FlowRemoved) SetByteCount(b uint64) {
 	offset := this.ByteCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], b)
 	offset += 8
@@ -6732,7 +6708,7 @@ func (c *ErrorMsgConn) ReadErrorMsgs(pkts []ErrorMsg) (int, error) {
 	return n, nil
 }
 
-func (this ErrorMsg) Init() {
+func (this *ErrorMsg) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -6767,7 +6743,7 @@ func (this ErrorMsg) ErrType() uint16 {
 	return res
 }
 
-func (this ErrorMsg) SetErrType(e uint16) {
+func (this *ErrorMsg) SetErrType(e uint16) {
 	offset := this.ErrTypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], e)
 	offset += 2
@@ -6784,7 +6760,7 @@ func (this ErrorMsg) Code() uint16 {
 	return res
 }
 
-func (this ErrorMsg) SetCode(c uint16) {
+func (this *ErrorMsg) SetCode(c uint16) {
 	offset := this.CodeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], c)
 	offset += 2
@@ -6799,26 +6775,14 @@ func (this ErrorMsg) Data() []uint8 {
 	offset := this.DataOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
-	count := this.Size() - offset
-	var res []uint8
-	for size > 0 && count > 0 && packet_size > offset {
-		elem := uint8(this.Buf[offset])
-		if size < 1 {
-			break
-		}
-		size -= 1
-		offset += 1
-		count--
-		res = append(res, elem)
-	}
-	return res
+	return []uint8(this.Buf[offset : offset+size])
 }
 
-func (this ErrorMsg) AddData(d uint8) {
+func (this *ErrorMsg) AddData(d uint8) {
 	offset := this.DataOffset()
 	offset += this.DataSize()
 	size := 1
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	this.Buf[offset] = byte(d)
 	offset++
@@ -6960,7 +6924,7 @@ func (c *StatsRequestConn) ReadStatsRequests(pkts []StatsRequest) (int, error) {
 	return n, nil
 }
 
-func (this StatsRequest) Init() {
+func (this *StatsRequest) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -6995,7 +6959,7 @@ func (this StatsRequest) StatsType() uint16 {
 	return res
 }
 
-func (this StatsRequest) SetStatsType(s uint16) {
+func (this *StatsRequest) SetStatsType(s uint16) {
 	offset := this.StatsTypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], s)
 	offset += 2
@@ -7012,7 +6976,7 @@ func (this StatsRequest) Flags() uint16 {
 	return res
 }
 
-func (this StatsRequest) SetFlags(f uint16) {
+func (this *StatsRequest) SetFlags(f uint16) {
 	offset := this.FlagsOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], f)
 	offset += 2
@@ -7149,7 +7113,7 @@ func (c *StatsReplyConn) ReadStatsReplys(pkts []StatsReply) (int, error) {
 	return n, nil
 }
 
-func (this StatsReply) Init() {
+func (this *StatsReply) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -7184,7 +7148,7 @@ func (this StatsReply) StatsType() uint16 {
 	return res
 }
 
-func (this StatsReply) SetStatsType(s uint16) {
+func (this *StatsReply) SetStatsType(s uint16) {
 	offset := this.StatsTypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], s)
 	offset += 2
@@ -7201,7 +7165,7 @@ func (this StatsReply) Flags() uint16 {
 	return res
 }
 
-func (this StatsReply) SetFlags(f uint16) {
+func (this *StatsReply) SetFlags(f uint16) {
 	offset := this.FlagsOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], f)
 	offset += 2
@@ -7338,7 +7302,7 @@ func (c *DescStatsConn) ReadDescStatss(pkts []DescStats) (int, error) {
 	return n, nil
 }
 
-func (this DescStats) Init() {
+func (this *DescStats) Init() {
 	this.StatsReply.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -7389,7 +7353,7 @@ func (this DescStats) MfrDesc() [256]byte {
 	return res
 }
 
-func (this DescStats) SetMfrDesc(m [256]byte) {
+func (this *DescStats) SetMfrDesc(m [256]byte) {
 	offset := this.MfrDescOffset()
 	for _, e := range m {
 		this.Buf[offset] = byte(e)
@@ -7423,7 +7387,7 @@ func (this DescStats) HwDesc() [256]byte {
 	return res
 }
 
-func (this DescStats) SetHwDesc(h [256]byte) {
+func (this *DescStats) SetHwDesc(h [256]byte) {
 	offset := this.HwDescOffset()
 	for _, e := range h {
 		this.Buf[offset] = byte(e)
@@ -7457,7 +7421,7 @@ func (this DescStats) SwDesc() [256]byte {
 	return res
 }
 
-func (this DescStats) SetSwDesc(s [256]byte) {
+func (this *DescStats) SetSwDesc(s [256]byte) {
 	offset := this.SwDescOffset()
 	for _, e := range s {
 		this.Buf[offset] = byte(e)
@@ -7491,7 +7455,7 @@ func (this DescStats) SerialNum() [32]byte {
 	return res
 }
 
-func (this DescStats) SetSerialNum(s [32]byte) {
+func (this *DescStats) SetSerialNum(s [32]byte) {
 	offset := this.SerialNumOffset()
 	for _, e := range s {
 		this.Buf[offset] = byte(e)
@@ -7525,7 +7489,7 @@ func (this DescStats) DpDesc() [256]byte {
 	return res
 }
 
-func (this DescStats) SetDpDesc(d [256]byte) {
+func (this *DescStats) SetDpDesc(d [256]byte) {
 	offset := this.DpDescOffset()
 	for _, e := range d {
 		this.Buf[offset] = byte(e)
@@ -7664,7 +7628,7 @@ func (c *FlowStatsRequestConn) ReadFlowStatsRequests(pkts []FlowStatsRequest) (i
 	return n, nil
 }
 
-func (this FlowStatsRequest) Init() {
+func (this *FlowStatsRequest) Init() {
 	this.StatsRequest.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -7700,14 +7664,14 @@ func (this FlowStatsRequest) Match() Match {
 	return res
 }
 
-func (this FlowStatsRequest) SetMatch(m Match) {
+func (this *FlowStatsRequest) SetMatch(m Match) {
 	offset := this.MatchOffset()
 	if this.MatchSize() != 0 {
 		panic("Repeated field match is already set.")
 	}
 	size := m.Size()
 	this.SetLength(uint16(this.Size() + size))
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	copy(this.Buf[offset:], m.Buf[:m.Size()])
 	offset += m.Size()
 }
@@ -7731,7 +7695,7 @@ func (this FlowStatsRequest) TableId() uint8 {
 	return res
 }
 
-func (this FlowStatsRequest) SetTableId(t uint8) {
+func (this *FlowStatsRequest) SetTableId(t uint8) {
 	offset := this.TableIdOffset()
 	this.Buf[offset] = byte(t)
 	offset++
@@ -7749,7 +7713,7 @@ func (this FlowStatsRequest) Pad() uint8 {
 	return res
 }
 
-func (this FlowStatsRequest) SetPad(p uint8) {
+func (this *FlowStatsRequest) SetPad(p uint8) {
 	offset := this.PadOffset()
 	this.Buf[offset] = byte(p)
 	offset++
@@ -7767,7 +7731,7 @@ func (this FlowStatsRequest) OutPort() uint16 {
 	return res
 }
 
-func (this FlowStatsRequest) SetOutPort(o uint16) {
+func (this *FlowStatsRequest) SetOutPort(o uint16) {
 	offset := this.OutPortOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], o)
 	offset += 2
@@ -7905,7 +7869,7 @@ func (c *FlowStatsConn) ReadFlowStatss(pkts []FlowStats) (int, error) {
 	return n, nil
 }
 
-func (this FlowStats) Init() {
+func (this *FlowStats) Init() {
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
 }
@@ -7937,7 +7901,7 @@ func (this FlowStats) Length() uint16 {
 	return res
 }
 
-func (this FlowStats) SetLength(l uint16) {
+func (this *FlowStats) SetLength(l uint16) {
 	offset := this.LengthOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
@@ -7954,7 +7918,7 @@ func (this FlowStats) TableId() uint8 {
 	return res
 }
 
-func (this FlowStats) SetTableId(t uint8) {
+func (this *FlowStats) SetTableId(t uint8) {
 	offset := this.TableIdOffset()
 	this.Buf[offset] = byte(t)
 	offset++
@@ -7971,7 +7935,7 @@ func (this FlowStats) Pad() uint8 {
 	return res
 }
 
-func (this FlowStats) SetPad(p uint8) {
+func (this *FlowStats) SetPad(p uint8) {
 	offset := this.PadOffset()
 	this.Buf[offset] = byte(p)
 	offset++
@@ -7988,14 +7952,14 @@ func (this FlowStats) Match() Match {
 	return res
 }
 
-func (this FlowStats) SetMatch(m Match) {
+func (this *FlowStats) SetMatch(m Match) {
 	offset := this.MatchOffset()
 	if this.MatchSize() != 0 {
 		panic("Repeated field match is already set.")
 	}
 	size := m.Size()
 	this.SetLength(uint16(this.Size() + size))
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	copy(this.Buf[offset:], m.Buf[:m.Size()])
 	offset += m.Size()
 }
@@ -8019,7 +7983,7 @@ func (this FlowStats) DurationSec() uint32 {
 	return res
 }
 
-func (this FlowStats) SetDurationSec(d uint32) {
+func (this *FlowStats) SetDurationSec(d uint32) {
 	offset := this.DurationSecOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], d)
 	offset += 4
@@ -8037,7 +8001,7 @@ func (this FlowStats) DurationNsec() uint32 {
 	return res
 }
 
-func (this FlowStats) SetDurationNsec(d uint32) {
+func (this *FlowStats) SetDurationNsec(d uint32) {
 	offset := this.DurationNsecOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], d)
 	offset += 4
@@ -8055,7 +8019,7 @@ func (this FlowStats) Priority() uint16 {
 	return res
 }
 
-func (this FlowStats) SetPriority(p uint16) {
+func (this *FlowStats) SetPriority(p uint16) {
 	offset := this.PriorityOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -8073,7 +8037,7 @@ func (this FlowStats) IdleTimeout() uint16 {
 	return res
 }
 
-func (this FlowStats) SetIdleTimeout(i uint16) {
+func (this *FlowStats) SetIdleTimeout(i uint16) {
 	offset := this.IdleTimeoutOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], i)
 	offset += 2
@@ -8091,7 +8055,7 @@ func (this FlowStats) HardTimeout() uint16 {
 	return res
 }
 
-func (this FlowStats) SetHardTimeout(h uint16) {
+func (this *FlowStats) SetHardTimeout(h uint16) {
 	offset := this.HardTimeoutOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], h)
 	offset += 2
@@ -8124,7 +8088,7 @@ func (this FlowStats) Pad2() [6]uint8 {
 	return res
 }
 
-func (this FlowStats) SetPad2(p [6]uint8) {
+func (this *FlowStats) SetPad2(p [6]uint8) {
 	offset := this.Pad2Offset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -8144,7 +8108,7 @@ func (this FlowStats) Cookie() uint64 {
 	return res
 }
 
-func (this FlowStats) SetCookie(c uint64) {
+func (this *FlowStats) SetCookie(c uint64) {
 	offset := this.CookieOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], c)
 	offset += 8
@@ -8162,7 +8126,7 @@ func (this FlowStats) PacketCount() uint64 {
 	return res
 }
 
-func (this FlowStats) SetPacketCount(p uint64) {
+func (this *FlowStats) SetPacketCount(p uint64) {
 	offset := this.PacketCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], p)
 	offset += 8
@@ -8180,7 +8144,7 @@ func (this FlowStats) ByteCount() uint64 {
 	return res
 }
 
-func (this FlowStats) SetByteCount(b uint64) {
+func (this *FlowStats) SetByteCount(b uint64) {
 	offset := this.ByteCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], b)
 	offset += 8
@@ -8211,11 +8175,11 @@ func (this FlowStats) Actions() []Action {
 	return res
 }
 
-func (this FlowStats) AddActions(a Action) {
+func (this *FlowStats) AddActions(a Action) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], a.Buf[:size])
 	offset += size
@@ -8358,7 +8322,7 @@ func (c *FlowStatsReplyConn) ReadFlowStatsReplys(pkts []FlowStatsReply) (int, er
 	return n, nil
 }
 
-func (this FlowStatsReply) Init() {
+func (this *FlowStatsReply) Init() {
 	this.StatsReply.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -8407,11 +8371,11 @@ func (this FlowStatsReply) FlowStats() []FlowStats {
 	return res
 }
 
-func (this FlowStatsReply) AddFlowStats(f FlowStats) {
+func (this *FlowStatsReply) AddFlowStats(f FlowStats) {
 	offset := this.FlowStatsOffset()
 	offset += this.FlowStatsSize()
 	size := f.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], f.Buf[:size])
 	offset += size
@@ -8553,7 +8517,7 @@ func (c *AggregateStatsRequestConn) ReadAggregateStatsRequests(pkts []AggregateS
 	return n, nil
 }
 
-func (this AggregateStatsRequest) Init() {
+func (this *AggregateStatsRequest) Init() {
 	this.StatsRequest.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -8589,14 +8553,14 @@ func (this AggregateStatsRequest) Match() Match {
 	return res
 }
 
-func (this AggregateStatsRequest) SetMatch(m Match) {
+func (this *AggregateStatsRequest) SetMatch(m Match) {
 	offset := this.MatchOffset()
 	if this.MatchSize() != 0 {
 		panic("Repeated field match is already set.")
 	}
 	size := m.Size()
 	this.SetLength(uint16(this.Size() + size))
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	copy(this.Buf[offset:], m.Buf[:m.Size()])
 	offset += m.Size()
 }
@@ -8620,7 +8584,7 @@ func (this AggregateStatsRequest) TableId() uint8 {
 	return res
 }
 
-func (this AggregateStatsRequest) SetTableId(t uint8) {
+func (this *AggregateStatsRequest) SetTableId(t uint8) {
 	offset := this.TableIdOffset()
 	this.Buf[offset] = byte(t)
 	offset++
@@ -8638,7 +8602,7 @@ func (this AggregateStatsRequest) Pad() uint8 {
 	return res
 }
 
-func (this AggregateStatsRequest) SetPad(p uint8) {
+func (this *AggregateStatsRequest) SetPad(p uint8) {
 	offset := this.PadOffset()
 	this.Buf[offset] = byte(p)
 	offset++
@@ -8656,7 +8620,7 @@ func (this AggregateStatsRequest) OutPort() uint16 {
 	return res
 }
 
-func (this AggregateStatsRequest) SetOutPort(o uint16) {
+func (this *AggregateStatsRequest) SetOutPort(o uint16) {
 	offset := this.OutPortOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], o)
 	offset += 2
@@ -8794,7 +8758,7 @@ func (c *AggregateStatsReplyConn) ReadAggregateStatsReplys(pkts []AggregateStats
 	return n, nil
 }
 
-func (this AggregateStatsReply) Init() {
+func (this *AggregateStatsReply) Init() {
 	this.StatsReply.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -8830,7 +8794,7 @@ func (this AggregateStatsReply) PacketCount() uint64 {
 	return res
 }
 
-func (this AggregateStatsReply) SetPacketCount(p uint64) {
+func (this *AggregateStatsReply) SetPacketCount(p uint64) {
 	offset := this.PacketCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], p)
 	offset += 8
@@ -8847,7 +8811,7 @@ func (this AggregateStatsReply) ByteCount() uint64 {
 	return res
 }
 
-func (this AggregateStatsReply) SetByteCount(b uint64) {
+func (this *AggregateStatsReply) SetByteCount(b uint64) {
 	offset := this.ByteCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], b)
 	offset += 8
@@ -8864,7 +8828,7 @@ func (this AggregateStatsReply) FlowCount() uint32 {
 	return res
 }
 
-func (this AggregateStatsReply) SetFlowCount(f uint32) {
+func (this *AggregateStatsReply) SetFlowCount(f uint32) {
 	offset := this.FlowCountOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], f)
 	offset += 4
@@ -8896,7 +8860,7 @@ func (this AggregateStatsReply) Pad() [4]uint8 {
 	return res
 }
 
-func (this AggregateStatsReply) SetPad(p [4]uint8) {
+func (this *AggregateStatsReply) SetPad(p [4]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -9035,7 +8999,7 @@ func (c *TableStatsConn) ReadTableStatss(pkts []TableStats) (int, error) {
 	return n, nil
 }
 
-func (this TableStats) Init() {
+func (this *TableStats) Init() {
 	this.StatsReply.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -9071,7 +9035,7 @@ func (this TableStats) TableId() uint8 {
 	return res
 }
 
-func (this TableStats) SetTableId(t uint8) {
+func (this *TableStats) SetTableId(t uint8) {
 	offset := this.TableIdOffset()
 	this.Buf[offset] = byte(t)
 	offset++
@@ -9103,7 +9067,7 @@ func (this TableStats) Pad() [3]uint8 {
 	return res
 }
 
-func (this TableStats) SetPad(p [3]uint8) {
+func (this *TableStats) SetPad(p [3]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -9137,7 +9101,7 @@ func (this TableStats) Name() [32]byte {
 	return res
 }
 
-func (this TableStats) SetName(n [32]byte) {
+func (this *TableStats) SetName(n [32]byte) {
 	offset := this.NameOffset()
 	for _, e := range n {
 		this.Buf[offset] = byte(e)
@@ -9156,7 +9120,7 @@ func (this TableStats) Wildcards() uint32 {
 	return res
 }
 
-func (this TableStats) SetWildcards(w uint32) {
+func (this *TableStats) SetWildcards(w uint32) {
 	offset := this.WildcardsOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], w)
 	offset += 4
@@ -9173,7 +9137,7 @@ func (this TableStats) MaxEntries() uint32 {
 	return res
 }
 
-func (this TableStats) SetMaxEntries(m uint32) {
+func (this *TableStats) SetMaxEntries(m uint32) {
 	offset := this.MaxEntriesOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], m)
 	offset += 4
@@ -9190,7 +9154,7 @@ func (this TableStats) ActiveCount() uint32 {
 	return res
 }
 
-func (this TableStats) SetActiveCount(a uint32) {
+func (this *TableStats) SetActiveCount(a uint32) {
 	offset := this.ActiveCountOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], a)
 	offset += 4
@@ -9207,7 +9171,7 @@ func (this TableStats) LookupCount() uint64 {
 	return res
 }
 
-func (this TableStats) SetLookupCount(l uint64) {
+func (this *TableStats) SetLookupCount(l uint64) {
 	offset := this.LookupCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], l)
 	offset += 8
@@ -9224,7 +9188,7 @@ func (this TableStats) MatchedCount() uint64 {
 	return res
 }
 
-func (this TableStats) SetMatchedCount(m uint64) {
+func (this *TableStats) SetMatchedCount(m uint64) {
 	offset := this.MatchedCountOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], m)
 	offset += 8
@@ -9361,7 +9325,7 @@ func (c *PortStatsRequestConn) ReadPortStatsRequests(pkts []PortStatsRequest) (i
 	return n, nil
 }
 
-func (this PortStatsRequest) Init() {
+func (this *PortStatsRequest) Init() {
 	this.StatsRequest.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -9397,7 +9361,7 @@ func (this PortStatsRequest) PortNo() uint16 {
 	return res
 }
 
-func (this PortStatsRequest) SetPortNo(p uint16) {
+func (this *PortStatsRequest) SetPortNo(p uint16) {
 	offset := this.PortNoOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -9429,7 +9393,7 @@ func (this PortStatsRequest) Pad() [6]uint8 {
 	return res
 }
 
-func (this PortStatsRequest) SetPad(p [6]uint8) {
+func (this *PortStatsRequest) SetPad(p [6]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -9568,7 +9532,7 @@ func (c *PortStatsConn) ReadPortStatss(pkts []PortStats) (int, error) {
 	return n, nil
 }
 
-func (this PortStats) Init() {
+func (this *PortStats) Init() {
 	this.StatsReply.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -9604,7 +9568,7 @@ func (this PortStats) PortNo() uint16 {
 	return res
 }
 
-func (this PortStats) SetPortNo(p uint16) {
+func (this *PortStats) SetPortNo(p uint16) {
 	offset := this.PortNoOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -9636,7 +9600,7 @@ func (this PortStats) Pad() [6]uint8 {
 	return res
 }
 
-func (this PortStats) SetPad(p [6]uint8) {
+func (this *PortStats) SetPad(p [6]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -9655,7 +9619,7 @@ func (this PortStats) RxPackets() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxPackets(r uint64) {
+func (this *PortStats) SetRxPackets(r uint64) {
 	offset := this.RxPacketsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9672,7 +9636,7 @@ func (this PortStats) TxPackets() uint64 {
 	return res
 }
 
-func (this PortStats) SetTxPackets(t uint64) {
+func (this *PortStats) SetTxPackets(t uint64) {
 	offset := this.TxPacketsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8
@@ -9689,7 +9653,7 @@ func (this PortStats) RxBytes() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxBytes(r uint64) {
+func (this *PortStats) SetRxBytes(r uint64) {
 	offset := this.RxBytesOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9706,7 +9670,7 @@ func (this PortStats) TxBytes() uint64 {
 	return res
 }
 
-func (this PortStats) SetTxBytes(t uint64) {
+func (this *PortStats) SetTxBytes(t uint64) {
 	offset := this.TxBytesOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8
@@ -9723,7 +9687,7 @@ func (this PortStats) RxDropped() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxDropped(r uint64) {
+func (this *PortStats) SetRxDropped(r uint64) {
 	offset := this.RxDroppedOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9740,7 +9704,7 @@ func (this PortStats) TxDropped() uint64 {
 	return res
 }
 
-func (this PortStats) SetTxDropped(t uint64) {
+func (this *PortStats) SetTxDropped(t uint64) {
 	offset := this.TxDroppedOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8
@@ -9757,7 +9721,7 @@ func (this PortStats) RxErrors() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxErrors(r uint64) {
+func (this *PortStats) SetRxErrors(r uint64) {
 	offset := this.RxErrorsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9774,7 +9738,7 @@ func (this PortStats) TxErrors() uint64 {
 	return res
 }
 
-func (this PortStats) SetTxErrors(t uint64) {
+func (this *PortStats) SetTxErrors(t uint64) {
 	offset := this.TxErrorsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8
@@ -9791,7 +9755,7 @@ func (this PortStats) RxFrameErr() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxFrameErr(r uint64) {
+func (this *PortStats) SetRxFrameErr(r uint64) {
 	offset := this.RxFrameErrOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9808,7 +9772,7 @@ func (this PortStats) RxOverErr() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxOverErr(r uint64) {
+func (this *PortStats) SetRxOverErr(r uint64) {
 	offset := this.RxOverErrOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9825,7 +9789,7 @@ func (this PortStats) RxCrcErr() uint64 {
 	return res
 }
 
-func (this PortStats) SetRxCrcErr(r uint64) {
+func (this *PortStats) SetRxCrcErr(r uint64) {
 	offset := this.RxCrcErrOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], r)
 	offset += 8
@@ -9842,7 +9806,7 @@ func (this PortStats) Collisions() uint64 {
 	return res
 }
 
-func (this PortStats) SetCollisions(c uint64) {
+func (this *PortStats) SetCollisions(c uint64) {
 	offset := this.CollisionsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], c)
 	offset += 8
@@ -9979,7 +9943,7 @@ func (c *VendorHeaderConn) ReadVendorHeaders(pkts []VendorHeader) (int, error) {
 	return n, nil
 }
 
-func (this VendorHeader) Init() {
+func (this *VendorHeader) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -10014,7 +9978,7 @@ func (this VendorHeader) Vendor() uint32 {
 	return res
 }
 
-func (this VendorHeader) SetVendor(v uint32) {
+func (this *VendorHeader) SetVendor(v uint32) {
 	offset := this.VendorOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], v)
 	offset += 4
@@ -10151,7 +10115,7 @@ func (c *QueuePropHeaderConn) ReadQueuePropHeaders(pkts []QueuePropHeader) (int,
 	return n, nil
 }
 
-func (this QueuePropHeader) Init() {
+func (this *QueuePropHeader) Init() {
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 }
@@ -10183,7 +10147,7 @@ func (this QueuePropHeader) Property() uint16 {
 	return res
 }
 
-func (this QueuePropHeader) SetProperty(p uint16) {
+func (this *QueuePropHeader) SetProperty(p uint16) {
 	offset := this.PropertyOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -10200,7 +10164,7 @@ func (this QueuePropHeader) Len() uint16 {
 	return res
 }
 
-func (this QueuePropHeader) SetLen(l uint16) {
+func (this *QueuePropHeader) SetLen(l uint16) {
 	offset := this.LenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
@@ -10232,7 +10196,7 @@ func (this QueuePropHeader) Pad() [4]uint8 {
 	return res
 }
 
-func (this QueuePropHeader) SetPad(p [4]uint8) {
+func (this *QueuePropHeader) SetPad(p [4]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -10371,7 +10335,7 @@ func (c *QueuePropMinRateConn) ReadQueuePropMinRates(pkts []QueuePropMinRate) (i
 	return n, nil
 }
 
-func (this QueuePropMinRate) Init() {
+func (this *QueuePropMinRate) Init() {
 	this.QueuePropHeader.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
@@ -10405,7 +10369,7 @@ func (this QueuePropMinRate) Rate() uint16 {
 	return res
 }
 
-func (this QueuePropMinRate) SetRate(r uint16) {
+func (this *QueuePropMinRate) SetRate(r uint16) {
 	offset := this.RateOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], r)
 	offset += 2
@@ -10437,7 +10401,7 @@ func (this QueuePropMinRate) Pad() [6]uint8 {
 	return res
 }
 
-func (this QueuePropMinRate) SetPad(p [6]uint8) {
+func (this *QueuePropMinRate) SetPad(p [6]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -10576,7 +10540,7 @@ func (c *PacketQueueConn) ReadPacketQueues(pkts []PacketQueue) (int, error) {
 	return n, nil
 }
 
-func (this PacketQueue) Init() {
+func (this *PacketQueue) Init() {
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 }
@@ -10608,7 +10572,7 @@ func (this PacketQueue) QueueId() uint32 {
 	return res
 }
 
-func (this PacketQueue) SetQueueId(q uint32) {
+func (this *PacketQueue) SetQueueId(q uint32) {
 	offset := this.QueueIdOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], q)
 	offset += 4
@@ -10625,7 +10589,7 @@ func (this PacketQueue) Len() uint16 {
 	return res
 }
 
-func (this PacketQueue) SetLen(l uint16) {
+func (this *PacketQueue) SetLen(l uint16) {
 	offset := this.LenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
@@ -10657,7 +10621,7 @@ func (this PacketQueue) Pad() [2]uint8 {
 	return res
 }
 
-func (this PacketQueue) SetPad(p [2]uint8) {
+func (this *PacketQueue) SetPad(p [2]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -10689,11 +10653,11 @@ func (this PacketQueue) Properties() []QueuePropHeader {
 	return res
 }
 
-func (this PacketQueue) AddProperties(p QueuePropHeader) {
+func (this *PacketQueue) AddProperties(p QueuePropHeader) {
 	offset := this.PropertiesOffset()
 	offset += this.PropertiesSize()
 	size := p.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLen(uint16(this.Size() + size))
 	copy(this.Buf[offset:], p.Buf[:size])
 	offset += size
@@ -10835,7 +10799,7 @@ func (c *QueueGetConfigRequestConn) ReadQueueGetConfigRequests(pkts []QueueGetCo
 	return n, nil
 }
 
-func (this QueueGetConfigRequest) Init() {
+func (this *QueueGetConfigRequest) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -10870,7 +10834,7 @@ func (this QueueGetConfigRequest) Port() uint16 {
 	return res
 }
 
-func (this QueueGetConfigRequest) SetPort(p uint16) {
+func (this *QueueGetConfigRequest) SetPort(p uint16) {
 	offset := this.PortOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -10885,26 +10849,14 @@ func (this QueueGetConfigRequest) Pad() []uint8 {
 	offset := this.PadOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
-	count := this.Size() - offset
-	var res []uint8
-	for size > 0 && count > 0 && packet_size > offset {
-		elem := uint8(this.Buf[offset])
-		if size < 1 {
-			break
-		}
-		size -= 1
-		offset += 1
-		count--
-		res = append(res, elem)
-	}
-	return res
+	return []uint8(this.Buf[offset : offset+size])
 }
 
-func (this QueueGetConfigRequest) AddPad(p uint8) {
+func (this *QueueGetConfigRequest) AddPad(p uint8) {
 	offset := this.PadOffset()
 	offset += this.PadSize()
 	size := 1
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	this.Buf[offset] = byte(p)
 	offset++
@@ -11046,7 +10998,7 @@ func (c *QueueGetConfigReplyConn) ReadQueueGetConfigReplys(pkts []QueueGetConfig
 	return n, nil
 }
 
-func (this QueueGetConfigReply) Init() {
+func (this *QueueGetConfigReply) Init() {
 	this.Header12.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -11081,7 +11033,7 @@ func (this QueueGetConfigReply) Port() uint16 {
 	return res
 }
 
-func (this QueueGetConfigReply) SetPort(p uint16) {
+func (this *QueueGetConfigReply) SetPort(p uint16) {
 	offset := this.PortOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -11113,7 +11065,7 @@ func (this QueueGetConfigReply) Pad() [6]uint8 {
 	return res
 }
 
-func (this QueueGetConfigReply) SetPad(p [6]uint8) {
+func (this *QueueGetConfigReply) SetPad(p [6]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -11145,11 +11097,11 @@ func (this QueueGetConfigReply) Queues() []PacketQueue {
 	return res
 }
 
-func (this QueueGetConfigReply) AddQueues(q PacketQueue) {
+func (this *QueueGetConfigReply) AddQueues(q PacketQueue) {
 	offset := this.QueuesOffset()
 	offset += this.QueuesSize()
 	size := q.Size()
-	this.OpenGap(offset, size)
+	this.OpenGap(offset, size, this.Size())
 	this.SetLength(uint16(this.Size() + size))
 	copy(this.Buf[offset:], q.Buf[:size])
 	offset += size
@@ -11291,7 +11243,7 @@ func (c *QueueStatsRequestConn) ReadQueueStatsRequests(pkts []QueueStatsRequest)
 	return n, nil
 }
 
-func (this QueueStatsRequest) Init() {
+func (this *QueueStatsRequest) Init() {
 	this.StatsRequest.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -11327,7 +11279,7 @@ func (this QueueStatsRequest) PortNo() uint16 {
 	return res
 }
 
-func (this QueueStatsRequest) SetPortNo(p uint16) {
+func (this *QueueStatsRequest) SetPortNo(p uint16) {
 	offset := this.PortNoOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -11359,7 +11311,7 @@ func (this QueueStatsRequest) Pad() [2]uint8 {
 	return res
 }
 
-func (this QueueStatsRequest) SetPad(p [2]uint8) {
+func (this *QueueStatsRequest) SetPad(p [2]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -11378,7 +11330,7 @@ func (this QueueStatsRequest) QueueId() uint32 {
 	return res
 }
 
-func (this QueueStatsRequest) SetQueueId(q uint32) {
+func (this *QueueStatsRequest) SetQueueId(q uint32) {
 	offset := this.QueueIdOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], q)
 	offset += 4
@@ -11515,7 +11467,7 @@ func (c *QueueStatsConn) ReadQueueStatss(pkts []QueueStats) (int, error) {
 	return n, nil
 }
 
-func (this QueueStats) Init() {
+func (this *QueueStats) Init() {
 	this.StatsReply.Init()
 	this.SetLength(uint16(this.minSize()))
 	// Invariants.
@@ -11551,7 +11503,7 @@ func (this QueueStats) PortNo() uint16 {
 	return res
 }
 
-func (this QueueStats) SetPortNo(p uint16) {
+func (this *QueueStats) SetPortNo(p uint16) {
 	offset := this.PortNoOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], p)
 	offset += 2
@@ -11583,7 +11535,7 @@ func (this QueueStats) Pad() [2]uint8 {
 	return res
 }
 
-func (this QueueStats) SetPad(p [2]uint8) {
+func (this *QueueStats) SetPad(p [2]uint8) {
 	offset := this.PadOffset()
 	for _, e := range p {
 		this.Buf[offset] = byte(e)
@@ -11602,7 +11554,7 @@ func (this QueueStats) QueueId() uint32 {
 	return res
 }
 
-func (this QueueStats) SetQueueId(q uint32) {
+func (this *QueueStats) SetQueueId(q uint32) {
 	offset := this.QueueIdOffset()
 	binary.BigEndian.PutUint32(this.Buf[offset:], q)
 	offset += 4
@@ -11619,7 +11571,7 @@ func (this QueueStats) TxBytes() uint64 {
 	return res
 }
 
-func (this QueueStats) SetTxBytes(t uint64) {
+func (this *QueueStats) SetTxBytes(t uint64) {
 	offset := this.TxBytesOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8
@@ -11636,7 +11588,7 @@ func (this QueueStats) TxPackets() uint64 {
 	return res
 }
 
-func (this QueueStats) SetTxPackets(t uint64) {
+func (this *QueueStats) SetTxPackets(t uint64) {
 	offset := this.TxPacketsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8
@@ -11653,7 +11605,7 @@ func (this QueueStats) TxErrors() uint64 {
 	return res
 }
 
-func (this QueueStats) SetTxErrors(t uint64) {
+func (this *QueueStats) SetTxErrors(t uint64) {
 	offset := this.TxErrorsOffset()
 	binary.BigEndian.PutUint64(this.Buf[offset:], t)
 	offset += 8

@@ -3,6 +3,7 @@ package openflow
 import (
 	"fmt"
 
+	"github.com/golang/glog"
 	"github.com/soheilhy/beehive-netctrl/nom"
 	"github.com/soheilhy/beehive-netctrl/openflow/of"
 	"github.com/soheilhy/beehive-netctrl/openflow/of10"
@@ -17,9 +18,15 @@ type ofDriver interface {
 	handleConnClose(conn *ofConn)
 }
 
-type of10Driver struct{}
+type of10Driver struct {
+	ofPorts  map[uint16]*nom.Port
+	nomPorts map[nom.UID]uint16
+}
 
-type of12Driver struct{}
+type of12Driver struct {
+	ofPorts  map[uint32]*nom.Port
+	nomPorts map[nom.UID]uint32
+}
 
 func (d *of10Driver) handlePkt(pkt of.Header, c *ofConn) error {
 	pkt10, err := of10.ToHeader10(pkt)
@@ -62,10 +69,30 @@ func (d *of12Driver) handlePkt(pkt of.Header, c *ofConn) error {
 }
 
 func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
+	ofh, err := d.convToOF(msg)
+	if err != nil {
+		return fmt.Errorf("of10Driver: Unsupported message %v", msg.Data())
+	}
+
+	if err := c.WriteHeader(ofh); err != nil {
+		glog.Errorf("ofconn: Cannot write packet: %v", err)
+		return err
+	}
+
 	return nil
 }
 
 func (d *of12Driver) handleMsg(msg bh.Msg, c *ofConn) error {
+	ofh, err := d.convToOF(msg)
+	if err != nil {
+		return fmt.Errorf("of12Driver: Unsupported message %v", msg.Data())
+	}
+
+	if err := c.WriteHeader(ofh); err != nil {
+		glog.Errorf("ofconn: Cannot write packet: %v", err)
+		return err
+	}
+
 	return nil
 }
 
@@ -84,4 +111,59 @@ func emitNodeDisconnected(c *ofConn) {
 			BeeID: c.ctx.BeeID(),
 		},
 	})
+}
+
+func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
+	switch data := msg.Data().(type) {
+	case nom.PacketOut:
+		ofPort, ok := d.nomPorts[data.InPort]
+		if !ok {
+			return of.Header{},
+				fmt.Errorf("of10Driver: Port %v not found", data.InPort)
+		}
+
+		buf := make([]byte, 256)
+		out := of10.NewPacketOutWithBuf(buf)
+		out.Init()
+		out.SetBufferId(uint32(data.BufferID))
+		out.SetInPort(ofPort)
+
+		if data.BufferID == 0xFFFFFFFF {
+			for _, d := range data.Packet {
+				out.AddData(d)
+			}
+		}
+
+		for _, a := range data.Actions {
+			ofa, err := d.convAction(a)
+			if err != nil {
+				return of.Header{},
+					fmt.Errorf("of10Driver: Invalid action %v", err)
+			}
+			out.AddActions(ofa)
+		}
+
+		return out.Header, nil
+
+	default:
+		return of.Header{}, fmt.Errorf("of10Driver: Message not supported %v", data)
+	}
+}
+
+func (d *of12Driver) convToOF(msg bh.Msg) (of.Header, error) {
+	return of.Header{}, fmt.Errorf("of12Driver: Message not supported %v",
+		msg.Data())
+}
+
+func (d *of10Driver) convAction(a nom.Action) (of10.ActionHeader, error) {
+	switch action := a.(type) {
+	case nom.ActionFlood:
+		flood := of10.NewActionOutput()
+		flood.SetPort(uint16(of10.PP_FLOOD))
+		return flood.ActionHeader, nil
+
+	default:
+		return of10.ActionHeader{},
+			fmt.Errorf("of10Driver: Action not support %v", action)
+	}
 }

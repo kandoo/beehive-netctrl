@@ -6,7 +6,9 @@ import (
 	"os"
 	"runtime/pprof"
 
+	"github.com/soheilhy/beehive-netctrl/nom"
 	"github.com/soheilhy/beehive-netctrl/openflow"
+	"github.com/soheilhy/beehive-netctrl/switching"
 	"github.com/soheilhy/beehive/bh"
 )
 
@@ -26,6 +28,10 @@ func main() {
 
 	h := bh.NewHive()
 	openflow.StartOpenFlow(h)
+
+	app := h.NewApp("Hub")
+	app.Handle(nom.PacketIn{}, &switching.Hub{})
+	app.SetFlags(0)
 
 	h.Start()
 }

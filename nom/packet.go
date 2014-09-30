@@ -17,10 +17,10 @@ type PacketIn struct {
 // PacketOut messages are emitted to send a packet out of a port.
 type PacketOut struct {
 	Node     UID
-	OutPort  UID
 	InPort   UID
 	BufferID PacketBufferID
 	Packet   Packet
+	Actions  []Action
 }
 
 // Packet is simply the packet data.

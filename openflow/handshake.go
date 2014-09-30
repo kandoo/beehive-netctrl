@@ -100,18 +100,22 @@ func (d *of10Driver) handshake(c *ofConn) error {
 		},
 	})
 
+	d.ofPorts = make(map[uint16]*nom.Port)
+	d.nomPorts = make(map[nom.UID]uint16)
 	for _, p := range frep.Ports() {
 		glog.Infof("Port (switch=%016x, no=%d, mac=%012x, name=%s)\n",
 			frep.DatapathId(), p.PortNo(), p.HwAddr(), p.Name())
 		name := p.Name()
-		c.ctx.Emit(nom.Port{
+		port := nom.Port{
 			ID:      portNoToPortID(uint32(p.PortNo())),
 			Name:    string(name[:]),
 			MACAddr: p.HwAddr(),
 			Node:    c.NodeUID(),
-		})
+		}
+		d.ofPorts[p.PortNo()] = &port
+		d.nomPorts[port.UID()] = p.PortNo()
+		c.ctx.Emit(nom.PortAdded(port))
 	}
-
 	return nil
 }
 
@@ -161,16 +165,21 @@ func (d *of12Driver) handshake(c *ofConn) error {
 		},
 	})
 
+	d.ofPorts = make(map[uint32]*nom.Port)
+	d.nomPorts = make(map[nom.UID]uint32)
 	for _, p := range frep.Ports() {
 		glog.Infof("Port (switch=%016x, no=%d, mac=%012x, name=%s)\n",
 			frep.DatapathId(), p.PortNo(), p.HwAddr(), p.Name())
 		name := p.Name()
-		c.ctx.Emit(nom.PortAdded{
+		port := nom.Port{
 			ID:      portNoToPortID(p.PortNo()),
 			Name:    string(name[:]),
 			MACAddr: p.HwAddr(),
 			Node:    c.NodeUID(),
-		})
+		}
+		d.ofPorts[p.PortNo()] = &port
+		d.nomPorts[port.UID()] = p.PortNo()
+		c.ctx.Emit(nom.PortAdded(port))
 	}
 
 	return nil
