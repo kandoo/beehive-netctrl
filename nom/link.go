@@ -54,3 +54,13 @@ const (
 	LinkStateUp                = iota
 	LinkStateDown              = iota
 )
+
+// Bandwidth represents bandwidth in bps.
+type Bandwidth uint64
+
+// Bandwidth units.
+const (
+	Kbps Bandwidth = 1000
+	Mbps Bandwidth = 1000000
+	Gbps Bandwidth = 1000000000
+)
