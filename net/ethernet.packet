@@ -1,0 +1,46 @@
+# Copyright (C) 2014, The Beehive project authors.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS  ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+@bigendian
+@custom_size
+packet EthernetPayload {
+  uint16 type;
+}
+
+@bigendian
+packet Ethernet {
+  @repeated(count = 6)
+  uint8 dst_mac;
+  @repeated(count = 6)
+  uint8 src_mac;
+  EthernetPayload payload;
+}
+
+@bigendian
+packet LLDP_TLV {
+  uint16 type_and_len;
+  @repeated
+  uint8 value;
+}
+
+@type_selector(type=0x88CC)
+packet LLDP(EthernetPayload) {
+  LLDP_TLV chassis_id;
+  LLDP_TLV port_id;
+  LLDP_TLV ttl;
+
+  @repeated
+  LLDP_TLV tlvs;
+}
+
