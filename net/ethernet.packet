@@ -12,35 +12,18 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-@bigendian
-@custom_size
-packet EthernetPayload {
-  uint16 type;
+enum EtherType {
+  ETH_T_LLDP = 0x88CC
 }
 
+# TODO(soheil): This is very hackish and must be fixed later.
 @bigendian
 packet Ethernet {
   @repeated(count = 6)
   uint8 dst_mac;
   @repeated(count = 6)
   uint8 src_mac;
-  EthernetPayload payload;
+  uint16 type;
 }
 
-@bigendian
-packet LLDP_TLV {
-  uint16 type_and_len;
-  @repeated
-  uint8 value;
-}
-
-@type_selector(type=0x88CC)
-packet LLDP(EthernetPayload) {
-  LLDP_TLV chassis_id;
-  LLDP_TLV port_id;
-  LLDP_TLV ttl;
-
-  @repeated
-  LLDP_TLV tlvs;
-}
 

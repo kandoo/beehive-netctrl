@@ -1,0 +1,56 @@
+# Copyright (C) 2014, The Beehive project authors.
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS  ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+
+include <ethernet.packet>;
+
+enum LinkDiscoveryTLVType {
+  TLV_CHASSIS_ID = 1,
+  TLV_PORT_ID = 2,
+  TLV_TTL = 3,
+  TLV_CUSTOM = 127
+}
+
+enum PortTLVSubtype {
+  PORT_TLV_IFACE_ALIAS = 1,
+  PORT_TLV_PORT_COMP = 2,
+  PORT_TLV_MAC_ADDR = 3,
+  PORT_TLV_NET_ADDR = 4,
+  PORT_TLV_IFACE_NAME = 5,
+  PORT_TLV_AGENT_CIRCUIT_ID = 6,
+  PORT_TLV_LOCAL = 7
+}
+
+@bigendian
+packet LinkDiscoveryTLV {
+  uint16 type_and_len;
+  @repeated
+  uint8 value;
+}
+
+@type_selector(type=ethernet.EtherType.ETH_T_LLDP)
+packet LinkDiscoveryProtocol(ethernet.Ethernet) {
+}
+
+@bigendian
+packet ChassisTLV {
+  uint16 type_and_len;
+  uint8 subtype;
+}
+
+@type_selector(type_and_len=0x0207, subtype=0x04)
+packet ChassisMacTLV(ChassisTLV) {
+  @repeated(count=6)
+  uint8 mac_addr;
+}
+
