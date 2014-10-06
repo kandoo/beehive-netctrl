@@ -2238,8 +2238,9 @@ func (this *FeaturesReply) AddPorts(p PhysicalPort) {
 	offset := this.PortsOffset()
 	offset += this.PortsSize()
 	size := p.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	copy(this.Buf[offset:], p.Buf[:size])
 	offset += size
 }
@@ -3019,8 +3020,9 @@ func (this *PacketIn) AddData(d uint8) {
 	offset := this.DataOffset()
 	offset += this.DataSize()
 	size := 1
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	this.Buf[offset] = byte(d)
 	offset++
 }
@@ -5620,8 +5622,9 @@ func (this *PacketOut) AddActions(a ActionHeader) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	copy(this.Buf[offset:], a.Buf[:size])
 	offset += size
 	this.SetActionsLen(this.ActionsLen() + uint16(size))
@@ -5647,8 +5650,9 @@ func (this *PacketOut) AddData(d uint8) {
 	offset := this.DataOffset()
 	offset += this.DataSize()
 	size := 1
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	this.Buf[offset] = byte(d)
 	offset++
 }
@@ -6464,8 +6468,9 @@ func (this *FlowMod) AddActions(a ActionHeader) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	copy(this.Buf[offset:], a.Buf[:size])
 	offset += size
 }
@@ -7056,8 +7061,9 @@ func (this *ErrorMsg) AddData(d uint8) {
 	offset := this.DataOffset()
 	offset += this.DataSize()
 	size := 1
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	this.Buf[offset] = byte(d)
 	offset++
 }
@@ -8413,8 +8419,9 @@ func (this *FlowStats) AddActions(a ActionHeader) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	copy(this.Buf[offset:], a.Buf[:size])
 	offset += size
 }
@@ -8608,8 +8615,9 @@ func (this *FlowStatsReply) AddFlowStats(f FlowStats) {
 	offset := this.FlowStatsOffset()
 	offset += this.FlowStatsSize()
 	size := f.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	copy(this.Buf[offset:], f.Buf[:size])
 	offset += size
 }
@@ -10873,8 +10881,9 @@ func (this *PacketQueue) AddProperties(p QueuePropHeader) {
 	offset := this.PropertiesOffset()
 	offset += this.PropertiesSize()
 	size := p.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLen(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLen(uint16(pSize + size))
 	copy(this.Buf[offset:], p.Buf[:size])
 	offset += size
 }
@@ -11072,8 +11081,9 @@ func (this *QueueGetConfigRequest) AddPad(p uint8) {
 	offset := this.PadOffset()
 	offset += this.PadSize()
 	size := 1
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	this.Buf[offset] = byte(p)
 	offset++
 }
@@ -11317,8 +11327,9 @@ func (this *QueueGetConfigReply) AddQueues(q PacketQueue) {
 	offset := this.QueuesOffset()
 	offset += this.QueuesSize()
 	size := q.Size()
-	this.OpenGap(offset, size, this.Size())
-	this.SetLength(uint16(this.Size() + size))
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
 	copy(this.Buf[offset:], q.Buf[:size])
 	offset += size
 }
