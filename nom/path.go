@@ -1,7 +1,5 @@
 package nom
 
-import "github.com/soheilhy/beehive-netctrl/nom"
-
 // Path represents a directed, logical multi-path among points in the network.
 // Each path start from one or more points in the network and is then connected
 // to other paths.
@@ -52,33 +50,33 @@ func NewPointGroup(p ...Point) *PointGroup {
 }
 
 // CreatePath is a message emitted to create a path in the network.
-type CreatePath nom.Path
+type CreatePath Path
 
 // DeletePath is a message emitted to delete a path.
 type DeletePath struct {
-	Path nom.UID
+	Path UID
 }
 
 // ReplacePath is a message emitted to replace an old path with a new one.
 type ReplacePath struct {
-	OldPath nom.Path
-	NewPath nom.Path
+	OldPath Path
+	NewPath Path
 }
 
 // QueryPath is emitted to query the stats of a path.
 type QueryPath struct {
-	Path nom.UID
+	Path UID
 }
 
 // PathStatistics is emitted as a reply to a QueryPath.
 type QueryPathResult struct {
-	Path  nom.UID
+	Path  UID
 	Stats []PointStats
 }
 
 // PointStats is the statistics of a specific point.
 type PointStats struct {
-	Point   nom.Point
+	Point   Point
 	Bytes   uint64
 	Packets uint64
 }

@@ -1,6 +1,9 @@
 package nom
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // PortAdded is emitted when a port is added to a node (or when the node
 // joins the network for the first time).
@@ -23,6 +26,10 @@ type Port struct {
 	State   PortState   // Is the state of the port.
 	Config  PortConfig  // Is the configuration of the port.
 	Feature PortFeature // Features of this port.
+}
+
+func (p Port) String() string {
+	return fmt.Sprintf("Port (node=%v, id=%v, addr=%v)", p.Node, p.ID, p.MACAddr)
 }
 
 // PortID is the ID of a port and is unique among the ports of a node.

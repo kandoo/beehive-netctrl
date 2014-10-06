@@ -1,6 +1,9 @@
 package nom
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // NodeConnected is a message emitted when a node connects to a driver.
 type NodeConnected struct {
@@ -36,6 +39,11 @@ type Node struct {
 	ID           NodeID
 	Net          UID
 	Capabilities []NodeCapability
+	MACAddr      MACAddr
+}
+
+func (n Node) String() string {
+	return fmt.Sprintf("Node %s", string(n.ID))
 }
 
 // NodeID is the ID of a node. This must be unique among all nodes in the
