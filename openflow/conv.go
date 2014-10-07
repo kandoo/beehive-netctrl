@@ -6,8 +6,8 @@ import (
 	"github.com/soheilhy/beehive-netctrl/nom"
 )
 
-func datapathIDToNodeID(datapathID uint64) nom.NodeID {
-	return nom.NodeID(strconv.FormatUint(datapathID, 16))
+func datapathIDToNodeID(dpID uint64) nom.NodeID {
+	return nom.NodeID(strconv.FormatUint(dpID, 16))
 }
 
 func nodeIDToDatapathID(nodeID nom.NodeID) (uint64, error) {
@@ -21,4 +21,12 @@ func portNoToPortID(portNo uint32) nom.PortID {
 func portIDToPortNo(portID nom.PortID) (uint32, error) {
 	no, err := strconv.ParseUint(string(portID), 10, 32)
 	return uint32(no), err
+}
+
+func datapathIDToMACAddr(dpID uint64) nom.MACAddr {
+	var mac [6]byte
+	for i := 0; i < len(mac); i++ {
+		mac[i] = byte((dpID >> uint(len(mac)-1-i)) & 0xFF)
+	}
+	return mac
 }

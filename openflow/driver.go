@@ -1,6 +1,7 @@
 package openflow
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/golang/glog"
@@ -71,7 +72,7 @@ func (d *of12Driver) handlePkt(pkt of.Header, c *ofConn) error {
 func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 	ofh, err := d.convToOF(msg)
 	if err != nil {
-		return fmt.Errorf("of10Driver: Unsupported message %v", msg.Data())
+		return err
 	}
 
 	if err := c.WriteHeader(ofh); err != nil {
@@ -85,7 +86,7 @@ func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 func (d *of12Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 	ofh, err := d.convToOF(msg)
 	if err != nil {
-		return fmt.Errorf("of12Driver: Unsupported message %v", msg.Data())
+		return err
 	}
 
 	if err := c.WriteHeader(ofh); err != nil {
@@ -116,24 +117,18 @@ func emitNodeDisconnected(c *ofConn) {
 func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 	switch data := msg.Data().(type) {
 	case nom.PacketOut:
-		ofPort, ok := d.nomPorts[data.InPort]
-		if !ok {
-			return of.Header{},
-				fmt.Errorf("of10Driver: Port %v not found", data.InPort)
-		}
-
 		buf := make([]byte, 256)
 		out := of10.NewPacketOutWithBuf(buf)
 		out.Init()
 		out.SetBufferId(uint32(data.BufferID))
-		out.SetInPort(ofPort)
 
-		if data.BufferID == 0xFFFFFFFF {
-			for _, d := range data.Packet {
-				out.AddData(d)
-			}
+		ofPort, ok := d.nomPorts[data.InPort]
+		if ok {
+			out.SetInPort(ofPort)
 		}
 
+		// FIXME(soheil): When actions are added after data, the packet becomes
+		// corrupted.
 		for _, a := range data.Actions {
 			ofa, err := d.convAction(a)
 			if err != nil {
@@ -143,15 +138,21 @@ func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 			out.AddActions(ofa)
 		}
 
+		if data.BufferID == 0xFFFFFFFF {
+			for _, d := range data.Packet {
+				out.AddData(d)
+			}
+		}
+
 		return out.Header, nil
 
 	default:
-		return of.Header{}, fmt.Errorf("of10Driver: Message not supported %v", data)
+		return of.Header{}, fmt.Errorf("of10Driver: Unsupported message %+v", data)
 	}
 }
 
 func (d *of12Driver) convToOF(msg bh.Msg) (of.Header, error) {
-	return of.Header{}, fmt.Errorf("of12Driver: Message not supported %v",
+	return of.Header{}, fmt.Errorf("of12Driver: Message not supported %+v",
 		msg.Data())
 }
 
@@ -162,8 +163,22 @@ func (d *of10Driver) convAction(a nom.Action) (of10.ActionHeader, error) {
 		flood.SetPort(uint16(of10.PP_FLOOD))
 		return flood.ActionHeader, nil
 
+	case nom.ActionForward:
+		if len(action.Ports) != 1 {
+			return of10.ActionHeader{},
+				errors.New("of10Driver: can forward to only one port")
+		}
+		p, ok := d.nomPorts[action.Ports[0]]
+		if !ok {
+			return of10.ActionHeader{},
+				fmt.Errorf("of10Driver: port %v no found", action.Ports[0])
+		}
+		out := of10.NewActionOutput()
+		out.SetPort(uint16(p))
+		return out.ActionHeader, nil
+
 	default:
 		return of10.ActionHeader{},
-			fmt.Errorf("of10Driver: Action not support %v", action)
+			fmt.Errorf("of10Driver: Action not supported %v", action)
 	}
 }

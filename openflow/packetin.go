@@ -3,16 +3,25 @@ package openflow
 import (
 	"fmt"
 
+	"github.com/golang/glog"
 	"github.com/soheilhy/beehive-netctrl/nom"
 	"github.com/soheilhy/beehive-netctrl/openflow/of10"
 	"github.com/soheilhy/beehive-netctrl/openflow/of12"
 )
 
 func (of *of10Driver) handlePacketIn(in of10.PacketIn, c *ofConn) error {
+	// Ignore packet-ins on switch specific ports.
+	if in.InPort() > uint16(of10.PP_MAX) {
+		glog.V(2).Infof("Ignoring packet-in on %v", in.InPort())
+		return nil
+	}
+
 	port, ok := of.ofPorts[in.InPort()]
 	if !ok {
 		return fmt.Errorf("of10driver: port not found %v", in.InPort())
 	}
+
+	glog.V(2).Infof("Packet received on %v", in.InPort())
 
 	nomIn := nom.PacketIn{
 		Node:     c.node.UID(),

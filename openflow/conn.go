@@ -25,7 +25,9 @@ type ofConn struct {
 
 func (c *ofConn) Start(ctx bh.RcvContext) {
 	defer func() {
-		c.driver.handleConnClose(c)
+		if c.driver != nil {
+			c.driver.handleConnClose(c)
+		}
 		c.Close()
 	}()
 
