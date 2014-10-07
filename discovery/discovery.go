@@ -112,10 +112,10 @@ func (h *nodeLeftHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	}
 }
 
-type portAddedHandler struct{}
+type portUpdateHandler struct{}
 
-func (h *portAddedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
-	p := nom.Port(msg.Data().(nom.PortAdded))
+func (h *portUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
+	p := nom.Port(msg.Data().(nom.PortUpdated))
 	d := ctx.Dict(nodeDict)
 	k := bh.Key(p.Node)
 	var np nodePortsAndLinks
@@ -136,9 +136,9 @@ func (h *portAddedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	return d.PutGob(k, &np)
 }
 
-func (h *portAddedHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
+func (h *portUpdateHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDict, bh.Key(msg.Data().(nom.PortAdded).Node)},
+		{nodeDict, bh.Key(msg.Data().(nom.PortUpdated).Node)},
 	}
 }
 
@@ -230,10 +230,11 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			return nil
 		}
 		np.removeLink(l)
+		ctx.Emit(nom.LinkRemoved(l))
 	}
 
 	glog.V(2).Infof("Link detected %v", l)
-	ctx.Emit(nom.LinkDetected(l))
+	ctx.Emit(nom.LinkAdded(l))
 	np.L = append(np.L, l)
 	return d.PutGob(k, &np)
 }
@@ -248,7 +249,7 @@ func RegisterDiscovery(h bh.Hive) {
 	a := h.NewApp("discovery")
 	a.Handle(nom.NodeJoined{}, &nodeJoinedHandler{})
 	a.Handle(nom.NodeLeft{}, &nodeLeftHandler{})
-	a.Handle(nom.PortAdded{}, &portAddedHandler{})
+	a.Handle(nom.PortUpdated{}, &portUpdateHandler{})
 	// TODO(soheil): Handle PortRemoved.
 	a.Handle(nom.PacketIn{}, &pktInHandler{})
 	a.Handle(NewLink{}, &newLinkHandler{})

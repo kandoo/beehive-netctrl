@@ -94,12 +94,14 @@ func (d *of10Driver) handshake(c *ofConn) error {
 	}
 	glog.Infof("%v connected", c.node)
 
+	nomDriver := nom.Driver{
+		BeeID: c.ctx.BeeID(),
+		Role:  nom.DriverRoleDefault,
+	}
+
 	c.ctx.Emit(nom.NodeConnected{
-		Node: c.node,
-		Driver: nom.Driver{
-			BeeID: c.ctx.BeeID(),
-			Role:  nom.DriverRoleDefault,
-		},
+		Node:   c.node,
+		Driver: nomDriver,
 	})
 
 	d.ofPorts = make(map[uint16]*nom.Port)
@@ -116,7 +118,10 @@ func (d *of10Driver) handshake(c *ofConn) error {
 		d.nomPorts[port.UID()] = p.PortNo()
 		glog.Infof("%v added", port)
 		if p.PortNo() <= uint16(of10.PP_MAX) {
-			c.ctx.Emit(nom.PortAdded(port))
+			c.ctx.Emit(nom.PortStatusChanged{
+				Port:   port,
+				Driver: nomDriver,
+			})
 		}
 	}
 	return nil
@@ -161,12 +166,13 @@ func (d *of12Driver) handshake(c *ofConn) error {
 		},
 	}
 
+	nomDriver := nom.Driver{
+		BeeID: c.ctx.BeeID(),
+		Role:  nom.DriverRoleDefault,
+	}
 	c.ctx.Emit(nom.NodeConnected{
-		Node: c.node,
-		Driver: nom.Driver{
-			BeeID: c.ctx.BeeID(),
-			Role:  nom.DriverRoleDefault,
-		},
+		Node:   c.node,
+		Driver: nomDriver,
 	})
 
 	d.ofPorts = make(map[uint32]*nom.Port)
@@ -185,7 +191,10 @@ func (d *of12Driver) handshake(c *ofConn) error {
 		d.ofPorts[p.PortNo()] = &port
 		d.nomPorts[port.UID()] = p.PortNo()
 		glog.Infof("%v added", port)
-		c.ctx.Emit(nom.PortAdded(port))
+		c.ctx.Emit(nom.PortStatusChanged{
+			Port:   port,
+			Driver: nomDriver,
+		})
 	}
 
 	return nil

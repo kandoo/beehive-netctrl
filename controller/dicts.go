@@ -13,6 +13,7 @@ const (
 type nodeDrivers struct {
 	Node    nom.Node
 	Drivers []nom.Driver
+	Ports   nom.Ports
 }
 
 func (nd *nodeDrivers) UID() nom.UID {

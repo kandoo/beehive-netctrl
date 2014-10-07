@@ -10,6 +10,7 @@ func RegisterNOMController(h bh.Hive) {
 
 	app.Handle(nom.NodeConnected{}, &nodeConnectedHandler{})
 	app.Handle(nom.NodeDisconnected{}, &nodeDisconnectedHandler{})
+	app.Handle(nom.PortStatusChanged{}, &portStatusHandler{})
 
 	app.Handle(nom.AddFlowEntry{}, &addFlowHandler{})
 	app.Handle(nom.DelFlowEntry{}, &delFlowHandler{})

@@ -5,16 +5,15 @@ import (
 	"fmt"
 )
 
-// PortAdded is emitted when a port is added to a node (or when the node
-// joins the network for the first time).
-type PortAdded Port
+// PortUpdated is a high-level event emitted when a port is added, removed, or
+// its state/configuration is changed.
+type PortUpdated Port
 
-// PortRemoved is emitted when a port is removed (or its node is disconnected
-// from the controller).
-type PortRemoved Port
-
-// PortChanged is emitted when a port's state or configuration is changed.
-type PortChanged Port
+// PortStatusChanged is emitted when a driver receives a port status
+type PortStatusChanged struct {
+	Port   Port
+	Driver Driver
+}
 
 // Port is either a physical or a virtual port of a node.
 type Port struct {
@@ -66,6 +65,42 @@ func (p *Port) JSONDecode(b []byte) error {
 // JSONEncode encodes the port into a byte array using JSON.
 func (p *Port) JSONEncode() ([]byte, error) {
 	return json.Marshal(p)
+}
+
+// Ports is a slice of ports with useful auxilaries.
+type Ports []Port
+
+// GetPort retrieves a port by its ID, and returns false if no port is found.
+func (ports Ports) GetPort(id UID) (Port, bool) {
+	for _, p := range ports {
+		if p.UID() == id {
+			return p, true
+		}
+	}
+	return Port{}, false
+}
+
+// HasPort returns whether port is in ports.
+func (ports Ports) HasPort(port Port) bool {
+	_, ok := ports.GetPort(port.UID())
+	return ok
+}
+
+// AddPort adds p to ports.
+func (ports *Ports) AddPort(p Port) {
+	*ports = append(*ports, p)
+}
+
+// DelPort deletes port from ports. If there is no such port, it returns false.
+func (ports *Ports) DelPort(port Port) bool {
+	id := port.UID()
+	for i, p := range *ports {
+		if p.UID() == id {
+			*ports = append((*ports)[:i], (*ports)[i+1:]...)
+			return true
+		}
+	}
+	return false
 }
 
 // PortState is the current state of a port.
