@@ -2,6 +2,12 @@ package nom
 
 import "encoding/json"
 
+// LinkAdded is emitted when a new link is discovered.
+type LinkAdded Link
+
+// LinkRemoved is emitted when a new link is removed.
+type LinkRemoved Link
+
 // Link represents an outgoing link from a port.
 type Link struct {
 	ID    LinkID    // Link's ID.

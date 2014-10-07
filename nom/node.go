@@ -43,7 +43,7 @@ type Node struct {
 }
 
 func (n Node) String() string {
-	return fmt.Sprintf("Node %s", string(n.ID))
+	return fmt.Sprintf("Node %s (mac=%v)", string(n.ID), n.MACAddr)
 }
 
 // NodeID is the ID of a node. This must be unique among all nodes in the
