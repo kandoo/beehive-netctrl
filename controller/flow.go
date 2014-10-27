@@ -1,6 +1,6 @@
 package controller
 
-import "github.com/soheilhy/beehive/bh"
+import bh "github.com/kandoo/beehive"
 
 type addFlowHandler struct{}
 

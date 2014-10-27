@@ -5,9 +5,9 @@ import (
 	"time"
 
 	"github.com/golang/glog"
-	"github.com/soheilhy/beehive-netctrl/net/ethernet"
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive/bh"
+	bh "github.com/kandoo/beehive"
+	"github.com/kandoo/beehive-netctrl/net/ethernet"
+	"github.com/kandoo/beehive-netctrl/nom"
 )
 
 type LinkDiscovered struct {
@@ -77,7 +77,7 @@ func (h *nodeJoinedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	joined := msg.Data().(nom.NodeJoined)
 	d := ctx.Dict(nodeDict)
 	n := nom.Node(joined)
-	k := bh.Key(n.UID())
+	k := string(n.UID())
 	var np nodePortsAndLinks
 	if err := d.GetGob(k, &np); err != nil {
 		glog.Warningf("%v rejoins", n)
@@ -89,7 +89,7 @@ func (h *nodeJoinedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h *nodeJoinedHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDict, bh.Key(nom.Node(msg.Data().(nom.NodeJoined)).UID())},
+		{nodeDict, string(nom.Node(msg.Data().(nom.NodeJoined)).UID())},
 	}
 }
 
@@ -98,7 +98,7 @@ type nodeLeftHandler struct{}
 func (h *nodeLeftHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	n := nom.Node(msg.Data().(nom.NodeLeft))
 	d := ctx.Dict(nodeDict)
-	k := bh.Key(n.UID())
+	k := string(n.UID())
 	if _, err := d.Get(k); err != nil {
 		return fmt.Errorf("%v is not joined", n)
 	}
@@ -108,7 +108,7 @@ func (h *nodeLeftHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h *nodeLeftHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDict, bh.Key(nom.Node(msg.Data().(nom.NodeLeft)).UID())},
+		{nodeDict, string(nom.Node(msg.Data().(nom.NodeLeft)).UID())},
 	}
 }
 
@@ -117,7 +117,7 @@ type portUpdateHandler struct{}
 func (h *portUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	p := nom.Port(msg.Data().(nom.PortUpdated))
 	d := ctx.Dict(nodeDict)
-	k := bh.Key(p.Node)
+	k := string(p.Node)
 	var np nodePortsAndLinks
 	if err := d.GetGob(k, &np); err != nil {
 		glog.Warningf("%v added before its node", p)
@@ -138,7 +138,7 @@ func (h *portUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h *portUpdateHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDict, bh.Key(msg.Data().(nom.PortUpdated).Node)},
+		{nodeDict, string(msg.Data().(nom.PortUpdated).Node)},
 	}
 }
 
@@ -148,9 +148,9 @@ type timeoutHandler struct{}
 
 func (h *timeoutHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	d := ctx.Dict(nodeDict)
-	d.ForEach(func(k bh.Key, v bh.Value) {
+	d.ForEach(func(k string, v []byte) {
 		var np nodePortsAndLinks
-		if err := nom.ObjGoDecode(&np, []byte(v)); err != nil {
+		if err := nom.ObjGoDecode(&np, v); err != nil {
 			glog.Errorf("Error in decoding value: %v", err)
 			return
 		}
@@ -180,7 +180,7 @@ func (h *pktInHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	}
 
 	d := ctx.Dict(nodeDict)
-	k := bh.Key(pin.Node)
+	k := string(pin.Node)
 	var np nodePortsAndLinks
 	if err := d.GetGob(k, &np); err != nil {
 		return fmt.Errorf("Node %v not found", pin.Node)
@@ -207,7 +207,7 @@ func (h *pktInHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h *pktInHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDict, bh.Key(msg.Data().(nom.PacketIn).Node)},
+		{nodeDict, string(msg.Data().(nom.PacketIn).Node)},
 	}
 }
 
@@ -219,7 +219,7 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	l := nom.Link(msg.Data().(NewLink))
 	n, _ := nom.ParsePortUID(l.From)
 	d := ctx.Dict(nodeDict)
-	k := bh.Key(n)
+	k := string(n)
 	var np nodePortsAndLinks
 	if err := d.GetGob(k, &np); err != nil {
 		return err
@@ -241,7 +241,7 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h *newLinkHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	n, _ := nom.ParsePortUID(msg.Data().(NewLink).From)
-	return bh.MappedCells{{nodeDict, bh.Key(n)}}
+	return bh.MappedCells{{nodeDict, string(n)}}
 }
 
 // RegisterDiscovery registers the handlers for topology discovery on the hive.

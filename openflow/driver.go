@@ -5,11 +5,11 @@ import (
 	"fmt"
 
 	"github.com/golang/glog"
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive-netctrl/openflow/of"
-	"github.com/soheilhy/beehive-netctrl/openflow/of10"
-	"github.com/soheilhy/beehive-netctrl/openflow/of12"
-	"github.com/soheilhy/beehive/bh"
+	bh "github.com/kandoo/beehive"
+	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive-netctrl/openflow/of"
+	"github.com/kandoo/beehive-netctrl/openflow/of10"
+	"github.com/kandoo/beehive-netctrl/openflow/of12"
 )
 
 type ofDriver interface {
@@ -109,7 +109,7 @@ func emitNodeDisconnected(c *ofConn) {
 	c.ctx.Emit(nom.NodeDisconnected{
 		Node: c.node,
 		Driver: nom.Driver{
-			BeeID: c.ctx.BeeID(),
+			BeeID: c.ctx.ID(),
 		},
 	})
 }

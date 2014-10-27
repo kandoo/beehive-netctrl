@@ -3,8 +3,8 @@ package openflow
 import (
 	"errors"
 
-	"github.com/soheilhy/beehive-netctrl/openflow/of10"
-	"github.com/soheilhy/beehive-netctrl/openflow/of12"
+	"github.com/kandoo/beehive-netctrl/openflow/of10"
+	"github.com/kandoo/beehive-netctrl/openflow/of12"
 )
 
 func (of *of10Driver) handleFeaturesReply(rep of10.FeaturesReply,

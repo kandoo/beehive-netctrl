@@ -5,8 +5,8 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive/bh"
+	bh "github.com/kandoo/beehive"
+	"github.com/kandoo/beehive-netctrl/nom"
 )
 
 type nodeConnectedHandler struct{}
@@ -15,7 +15,7 @@ func (h *nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	nc := msg.Data().(nom.NodeConnected)
 
 	dict := ctx.Dict(nodeDriversDict)
-	k := bh.Key(nc.Node.ID)
+	k := string(nc.Node.ID)
 	n := nodeDrivers{}
 	if err := nom.DictGet(dict, k, &n); err != nil {
 		n.Node = nc.Node
@@ -41,14 +41,14 @@ func (h *nodeConnectedHandler) Map(msg bh.Msg,
 	ctx bh.MapContext) bh.MappedCells {
 
 	nc := msg.Data().(nom.NodeConnected)
-	return bh.MappedCells{{nodeDriversDict, bh.Key(nc.Node.ID)}}
+	return bh.MappedCells{{nodeDriversDict, string(nc.Node.ID)}}
 }
 
 type nodeDisconnectedHandler struct{}
 
 func (h *nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	nd := msg.Data().(nom.NodeDisconnected)
-	k := bh.Key(nd.Node.ID)
+	k := string(nd.Node.ID)
 	n := nodeDrivers{}
 	if err := ctx.Dict(nodeDriversDict).GetGob(k, &n); err != nil {
 		return fmt.Errorf("Driver %v disconnects from %v before connecting",
@@ -67,5 +67,5 @@ func (h *nodeDisconnectedHandler) Map(msg bh.Msg,
 	ctx bh.MapContext) bh.MappedCells {
 
 	nd := msg.Data().(nom.NodeDisconnected)
-	return bh.MappedCells{{nodeDriversDict, bh.Key(nd.Node.ID)}}
+	return bh.MappedCells{{nodeDriversDict, string(nd.Node.ID)}}
 }

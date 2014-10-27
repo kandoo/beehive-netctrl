@@ -12,6 +12,6 @@ import (
 
 	"github.com/packet/packet/src/go/packet"
 
-	"github.com/soheilhy/beehive-netctrl/openflow/of10"
-	"github.com/soheilhy/beehive-netctrl/openflow/of12"
+	"github.com/kandoo/beehive-netctrl/openflow/of10"
+	"github.com/kandoo/beehive-netctrl/openflow/of12"
 )

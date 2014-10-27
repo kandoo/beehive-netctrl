@@ -3,7 +3,7 @@ package controller
 import (
 	"encoding/json"
 
-	"github.com/soheilhy/beehive-netctrl/nom"
+	"github.com/kandoo/beehive-netctrl/nom"
 )
 
 const (

@@ -12,7 +12,7 @@ import (
 
 	"github.com/packet/packet/src/go/packet"
 
-	"github.com/soheilhy/beehive-netctrl/openflow/of"
+	"github.com/kandoo/beehive-netctrl/openflow/of"
 )
 
 type Ports int

@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive/bh"
+	"github.com/kandoo/beehive-netctrl/nom"
+	bh "github.com/kandoo/beehive"
 )
 
 func RegisterNOMController(h bh.Hive) {

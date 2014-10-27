@@ -6,7 +6,7 @@ import (
 	"reflect"
 
 	"github.com/golang/glog"
-	"github.com/soheilhy/beehive/bh"
+	"github.com/kandoo/beehive/state"
 )
 
 // Object is the interface of all structs in the network object model.
@@ -42,7 +42,7 @@ func ObjGoEncode(obj interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-func DictGet(d bh.Dict, k bh.Key, obj Object) error {
+func DictGet(d state.Dict, k string, obj Object) error {
 	v, err := d.Get(k)
 	if err != nil {
 		return err
@@ -57,7 +57,7 @@ func DictGet(d bh.Dict, k bh.Key, obj Object) error {
 	return nil
 }
 
-func DictPut(d bh.Dict, k bh.Key, obj Object) error {
+func DictPut(d state.Dict, k string, obj Object) error {
 	v, err := obj.GoEncode()
 	if err != nil {
 		return err

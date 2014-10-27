@@ -12,6 +12,6 @@ import (
 
 	"github.com/packet/packet/src/go/packet"
 
-	"github.com/soheilhy/beehive-netctrl/net/ethernet"
-	"github.com/soheilhy/beehive-netctrl/net/lldp"
+	"github.com/kandoo/beehive-netctrl/net/ethernet"
+	"github.com/kandoo/beehive-netctrl/net/lldp"
 )

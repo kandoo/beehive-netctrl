@@ -6,10 +6,10 @@ import (
 	"os"
 	"runtime/pprof"
 
-	"github.com/soheilhy/beehive-netctrl/controller"
-	"github.com/soheilhy/beehive-netctrl/discovery"
-	"github.com/soheilhy/beehive-netctrl/openflow"
-	"github.com/soheilhy/beehive/bh"
+	"github.com/kandoo/beehive-netctrl/controller"
+	"github.com/kandoo/beehive-netctrl/discovery"
+	"github.com/kandoo/beehive-netctrl/openflow"
+	bh "github.com/kandoo/beehive"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")

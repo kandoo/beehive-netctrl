@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/soheilhy/beehive/bh"
+	bh "github.com/kandoo/beehive"
 )
 
 // OFConfig stores the configuration of the OpenFlow driver.

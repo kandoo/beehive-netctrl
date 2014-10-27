@@ -4,9 +4,9 @@ import (
 	"io"
 
 	"github.com/golang/glog"
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive-netctrl/openflow/of"
-	"github.com/soheilhy/beehive/bh"
+	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive-netctrl/openflow/of"
+	bh "github.com/kandoo/beehive"
 )
 
 type ofConnConfig struct {

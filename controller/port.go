@@ -3,8 +3,8 @@ package controller
 import (
 	"fmt"
 
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive/bh"
+	bh "github.com/kandoo/beehive"
+	"github.com/kandoo/beehive-netctrl/nom"
 )
 
 type portStatusHandler struct{}
@@ -16,7 +16,7 @@ func (h *portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	// make sure we apply the log to the port status
 	data := msg.Data().(nom.PortStatusChanged)
 	dict := ctx.Dict(nodeDriversDict)
-	k := bh.Key(data.Port.Node)
+	k := string(data.Port.Node)
 	n := nodeDrivers{}
 	if err := dict.GetGob(k, &n); err != nil {
 		return fmt.Errorf("Node %v not found", data.Port.Node)
@@ -42,6 +42,6 @@ func (h *portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h *portStatusHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDriversDict, bh.Key(msg.Data().(nom.PortStatusChanged).Port.Node)},
+		{nodeDriversDict, string(msg.Data().(nom.PortStatusChanged).Port.Node)},
 	}
 }

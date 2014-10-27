@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/golang/glog"
-	"github.com/soheilhy/beehive-netctrl/nom"
-	"github.com/soheilhy/beehive-netctrl/openflow/of10"
-	"github.com/soheilhy/beehive-netctrl/openflow/of12"
+	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive-netctrl/openflow/of10"
+	"github.com/kandoo/beehive-netctrl/openflow/of12"
 )
 
 func (of *of10Driver) handlePacketIn(in of10.PacketIn, c *ofConn) error {

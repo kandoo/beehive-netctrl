@@ -1,15 +1,11 @@
 package nom
 
-import (
-	"encoding/json"
-
-	"github.com/soheilhy/beehive/bh"
-)
+import "encoding/json"
 
 // Driver represents the Bee that communicates with the actual networking
 // element and adapts the southbound protocol for using in NOM.
 type Driver struct {
-	BeeID bh.BeeID
+	BeeID uint64
 	Role  DriverRole
 }
 
