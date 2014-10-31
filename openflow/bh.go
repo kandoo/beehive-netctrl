@@ -3,7 +3,7 @@ package openflow
 import (
 	"flag"
 
-	"github.com/golang/glog"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 
 	bh "github.com/kandoo/beehive"
 )

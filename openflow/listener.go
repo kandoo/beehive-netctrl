@@ -4,7 +4,7 @@ import (
 	"errors"
 	"net"
 
-	"github.com/golang/glog"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/kandoo/beehive-netctrl/openflow/of"
 	bh "github.com/kandoo/beehive"
 )

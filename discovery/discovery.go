@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/golang/glog"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/net/ethernet"
 	"github.com/kandoo/beehive-netctrl/nom"
