@@ -4,12 +4,12 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
 	"github.com/kandoo/beehive-netctrl/openflow/of"
 	"github.com/kandoo/beehive-netctrl/openflow/of10"
 	"github.com/kandoo/beehive-netctrl/openflow/of12"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 )
 
 type ofDriver interface {
@@ -65,7 +65,7 @@ func (d *of12Driver) handlePkt(pkt of.Header, c *ofConn) error {
 	case of12.IsErrorMsg(pkt12):
 		return d.handleErrorMsg(of12.NewErrorMsgWithBuf(pkt12.Buf), c)
 	default:
-		return fmt.Errorf("Received unsupported packet: %v", pkt.Type())
+		return fmt.Errorf("received unsupported packet: %v", pkt.Type())
 	}
 }
 
@@ -76,7 +76,7 @@ func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 	}
 
 	if err := c.WriteHeader(ofh); err != nil {
-		glog.Errorf("ofconn: Cannot write packet: %v", err)
+		glog.Errorf("ofconn: cannot write packet: %v", err)
 		return err
 	}
 
@@ -90,7 +90,7 @@ func (d *of12Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 	}
 
 	if err := c.WriteHeader(ofh); err != nil {
-		glog.Errorf("ofconn: Cannot write packet: %v", err)
+		glog.Errorf("ofconn: cannot write packet: %v", err)
 		return err
 	}
 
@@ -127,13 +127,13 @@ func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 			out.SetInPort(ofPort)
 		}
 
-		// FIXME(soheil): When actions are added after data, the packet becomes
+		// FIXME(soheil): when actions are added after data, the packet becomes
 		// corrupted.
 		for _, a := range data.Actions {
 			ofa, err := d.convAction(a)
 			if err != nil {
 				return of.Header{},
-					fmt.Errorf("of10Driver: Invalid action %v", err)
+					fmt.Errorf("of10Driver: invalid action %v", err)
 			}
 			out.AddActions(ofa)
 		}
@@ -146,13 +146,49 @@ func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 
 		return out.Header, nil
 
+	case nom.AddFlowEntry:
+		mod := of10.NewFlowMod()
+		mod.SetCommand(uint16(of10.PFC_ADD))
+		mod.SetPriority(uint16(data.Flow.Priority))
+		mod.SetIdleTimeout(uint16(data.Flow.IdleTimeout))
+		mod.SetHardTimeout(uint16(data.Flow.HardTimeout))
+		mod.SetBufferId(0xFFFFFFFF)
+		match, err := d.convMatch(data.Flow.Match)
+		if err != nil {
+			return of.Header{}, fmt.Errorf("of10Driver: invalid match %v", err)
+		}
+		mod.SetMatch(match)
+		for _, a := range data.Flow.Actions {
+			ofa, err := d.convAction(a)
+			if err != nil {
+				return of.Header{},
+					fmt.Errorf("of10Driver: invalid action %v", err)
+			}
+			mod.AddActions(ofa)
+		}
+		return mod.Header, nil
+
+	case nom.DelFlowEntry:
+		mod := of10.NewFlowMod()
+		if data.Exact {
+			mod.SetCommand(uint16(of10.PFC_DELETE))
+		} else {
+			mod.SetCommand(uint16(of10.PFC_DELETE_STRICT))
+		}
+		match, err := d.convMatch(data.Match)
+		if err != nil {
+			return of.Header{}, fmt.Errorf("of10Driver: invalid match %v", err)
+		}
+		mod.SetMatch(match)
+		return mod.Header, nil
+
 	default:
-		return of.Header{}, fmt.Errorf("of10Driver: Unsupported message %+v", data)
+		return of.Header{}, fmt.Errorf("of10Driver: unsupported message %+v", data)
 	}
 }
 
 func (d *of12Driver) convToOF(msg bh.Msg) (of.Header, error) {
-	return of.Header{}, fmt.Errorf("of12Driver: Message not supported %+v",
+	return of.Header{}, fmt.Errorf("of12Driver: message not supported %+v",
 		msg.Data())
 }
 
@@ -179,6 +215,77 @@ func (d *of10Driver) convAction(a nom.Action) (of10.ActionHeader, error) {
 
 	default:
 		return of10.ActionHeader{},
-			fmt.Errorf("of10Driver: Action not supported %v", action)
+			fmt.Errorf("of10Driver: action not supported %v", action)
 	}
+}
+
+func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
+	ofm := of10.NewMatch()
+	w := of10.PFW_ALL
+	for _, f := range m.Fields {
+		switch f := f.(type) {
+		case nom.InPort:
+			p, ok := d.nomPorts[nom.UID(f)]
+			if !ok {
+				return of10.Match{}, fmt.Errorf("of10Driver: nom port not found %v", f)
+			}
+			ofm.SetInPort(p)
+			w &= ^of10.PFW_IN_PORT
+
+		case nom.EthDst:
+			if f.Mask != [6]byte{} {
+				return of10.Match{},
+					fmt.Errorf("of10Driver: masked ethernet address is not supported")
+			}
+			ofm.SetDlDst([6]byte(f.Addr))
+			w &= ^of10.PFW_DL_DST
+
+		case nom.EthSrc:
+			if f.Mask != [6]byte{} {
+				return of10.Match{},
+					fmt.Errorf("of10Driver: masked ethernet address is not supported")
+			}
+			ofm.SetDlSrc([6]byte(f.Addr))
+			w &= ^of10.PFW_DL_SRC
+
+		case nom.EthType:
+			ofm.SetDlType(uint16(f))
+			w &= ^of10.PFW_DL_TYPE
+
+		case nom.IPV4Src:
+			ofm.SetNwSrc(f.Addr.Uint32())
+			mask := f.Mask.Uint32()
+			w &= ^of10.PFW_NW_SRC_ALL
+			for i := uint(0); i < 32; i++ {
+				if mask&(1<<i) != 0 {
+					w |= of10.FlowWildcards(i << uint(of10.PFW_NW_SRC_SHIFT))
+					break
+				}
+			}
+
+		case nom.IPV4Dst:
+			ofm.SetNwDst(f.Addr.Uint32())
+			mask := f.Mask.Uint32()
+			w &= ^of10.PFW_NW_DST_ALL
+			for i := uint(0); i < 32; i++ {
+				if mask&(1<<i) != 0 {
+					w |= of10.FlowWildcards(i << uint(of10.PFW_NW_DST_SHIFT))
+					break
+				}
+			}
+
+		case nom.TransportPortSrc:
+			ofm.SetTpSrc(uint16(f))
+			w &= ^of10.PFW_TP_SRC
+
+		case nom.TransportPortDst:
+			ofm.SetTpDst(uint16(f))
+			w &= ^of10.PFW_TP_DST
+
+		case nom.IPV6Src, nom.IPV6Dst:
+			return of10.Match{}, fmt.Errorf("of10Driver: IPv6 not supported")
+		}
+	}
+	ofm.SetWildcards(uint32(w))
+	return ofm, nil
 }
