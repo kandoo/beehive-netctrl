@@ -3,6 +3,7 @@ package controller
 import (
 	"encoding/json"
 
+	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
 )
 
@@ -59,4 +60,18 @@ func (nd *nodeDrivers) removeDriver(d nom.Driver) bool {
 func (nd *nodeDrivers) master() nom.Driver {
 	// FIXME(soheil)
 	return nd.Drivers[0]
+}
+
+func nodeDriversMap(node nom.UID) bh.MappedCells {
+	return bh.MappedCells{{nodeDriversDict, string(node)}}
+}
+
+func sendToMaster(msg interface{}, node nom.UID, ctx bh.RcvContext) error {
+	d := ctx.Dict(nodeDriversDict)
+	var nd nodeDrivers
+	if err := d.GetGob(string(node), &nd); err != nil {
+		return err
+	}
+	ctx.SendToBee(msg, nd.master().BeeID)
+	return nil
 }
