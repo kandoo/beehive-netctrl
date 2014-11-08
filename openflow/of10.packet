@@ -492,7 +492,7 @@ packet Match {
 
 enum FlowModFlags {
   PFF_SEND_FLOW_REM = 1 << 0,  # Send flow removed message when flow
-                                 # expires or is deleted.
+                               # expires or is deleted.
   PFF_CHECK_OVERLAP = 1 << 1,  # Check for overlapping entries first.
   PFF_EMERG         = 1 << 2   # Remark this is for emergency.
 }
@@ -500,25 +500,25 @@ enum FlowModFlags {
 # Flow setup and teardown (controller -> datapath).
 @type_selector(type = Type.PT_FLOW_MOD)
 packet FlowMod(Header10) {
-  Match match;      # Fields to match
-  uint64 cookie;             # Opaque controller-issued identifier.
+  Match match;            # Fields to match
+  uint64 cookie;          # Opaque controller-issued identifier.
 
   # Flow actions.
-  uint16 command;             # One of.PFC_*.
-  uint16 idle_timeout;        # Idle time before discarding (seconds).
-  uint16 hard_timeout;        # Max time before discarding (seconds).
-  uint16 priority;            # Priority level of flow entry.
-  uint32 buffer_id;           # Buffered packet to apply to (or -1).
-                              # Not meaningful for PFC_DELETE*.
-  uint16 out_port;            # For PFC_DELETE* commands, require
-                              # matching entries to include this as an
-                              # output port.  A value of.PP_NONE
-                              # indicates no restriction.
-  uint16 flags;               # One of.PFF_*.
+  uint16 command;         # One of.PFC_*.
+  uint16 idle_timeout;    # Idle time before discarding (seconds).
+  uint16 hard_timeout;    # Max time before discarding (seconds).
+  uint16 priority;        # Priority level of flow entry.
+  uint32 buffer_id;       # Buffered packet to apply to (or -1).
+                          # Not meaningful for PFC_DELETE*.
+  uint16 out_port;        # For PFC_DELETE* commands, require
+                          # matching entries to include this as an
+                          # output port.  A value of.PP_NONE
+                          # indicates no restriction.
+  uint16 flags;           # One of.PFF_*.
   @repeated
-  ActionHeader actions; # The action length is inferred
-                                # from the length field in the
-                                # header.
+  ActionHeader actions;   # The action length is inferred
+                          # from the length field in the
+                          # header.
 }
 
 # Why was this flow removed?
@@ -531,7 +531,7 @@ enum FlowRemovedReason {
 # Flow removed (datapath -> controller).
 @type_selector(type = Type.PT_FLOW_REMOVED)
 packet FlowRemoved(Header10) {
-  Match match;    # Description of fields.
+  Match match;            # Description of fields.
   uint64 cookie;          # Opaque controller-issued identifier.
 
   uint16 priority;        # Priority level of flow entry.
