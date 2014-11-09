@@ -16,6 +16,7 @@ func (h LearningSwitch) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	dst := in.Packet.DstMAC()
 	glog.V(2).Infof("received packet in from %v to %v", src, dst)
 	if dst.IsMulticast() {
+		// TODO(soheil): just drop LLDP.
 		glog.Infof("dropped multi-cast packet to %v", dst)
 		return nil
 	}
