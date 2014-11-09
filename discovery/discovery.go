@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/net/ethernet"
 	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 )
 
 type LinkDiscovered struct {
@@ -42,13 +42,18 @@ func (np *nodePortsAndLinks) removePort(port nom.Port) bool {
 	return false
 }
 
-func (np *nodePortsAndLinks) hasLinkFrom(from nom.UID) bool {
+func (np *nodePortsAndLinks) linkFrom(from nom.UID) (nom.Link, bool) {
 	for _, l := range np.L {
 		if l.From == from {
-			return true
+			return l, true
 		}
 	}
-	return false
+	return nom.Link{}, false
+}
+
+func (np *nodePortsAndLinks) hasLinkFrom(from nom.UID) bool {
+	_, ok := np.linkFrom(from)
+	return ok
 }
 
 func (np *nodePortsAndLinks) hasLink(link nom.Link) bool {
@@ -225,12 +230,12 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		return err
 	}
 
-	if np.hasLinkFrom(l.From) {
-		if np.hasLink(l) {
+	if oldl, ok := np.linkFrom(l.From); ok {
+		if oldl.UID() == l.UID() {
 			return nil
 		}
-		np.removeLink(l)
-		ctx.Emit(nom.LinkRemoved(l))
+		np.removeLink(oldl)
+		ctx.Emit(nom.LinkRemoved(oldl))
 	}
 
 	glog.V(2).Infof("Link detected %v", l)
