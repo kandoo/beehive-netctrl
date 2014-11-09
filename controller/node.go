@@ -11,7 +11,7 @@ import (
 
 type nodeConnectedHandler struct{}
 
-func (h *nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
+func (h nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	nc := msg.Data().(nom.NodeConnected)
 
 	dict := ctx.Dict(nodeDriversDict)
@@ -37,7 +37,7 @@ func (h *nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	return dict.PutGob(k, &n)
 }
 
-func (h *nodeConnectedHandler) Map(msg bh.Msg,
+func (h nodeConnectedHandler) Map(msg bh.Msg,
 	ctx bh.MapContext) bh.MappedCells {
 
 	nc := msg.Data().(nom.NodeConnected)
@@ -46,7 +46,7 @@ func (h *nodeConnectedHandler) Map(msg bh.Msg,
 
 type nodeDisconnectedHandler struct{}
 
-func (h *nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
+func (h nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	nd := msg.Data().(nom.NodeDisconnected)
 	k := string(nd.Node.ID)
 	n := nodeDrivers{}
@@ -63,7 +63,7 @@ func (h *nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	return nil
 }
 
-func (h *nodeDisconnectedHandler) Map(msg bh.Msg,
+func (h nodeDisconnectedHandler) Map(msg bh.Msg,
 	ctx bh.MapContext) bh.MappedCells {
 
 	nd := msg.Data().(nom.NodeDisconnected)

@@ -2,7 +2,7 @@ package nom
 
 import "time"
 
-// NodeQuery queries the information of a pode.
+// NodeQuery queries the information of a node.
 type NodeQuery struct {
 	Node UID
 }

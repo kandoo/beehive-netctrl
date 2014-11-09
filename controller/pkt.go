@@ -7,11 +7,11 @@ import (
 
 type pktOutHandler struct{}
 
-func (h *pktOutHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
+func (h pktOutHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	pkt := msg.Data().(nom.PacketOut)
 	return sendToMaster(pkt, pkt.Node, ctx)
 }
 
-func (h *pktOutHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
+func (h pktOutHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return nodeDriversMap(msg.Data().(nom.PacketOut).Node)
 }

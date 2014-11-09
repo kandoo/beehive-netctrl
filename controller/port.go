@@ -9,7 +9,7 @@ import (
 
 type portStatusHandler struct{}
 
-func (h *portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
+func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	// FIXME(soheil): This implementation is very naive and cannot tolerate
 	// faults. We need to first check if the driver is the mater, and then apply
 	// the change. Otherwise, we need to enque this message for that driver and
@@ -40,7 +40,7 @@ func (h *portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	return nil
 }
 
-func (h *portStatusHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
+func (h portStatusHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
 		{nodeDriversDict, string(msg.Data().(nom.PortStatusChanged).Port.Node)},
 	}
