@@ -23,16 +23,27 @@ type ofConn struct {
 	wErr   error         // Last error in write.
 }
 
+func (c *ofConn) drainWCh() {
+	for {
+		if _, ok := <-c.wCh; !ok {
+			return
+		}
+	}
+}
+
 func (c *ofConn) Start(ctx bh.RcvContext) {
 	defer func() {
 		if c.driver != nil {
 			c.driver.handleConnClose(c)
 		}
 		c.Close()
+		// TODO(soheil): is there any better way to prevent deadlocks?
+		glog.Infof("%v drains write queue for %v", ctx, c.RemoteAddr())
+		go c.drainWCh()
 	}()
 
 	c.ctx = ctx
-	c.wCh = make(chan bh.Msg, 4096)
+	c.wCh = make(chan bh.Msg, ctx.Hive().Config().DataChBufSize)
 
 	var err error
 	if c.driver, err = c.handshake(); err != nil {
@@ -45,11 +56,11 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 		n, err := c.ReadHeaders(pkts)
 		if err != nil {
 			if err == io.EOF {
-				glog.Info("Connection closed.")
+				glog.Infof("connection %v closed", c.RemoteAddr())
 			} else {
-				glog.Errorf("Cannot read from the connection: %v", err)
+				glog.Errorf("cannot read from the connection %v: %v", c.RemoteAddr(),
+					err)
 			}
-
 			return
 		}
 

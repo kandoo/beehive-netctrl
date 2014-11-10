@@ -19,17 +19,18 @@ func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	k := string(data.Port.Node)
 	n := nodeDrivers{}
 	if err := dict.GetGob(k, &n); err != nil {
-		return fmt.Errorf("Node %v not found", data.Port.Node)
+		return fmt.Errorf("NOMController: node %v not found", data.Port.Node)
 	}
 
 	if n.master() != data.Driver {
-		return fmt.Errorf("%v is ignored since %v is not master", data.Port,
-			data.Driver)
+		return fmt.Errorf("NOMController: %v is ignored since %v is not master",
+			data.Port, data.Driver)
 	}
 
 	if p, ok := n.Ports.GetPort(data.Port.UID()); ok {
 		if p == data.Port {
-			return fmt.Errorf("Duplicate port status change for %v", data.Port)
+			return fmt.Errorf("NOMController: duplicate port status change for %v",
+				data.Port)
 		}
 
 		n.Ports.DelPort(p)
