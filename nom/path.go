@@ -1,5 +1,7 @@
 package nom
 
+import "encoding/gob"
+
 // Path represents a directed, logical multi-path among points in the network.
 // Each path start from one or more points in the network and is then connected
 // to other paths.
@@ -79,4 +81,17 @@ type PointStats struct {
 	Point   Point
 	Bytes   uint64
 	Packets uint64
+}
+
+func init() {
+	gob.Register(CreatePath{})
+	gob.Register(DeletePath{})
+	gob.Register(Path{})
+	gob.Register(Point{})
+	gob.Register(PointGroup{})
+	gob.Register(PointStats{})
+	gob.Register(QueryPath{})
+	gob.Register(QueryPathResult{})
+	gob.Register(ReplacePath{})
+	gob.Register(WeightedPath{})
 }

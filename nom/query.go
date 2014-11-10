@@ -1,6 +1,9 @@
 package nom
 
-import "time"
+import (
+	"encoding/gob"
+	"time"
+)
 
 // NodeQuery queries the information of a node.
 type NodeQuery struct {
@@ -37,4 +40,13 @@ type FlowStatQueryResult struct {
 	Duration time.Duration
 	PktCount uint64
 	Bytes    uint64
+}
+
+func init() {
+	gob.Register(FlowStatQuery{})
+	gob.Register(FlowStatQueryResult{})
+	gob.Register(NodeQuery{})
+	gob.Register(NodeQueryResult{})
+	gob.Register(PortQuery{})
+	gob.Register(PortQueryResult{})
 }

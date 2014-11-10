@@ -1,6 +1,7 @@
 package nom
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 )
@@ -147,3 +148,10 @@ const (
 	PortPause                      = 1 << iota // Pause.
 	PortPauseAsym                  = 1 << iota // Asymmetric pause.
 )
+
+func init() {
+	gob.Register(Port{})
+	gob.Register(PortID(""))
+	gob.Register(PortStatusChanged{})
+	gob.Register(PortUpdated{})
+}

@@ -1,6 +1,9 @@
 package nom
 
-import "time"
+import (
+	"encoding/gob"
+	"time"
+)
 
 // InPort is the input port field.
 type InPort UID
@@ -122,7 +125,36 @@ type AddFlowEntryResult struct {
 }
 
 // DelFlowEntryResult is emitted in response to a DelFlowEntry.
-type DeldFlowEntryResult struct {
+type DelFlowEntryResult struct {
 	Err error
 	Del DelFlowEntry
+}
+
+func init() {
+	gob.Register(ActionDrop{})
+	gob.Register(ActionFlood{})
+	gob.Register(ActionForward{})
+	gob.Register(ActionPopVLAN{})
+	gob.Register(ActionPushVLAN{})
+	gob.Register(ActionSendToController{})
+	gob.Register(AddFlowEntry{})
+	gob.Register(AddFlowEntryResult{})
+	gob.Register(DelFlowEntry{})
+	gob.Register(DelFlowEntryResult{})
+	gob.Register(EthDst{})
+	gob.Register(EthSrc{})
+	gob.Register(EthType(0))
+	gob.Register(FlowEntry{})
+	gob.Register(FlowPriority(0))
+	gob.Register(InPort(0))
+	gob.Register(IPV4Src{})
+	gob.Register(IPV4Dst{})
+	gob.Register(IPV6Src{})
+	gob.Register(IPV6Dst{})
+	gob.Register(Match{})
+	gob.Register(TransportPortDst(0))
+	gob.Register(TransportPortSrc(0))
+	gob.Register(VLANID(0))
+	gob.Register(VLANPCP(0))
+	gob.Register(WriteFields{})
 }

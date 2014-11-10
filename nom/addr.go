@@ -1,6 +1,9 @@
 package nom
 
-import "fmt"
+import (
+	"encoding/gob"
+	"fmt"
+)
 
 // MACAddr represents a MAC address.
 type MACAddr [6]byte
@@ -72,3 +75,9 @@ func (ip IPV4Addr) Uint32() uint32 {
 
 // IPV6Addr represents an IP version 6 address in little endian byte order.
 type IPV6Addr [16]byte
+
+func init() {
+	gob.Register(MACAddr{})
+	gob.Register(IPV4Addr{})
+	gob.Register(IPV6Addr{})
+}

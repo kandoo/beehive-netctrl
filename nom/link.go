@@ -1,6 +1,9 @@
 package nom
 
-import "encoding/json"
+import (
+	"encoding/gob"
+	"encoding/json"
+)
 
 // LinkAdded is emitted when a new link is discovered.
 type LinkAdded Link
@@ -70,3 +73,12 @@ const (
 	Mbps Bandwidth = 1000000
 	Gbps Bandwidth = 1000000000
 )
+
+func init() {
+	gob.Register(LinkAdded{})
+	gob.Register(LinkRemoved{})
+	gob.Register(Link{})
+	gob.Register(LinkID(""))
+	gob.Register(LinkState(0))
+	gob.Register(Bandwidth(0))
+}

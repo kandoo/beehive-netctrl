@@ -1,6 +1,9 @@
 package nom
 
-import "fmt"
+import (
+	"encoding/gob"
+	"fmt"
+)
 
 // Special ports.
 const (
@@ -46,3 +49,10 @@ func (p Packet) SrcMAC() MACAddr {
 
 // PacketBufferID represents a packet buffered in the switch.
 type PacketBufferID uint32
+
+func init() {
+	gob.Register(Packet{})
+	gob.Register(PacketBufferID(0))
+	gob.Register(PacketIn{})
+	gob.Register(PacketOut{})
+}
