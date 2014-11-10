@@ -1,10 +1,10 @@
 package openflow
 
 import (
-	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/kandoo/beehive-netctrl/openflow/of"
 	"github.com/kandoo/beehive-netctrl/openflow/of10"
 	"github.com/kandoo/beehive-netctrl/openflow/of12"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 )
 
 func (d *of10Driver) handleEchoRequest(req of10.EchoRequest, c *ofConn) error {

@@ -6,16 +6,16 @@ import (
 	"os"
 	"runtime/pprof"
 
-	"github.com/kandoo/beehive-netctrl/controller"
-	"github.com/kandoo/beehive-netctrl/discovery"
-	"github.com/kandoo/beehive-netctrl/openflow"
 	bh "github.com/kandoo/beehive"
+	"github.com/kandoo/beehive-netctrl/controller"
+	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive-netctrl/openflow"
+	"github.com/kandoo/beehive-netctrl/switching"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
 
 func main() {
-
 	flag.Parse()
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
