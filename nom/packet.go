@@ -1,5 +1,7 @@
 package nom
 
+import "fmt"
+
 // Special ports.
 const (
 	PortFlood UID = "Ports.PortBcast"
@@ -12,6 +14,10 @@ type PacketIn struct {
 	InPort   UID
 	BufferID PacketBufferID
 	Packet   Packet
+}
+
+func (in PacketIn) String() string {
+	return fmt.Sprintf("packet in on switch %s port %s", in.Node, in.InPort)
 }
 
 // PacketOut messages are emitted to send a packet out of a port.
