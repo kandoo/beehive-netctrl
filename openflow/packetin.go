@@ -10,18 +10,19 @@ import (
 )
 
 func (of *of10Driver) handlePacketIn(in of10.PacketIn, c *ofConn) error {
+	inPort := in.InPort()
 	// Ignore packet-ins on switch specific ports.
-	if in.InPort() > uint16(of10.PP_MAX) {
-		glog.V(2).Infof("Ignoring packet-in on %v", in.InPort())
+	if inPort > uint16(of10.PP_MAX) {
+		glog.V(2).Infof("ignoring packet-in on %v", inPort)
 		return nil
 	}
 
-	port, ok := of.ofPorts[in.InPort()]
+	port, ok := of.ofPorts[inPort]
 	if !ok {
-		return fmt.Errorf("of10driver: port not found %v", in.InPort())
+		return fmt.Errorf("of10driver: port not found %v", inPort)
 	}
 
-	glog.V(2).Infof("Packet received on %v", in.InPort())
+	glog.V(2).Infof("packet received: %v", in)
 
 	nomIn := nom.PacketIn{
 		Node:     c.node.UID(),
