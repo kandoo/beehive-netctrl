@@ -252,7 +252,7 @@ func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
 			ofm.SetDlType(uint16(f))
 			w &= ^of10.PFW_DL_TYPE
 
-		case nom.IPV4Src:
+		case nom.IPv4Src:
 			ofm.SetNwSrc(f.Addr.Uint32())
 			mask := f.Mask.Uint32()
 			w &= ^of10.PFW_NW_SRC_ALL
@@ -263,7 +263,7 @@ func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
 				}
 			}
 
-		case nom.IPV4Dst:
+		case nom.IPv4Dst:
 			ofm.SetNwDst(f.Addr.Uint32())
 			mask := f.Mask.Uint32()
 			w &= ^of10.PFW_NW_DST_ALL
@@ -282,7 +282,7 @@ func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
 			ofm.SetTpDst(uint16(f))
 			w &= ^of10.PFW_TP_DST
 
-		case nom.IPV6Src, nom.IPV6Dst:
+		case nom.IPv6Src, nom.IPv6Dst:
 			return of10.Match{}, fmt.Errorf("of10Driver: IPv6 not supported")
 		}
 	}
