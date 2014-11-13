@@ -9,6 +9,7 @@ import (
 type MACAddr [6]byte
 
 var (
+	MaskAllMAC             MACAddr   = [6]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 	BroadcastMAC           MACAddr   = [6]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 	CDPMulticastMAC        MACAddr   = [6]byte{0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCC}
 	CiscoSTPMulticastMAC   MACAddr   = [6]byte{0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCD}
@@ -109,10 +110,17 @@ func (mm MaskedMACAddr) Subsumes(thatmm MaskedMACAddr) bool {
 // For example, 127.0.0.1 is represented as [4]byte{127, 0, 0, 1}.
 type IPv4Addr [4]byte
 
-// Uint32 converts the IP version 4 address into a 32-bit integer in little
+// Uint converts the IP version 4 address into a 32-bit integer in little
 // endian byte order.
-func (ip IPv4Addr) Uint32() uint32 {
+func (ip IPv4Addr) Uint() uint32 {
 	return uint32(ip[0]<<24 | ip[1]<<16 | ip[2]<<8 | ip[3])
+}
+
+// FromUint loads the ip address from addr.
+func (ip IPv4Addr) FromUint(addr uint32) {
+	for i := 0; i < 4; i++ {
+		ip[i] = byte((addr >> uint(4-i-1)) & 0xFF)
+	}
 }
 
 // Mask masked the IP address with mask.
@@ -135,6 +143,16 @@ func (ip IPv4Addr) Less(thatip IPv4Addr) bool {
 		}
 	}
 	return false
+}
+
+// CIDRToMaskedIPv4 converts a CIDR-style IP address into a NOM masked IP
+// address. For example, if addr is 0x7F000001 and mask is 24, this function
+// returns {IPv4Addr{127, 0, 0, 1}, IPv4Addr{255, 255, 255, 0}}.
+func CIDRToMaskedIPv4(addr uint32, mask uint) MaskedIPv4Addr {
+	var maskedip MaskedIPv4Addr
+	maskedip.Addr.FromUint(addr)
+	maskedip.Mask.FromUint(uint32(((1 << mask) - 1) << (32 - mask)))
+	return maskedip
 }
 
 // MaskedIPv4Addr represents a masked IP address (ie, an IPv4 prefix)
