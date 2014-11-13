@@ -1,12 +1,19 @@
 package nom
 
-import "encoding/json"
+import (
+	"encoding/json"
+	"fmt"
+)
 
 // Driver represents the Bee that communicates with the actual networking
 // element and adapts the southbound protocol for using in NOM.
 type Driver struct {
 	BeeID uint64
 	Role  DriverRole
+}
+
+func (d Driver) String() string {
+	return fmt.Sprintf("%016X (role=%v)", d.BeeID, d.Role)
 }
 
 // GoDecode decodes the driver from the byte slice using Gob.

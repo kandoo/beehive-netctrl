@@ -32,7 +32,6 @@ type PortQueryResult struct {
 type FlowStatsQuery struct {
 	Node  UID
 	Match Match
-	Exact bool
 }
 
 // FlowStatsQueryResult is the result for a FlowStatQuery
