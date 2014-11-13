@@ -15,7 +15,7 @@ func RegisterNOMController(h bh.Hive) {
 	app.Handle(nom.AddFlowEntry{}, addFlowHandler{})
 	app.Handle(nom.DelFlowEntry{}, delFlowHandler{})
 
-	app.Handle(nom.FlowStatQuery{}, queryHandler{})
+	app.Handle(nom.FlowStatsQuery{}, queryHandler{})
 
 	app.Handle(nom.PacketOut{}, pktOutHandler{})
 }
