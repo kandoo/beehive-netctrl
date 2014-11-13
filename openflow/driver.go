@@ -44,6 +44,8 @@ func (d *of10Driver) handlePkt(pkt of.Header, c *ofConn) error {
 		return d.handlePacketIn(of10.NewPacketInWithBuf(pkt10.Buf), c)
 	case of10.IsErrorMsg(pkt10):
 		return d.handleErrorMsg(of10.NewErrorMsgWithBuf(pkt10.Buf), c)
+	case of10.IsStatsReply(pkt10):
+		return d.handleStatsReply(of10.NewStatsReplyWithBuf(pkt10.Buf), c)
 	default:
 		return fmt.Errorf("Received unsupported packet: %v", pkt.Type())
 	}
@@ -153,7 +155,7 @@ func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 		mod.SetIdleTimeout(uint16(data.Flow.IdleTimeout))
 		mod.SetHardTimeout(uint16(data.Flow.HardTimeout))
 		mod.SetBufferId(0xFFFFFFFF)
-		match, err := d.convMatch(data.Flow.Match)
+		match, err := d.ofMatch(data.Flow.Match)
 		if err != nil {
 			return of.Header{}, fmt.Errorf("of10Driver: invalid match %v", err)
 		}
@@ -175,12 +177,23 @@ func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 		} else {
 			mod.SetCommand(uint16(of10.PFC_DELETE_STRICT))
 		}
-		match, err := d.convMatch(data.Match)
+		match, err := d.ofMatch(data.Match)
 		if err != nil {
 			return of.Header{}, fmt.Errorf("of10Driver: invalid match %v", err)
 		}
 		mod.SetMatch(match)
 		return mod.Header, nil
+
+	case nom.FlowStatsQuery:
+		match, err := d.ofMatch(data.Match)
+		if err != nil {
+			return of.Header{}, fmt.Errorf("of10Driver: invalid match %v", err)
+		}
+		query := of10.NewFlowStatsRequest()
+		query.SetMatch(match)
+		query.SetTableId(0xFF)
+		query.SetOutPort(uint16(of10.PP_NONE))
+		return query.Header, nil
 
 	default:
 		return of.Header{}, fmt.Errorf("of10Driver: unsupported message %+v", data)
@@ -219,7 +232,52 @@ func (d *of10Driver) convAction(a nom.Action) (of10.ActionHeader, error) {
 	}
 }
 
-func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
+func (d *of10Driver) nomMatch(m of10.Match) (nom.Match, error) {
+	nm := nom.Match{}
+	wc := of10.FlowWildcards(m.Wildcards())
+	if wc&of10.PFW_IN_PORT != 0 {
+		ofp := m.InPort()
+		nomp, ok := d.ofPorts[ofp]
+		if !ok {
+			return nom.Match{}, fmt.Errorf("of10Driver: cannot find port %v", ofp)
+		}
+		nm.Fields = append(nm.Fields, nom.InPort(nomp.UID()))
+	}
+	if wc&of10.PFW_DL_SRC != 0 {
+		nm.Fields = append(nm.Fields, nom.EthSrc{
+			Addr: m.DlSrc(),
+			Mask: nom.MaskAllMAC,
+		})
+	}
+	if wc&of10.PFW_DL_DST != 0 {
+		nm.Fields = append(nm.Fields, nom.EthDst{
+			Addr: m.DlDst(),
+			Mask: nom.MaskAllMAC,
+		})
+	}
+	if wc&of10.PFW_DL_TYPE != 0 {
+		nm.Fields = append(nm.Fields, nom.EthType(m.DlType()))
+	}
+	if wc&of10.PFW_NW_SRC_MASK != 0 {
+		mask := uint(wc&of10.PFW_NW_SRC_MASK) >> uint(of10.PFW_NW_DST_SHIFT)
+		nm.Fields = append(nm.Fields,
+			nom.IPv4Src(nom.CIDRToMaskedIPv4(m.NwSrc(), mask)))
+	}
+	if wc&of10.PFW_NW_DST_MASK != 0 {
+		mask := uint(wc&of10.PFW_NW_DST_MASK) >> uint(of10.PFW_NW_DST_SHIFT)
+		nm.Fields = append(nm.Fields,
+			nom.IPv4Dst(nom.CIDRToMaskedIPv4(m.NwDst(), mask)))
+	}
+	if wc&of10.PFW_TP_SRC != 0 {
+		nm.Fields = append(nm.Fields, nom.TransportPortSrc(m.TpSrc()))
+	}
+	if wc&of10.PFW_TP_DST != 0 {
+		nm.Fields = append(nm.Fields, nom.TransportPortDst(m.TpDst()))
+	}
+	return nm, nil
+}
+
+func (d *of10Driver) ofMatch(m nom.Match) (of10.Match, error) {
 	ofm := of10.NewMatch()
 	w := of10.PFW_ALL
 	for _, f := range m.Fields {
@@ -253,9 +311,9 @@ func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
 			w &= ^of10.PFW_DL_TYPE
 
 		case nom.IPv4Src:
-			ofm.SetNwSrc(f.Addr.Uint32())
-			mask := f.Mask.Uint32()
-			w &= ^of10.PFW_NW_SRC_ALL
+			ofm.SetNwSrc(f.Addr.Uint())
+			mask := f.Mask.Uint()
+			w &= ^of10.PFW_NW_SRC_MASK
 			for i := uint(0); i < 32; i++ {
 				if mask&(1<<i) != 0 {
 					w |= of10.FlowWildcards(i << uint(of10.PFW_NW_SRC_SHIFT))
@@ -264,9 +322,9 @@ func (d *of10Driver) convMatch(m nom.Match) (of10.Match, error) {
 			}
 
 		case nom.IPv4Dst:
-			ofm.SetNwDst(f.Addr.Uint32())
-			mask := f.Mask.Uint32()
-			w &= ^of10.PFW_NW_DST_ALL
+			ofm.SetNwDst(f.Addr.Uint())
+			mask := f.Mask.Uint()
+			w &= ^of10.PFW_NW_DST_MASK
 			for i := uint(0); i < 32; i++ {
 				if mask&(1<<i) != 0 {
 					w |= of10.FlowWildcards(i << uint(of10.PFW_NW_DST_SHIFT))
