@@ -9,7 +9,7 @@ import (
 type MACAddr [6]byte
 
 var (
-	MaskAllMAC             MACAddr   = [6]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
+	MaskNoneMAC            MACAddr   = [6]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 	BroadcastMAC           MACAddr   = [6]byte{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}
 	CDPMulticastMAC        MACAddr   = [6]byte{0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCC}
 	CiscoSTPMulticastMAC   MACAddr   = [6]byte{0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCD}
@@ -107,20 +107,32 @@ func (mm MaskedMACAddr) Subsumes(thatmm MaskedMACAddr) bool {
 }
 
 // IPv4Addr represents an IP version 4 address in big endian byte order.
-// For example, 127.0.0.1 is represented as [4]byte{127, 0, 0, 1}.
+// For example, 127.0.0.1 is represented as IPv4Addr{127, 0, 0, 1}.
 type IPv4Addr [4]byte
 
 // Uint converts the IP version 4 address into a 32-bit integer in little
 // endian byte order.
 func (ip IPv4Addr) Uint() uint32 {
-	return uint32(ip[0]<<24 | ip[1]<<16 | ip[2]<<8 | ip[3])
+	return uint32(ip[0])<<24 | uint32(ip[1])<<16 | uint32(ip[2])<<8 |
+		uint32(ip[3])
 }
 
 // FromUint loads the ip address from addr.
-func (ip IPv4Addr) FromUint(addr uint32) {
+func (ip *IPv4Addr) FromUint(addr uint32) {
 	for i := 0; i < 4; i++ {
-		ip[i] = byte((addr >> uint(4-i-1)) & 0xFF)
+		ip[i] = byte((addr >> uint(8*(3-i))) & 0xFF)
 	}
+}
+
+// PopCount returns the number of ones in the IP address. For example, it
+// returns 16 for IPv4Addr{255, 255, 0, 0}.
+func (ip IPv4Addr) PopCount() uint32 {
+	v := ip.Uint()
+	v -= (v >> 1) & 0x55555555
+	v = ((v >> 2) & 0x33333333) + v&0x33333333
+	v = ((v >> 4) + v) & 0x0F0F0F0F
+	v = ((v >> 8) + v) & 0x00FF00FF
+	return ((v >> 16) + v) & 0x0000FFFF
 }
 
 // Mask masked the IP address with mask.
