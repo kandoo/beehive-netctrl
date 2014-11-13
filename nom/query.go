@@ -27,24 +27,31 @@ type PortQueryResult struct {
 	Port Port
 }
 
-// FlowStatQuery queries the flows that would match the query. If Exact is
+// FlowStatsQuery queries the flows that would match the query. If Exact is
 // false, it removes all flow entries that are subsumed by the given match.
-type FlowStatQuery struct {
+type FlowStatsQuery struct {
+	Node  UID
 	Match Match
 	Exact bool
 }
 
-// FlowStatQueryResult is the result for a FlowStatQuery
-type FlowStatQueryResult struct {
-	Flow     FlowEntry
+// FlowStatsQueryResult is the result for a FlowStatQuery
+type FlowStatsQueryResult struct {
+	Node  UID
+	Stats []FlowStats
+}
+
+// FlowStats is the statistics of flow
+type FlowStats struct {
+	Match    Match
 	Duration time.Duration
-	PktCount uint64
+	Packets  uint64
 	Bytes    uint64
 }
 
 func init() {
-	gob.Register(FlowStatQuery{})
-	gob.Register(FlowStatQueryResult{})
+	gob.Register(FlowStatsQuery{})
+	gob.Register(FlowStatsQueryResult{})
 	gob.Register(NodeQuery{})
 	gob.Register(NodeQueryResult{})
 	gob.Register(PortQuery{})
