@@ -186,12 +186,12 @@ const (
 	PFW_TP_DST       FlowWildcards = 128
 	PFW_NW_SRC_SHIFT FlowWildcards = 8
 	PFW_NW_SRC_BITS  FlowWildcards = 5
-	PFW_NW_SRC_MASK  FlowWildcards = 8
-	PFW_NW_SRC_ALL   FlowWildcards = 8
+	PFW_NW_SRC_MASK  FlowWildcards = 7936
+	PFW_NW_SRC_ALL   FlowWildcards = 8192
 	PFW_NW_DST_SHIFT FlowWildcards = 14
 	PFW_NW_DST_BITS  FlowWildcards = 6
-	PFW_NW_DST_MASK  FlowWildcards = 14
-	PFW_NW_DST_ALL   FlowWildcards = 14
+	PFW_NW_DST_MASK  FlowWildcards = 1032192
+	PFW_NW_DST_ALL   FlowWildcards = 524288
 	PFW_DL_VLAN_PCP  FlowWildcards = 1048576
 	PFW_NW_TOS       FlowWildcards = 2097152
 	PFW_ALL          FlowWildcards = 4194303

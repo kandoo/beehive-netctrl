@@ -413,7 +413,7 @@ enum FlowWildcards {
   #  the entire field.  This is the *opposite* of the usual convention where
   # e.g. /24 indicates that 8 bits (not 24 bits) are wildcarded.
   PFW_NW_SRC_SHIFT = 8,
-  PFW_NW_SRC_BITS = (6 - 1),
+  PFW_NW_SRC_BITS = 6,
   PFW_NW_SRC_MASK = ((1  << FlowWildcards.PFW_NW_SRC_BITS) - 1) <<
       FlowWildcards.PFW_NW_SRC_SHIFT,
   PFW_NW_SRC_ALL = 32  << FlowWildcards.PFW_NW_SRC_SHIFT,
@@ -716,7 +716,7 @@ packet DescStats(StatsReply) {
 # Body for OpenflowStatsRequest of type PST_FLOW.
 @type_selector(stats_type = StatsTypes.PST_FLOW)
 packet FlowStatsRequest(StatsRequest) {
-  Match match;  # Fields to match.
+  Match match;					# Fields to match.
   uint8 table_id;       # ID of table to read (from OpenflowTableStats),
                         # 0xff for all tables or 0xfe for emergency.
   uint8 pad;            # Align to 32 bits.
