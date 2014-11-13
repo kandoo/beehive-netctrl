@@ -3,11 +3,11 @@ package openflow
 import (
 	"errors"
 
-	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 	"github.com/kandoo/beehive-netctrl/nom"
 	"github.com/kandoo/beehive-netctrl/openflow/of"
 	"github.com/kandoo/beehive-netctrl/openflow/of10"
 	"github.com/kandoo/beehive-netctrl/openflow/of12"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 )
 
 func (c *ofConn) handshake() (ofDriver, error) {
@@ -21,7 +21,7 @@ func (c *ofConn) handshake() (ofDriver, error) {
 		return nil, err
 	}
 
-	glog.V(2).Info("Received hello from a switch")
+	glog.V(2).Info("%v received hello from a switch", c.ctx)
 
 	version := of.OPENFLOW_1_0
 	if h.Version() > uint8(of.OPENFLOW_1_2) {
@@ -34,7 +34,7 @@ func (c *ofConn) handshake() (ofDriver, error) {
 	}
 	c.Flush()
 
-	glog.V(2).Info("Sent hello to the switch")
+	glog.V(2).Info("%v sent hello to the switch", c.ctx)
 
 	var driver ofDriver
 	switch version {
@@ -49,7 +49,7 @@ func (c *ofConn) handshake() (ofDriver, error) {
 	}
 
 	if c.node.ID == nom.NodeID(0) {
-		return nil, errors.New("Invalid node after handshake")
+		return nil, errors.New("ofConn: invalid node after handshake")
 	}
 
 	return driver, nil
@@ -62,7 +62,7 @@ func (d *of10Driver) handshake(c *ofConn) error {
 	}
 	c.Flush()
 
-	glog.V(2).Info("Sent features request to the switch")
+	glog.V(2).Info("%v sent features request to the switch", c.ctx)
 
 	hdr, err := c.ReadHeader()
 	if err != nil {
@@ -79,9 +79,10 @@ func (d *of10Driver) handshake(c *ofConn) error {
 		return err
 	}
 
-	glog.Infof("Handshake completed for switch %016x", frep.DatapathId())
-
-	glog.Infof("Disabling packet buffers in the switch.")
+	glog.Infof("%v completes handshaking with switch %016x", c.ctx,
+		frep.DatapathId())
+	glog.Infof("%v disables packet buffers in switch %016x", c.ctx,
+		frep.DatapathId())
 	cfg := of10.NewSwitchSetConfig()
 	cfg.SetMissSendLen(0xFFFF)
 	c.WriteHeader(cfg.Header)
@@ -92,7 +93,7 @@ func (d *of10Driver) handshake(c *ofConn) error {
 		MACAddr:      datapathIDToMACAddr(frep.DatapathId()),
 		Capabilities: nil,
 	}
-	glog.Infof("%v connected", c.node)
+	glog.Infof("%v is connected to %v", c.ctx, c.node)
 
 	nomDriver := nom.Driver{
 		BeeID: c.ctx.ID(),

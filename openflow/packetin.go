@@ -19,7 +19,7 @@ func (of *of10Driver) handlePacketIn(in of10.PacketIn, c *ofConn) error {
 
 	port, ok := of.ofPorts[inPort]
 	if !ok {
-		return fmt.Errorf("of10driver: port not found %v", inPort)
+		return fmt.Errorf("of10Driver: port not found %v", inPort)
 	}
 
 	glog.V(2).Infof("packet received: %v", in)

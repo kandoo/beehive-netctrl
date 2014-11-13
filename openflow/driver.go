@@ -235,7 +235,7 @@ func (d *of10Driver) convAction(a nom.Action) (of10.ActionHeader, error) {
 func (d *of10Driver) nomMatch(m of10.Match) (nom.Match, error) {
 	nm := nom.Match{}
 	wc := of10.FlowWildcards(m.Wildcards())
-	if wc&of10.PFW_IN_PORT != 0 {
+	if wc&of10.PFW_IN_PORT == 0 {
 		ofp := m.InPort()
 		nomp, ok := d.ofPorts[ofp]
 		if !ok {
@@ -243,35 +243,35 @@ func (d *of10Driver) nomMatch(m of10.Match) (nom.Match, error) {
 		}
 		nm.Fields = append(nm.Fields, nom.InPort(nomp.UID()))
 	}
-	if wc&of10.PFW_DL_SRC != 0 {
+	if wc&of10.PFW_DL_SRC == 0 {
 		nm.Fields = append(nm.Fields, nom.EthSrc{
 			Addr: m.DlSrc(),
-			Mask: nom.MaskAllMAC,
+			Mask: nom.MaskNoneMAC,
 		})
 	}
-	if wc&of10.PFW_DL_DST != 0 {
+	if wc&of10.PFW_DL_DST == 0 {
 		nm.Fields = append(nm.Fields, nom.EthDst{
 			Addr: m.DlDst(),
-			Mask: nom.MaskAllMAC,
+			Mask: nom.MaskNoneMAC,
 		})
 	}
-	if wc&of10.PFW_DL_TYPE != 0 {
+	if wc&of10.PFW_DL_TYPE == 0 {
 		nm.Fields = append(nm.Fields, nom.EthType(m.DlType()))
 	}
-	if wc&of10.PFW_NW_SRC_MASK != 0 {
-		mask := uint(wc&of10.PFW_NW_SRC_MASK) >> uint(of10.PFW_NW_DST_SHIFT)
+	if wc&of10.PFW_NW_SRC_MASK != of10.PFW_NW_SRC_ALL && m.NwSrc() != 0 {
+		mask := uint(wc&of10.PFW_NW_SRC_MASK) >> uint(of10.PFW_NW_SRC_SHIFT)
 		nm.Fields = append(nm.Fields,
 			nom.IPv4Src(nom.CIDRToMaskedIPv4(m.NwSrc(), mask)))
 	}
-	if wc&of10.PFW_NW_DST_MASK != 0 {
+	if wc&of10.PFW_NW_DST_MASK != of10.PFW_NW_DST_ALL && m.NwDst() != 0 {
 		mask := uint(wc&of10.PFW_NW_DST_MASK) >> uint(of10.PFW_NW_DST_SHIFT)
 		nm.Fields = append(nm.Fields,
 			nom.IPv4Dst(nom.CIDRToMaskedIPv4(m.NwDst(), mask)))
 	}
-	if wc&of10.PFW_TP_SRC != 0 {
+	if wc&of10.PFW_TP_SRC == 0 {
 		nm.Fields = append(nm.Fields, nom.TransportPortSrc(m.TpSrc()))
 	}
-	if wc&of10.PFW_TP_DST != 0 {
+	if wc&of10.PFW_TP_DST == 0 {
 		nm.Fields = append(nm.Fields, nom.TransportPortDst(m.TpDst()))
 	}
 	return nm, nil
@@ -291,7 +291,7 @@ func (d *of10Driver) ofMatch(m nom.Match) (of10.Match, error) {
 			w &= ^of10.PFW_IN_PORT
 
 		case nom.EthDst:
-			if f.Mask != [6]byte{} {
+			if f.Mask != nom.MaskNoneMAC {
 				return of10.Match{},
 					fmt.Errorf("of10Driver: masked ethernet address is not supported")
 			}
@@ -299,7 +299,7 @@ func (d *of10Driver) ofMatch(m nom.Match) (of10.Match, error) {
 			w &= ^of10.PFW_DL_DST
 
 		case nom.EthSrc:
-			if f.Mask != [6]byte{} {
+			if f.Mask != nom.MaskNoneMAC {
 				return of10.Match{},
 					fmt.Errorf("of10Driver: masked ethernet address is not supported")
 			}
@@ -311,25 +311,23 @@ func (d *of10Driver) ofMatch(m nom.Match) (of10.Match, error) {
 			w &= ^of10.PFW_DL_TYPE
 
 		case nom.IPv4Src:
-			ofm.SetNwSrc(f.Addr.Uint())
-			mask := f.Mask.Uint()
 			w &= ^of10.PFW_NW_SRC_MASK
-			for i := uint(0); i < 32; i++ {
-				if mask&(1<<i) != 0 {
-					w |= of10.FlowWildcards(i << uint(of10.PFW_NW_SRC_SHIFT))
-					break
-				}
+			ofm.SetNwSrc(f.Addr.Uint())
+			mask := f.Mask.PopCount()
+			if mask == 32 {
+				w |= of10.PFW_NW_SRC_MASK
+			} else {
+				w |= of10.FlowWildcards(mask << uint(of10.PFW_NW_SRC_SHIFT))
 			}
 
 		case nom.IPv4Dst:
-			ofm.SetNwDst(f.Addr.Uint())
-			mask := f.Mask.Uint()
 			w &= ^of10.PFW_NW_DST_MASK
-			for i := uint(0); i < 32; i++ {
-				if mask&(1<<i) != 0 {
-					w |= of10.FlowWildcards(i << uint(of10.PFW_NW_DST_SHIFT))
-					break
-				}
+			ofm.SetNwDst(f.Addr.Uint())
+			mask := f.Mask.PopCount()
+			if mask == 32 {
+				w |= of10.PFW_NW_DST_MASK
+			} else {
+				w |= of10.FlowWildcards(mask << uint(of10.PFW_NW_DST_SHIFT))
 			}
 
 		case nom.TransportPortSrc:
