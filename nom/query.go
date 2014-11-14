@@ -49,6 +49,9 @@ type FlowStats struct {
 }
 
 func (stats FlowStats) BW() Bandwidth {
+	if stats.Duration == 0 {
+		return 0
+	}
 	return Bandwidth(stats.Bytes / uint64(stats.Duration))
 }
 
