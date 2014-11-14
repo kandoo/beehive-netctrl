@@ -82,10 +82,10 @@ func sendToMaster(msg interface{}, node nom.UID, ctx bh.RcvContext) error {
 
 type nodeTriggers struct {
 	Node     nom.Node
-	Triggers []Trigger
+	Triggers []nom.Trigger
 }
 
-func (nt nodeTriggers) hasTrigger(trigger Trigger) bool {
+func (nt nodeTriggers) hasTrigger(trigger nom.Trigger) bool {
 	for _, t := range nt.Triggers {
 		if t.Equals(trigger) {
 			return true
@@ -94,7 +94,7 @@ func (nt nodeTriggers) hasTrigger(trigger Trigger) bool {
 	return false
 }
 
-func (nt *nodeTriggers) maybeAddTrigger(t Trigger) bool {
+func (nt *nodeTriggers) maybeAddTrigger(t nom.Trigger) bool {
 	if nt.hasTrigger(t) {
 		return false
 	}
@@ -102,17 +102,14 @@ func (nt *nodeTriggers) maybeAddTrigger(t Trigger) bool {
 	return true
 }
 
-func (nt *nodeTriggers) addTrigger(t Trigger) {
-	// TODO(soheil): check for equal triggers.
-	nt.Triggers = append(nt.Triggers, t)
-}
-
-func (nt *nodeTriggers) delTrigger(t Trigger) {
+func (nt *nodeTriggers) delTrigger(t nom.Trigger) {
 	panic("todo: implement delTrigger")
 }
 
-func newTriggered(t Trigger, d time.Duration, bw nom.Bandwidth) Triggered {
-	return Triggered{
+func newTriggered(t nom.Trigger, d time.Duration,
+	bw nom.Bandwidth) nom.Triggered {
+
+	return nom.Triggered{
 		Node:      t.Node,
 		Match:     t.Match,
 		Duration:  d,

@@ -21,7 +21,7 @@ func RegisterNOMController(h bh.Hive) {
 
 	app.Handle(nom.PacketOut{}, pktOutHandler{})
 
-	app.Handle(AddTrigger{}, triggerHandler{})
+	app.Handle(nom.AddTrigger{}, addTriggerHandler{})
 
 	app.Handle(nom.FlowStatsQueryResult{}, Consolidator{})
 	app.Handle(poll{}, Poller{})
