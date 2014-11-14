@@ -48,6 +48,10 @@ type FlowStats struct {
 	Bytes    uint64
 }
 
+func (stats FlowStats) BW() Bandwidth {
+	return Bandwidth(stats.Bytes / uint64(stats.Duration))
+}
+
 func init() {
 	gob.Register(FlowStatsQuery{})
 	gob.Register(FlowStatsQueryResult{})

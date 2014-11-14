@@ -64,14 +64,14 @@ const (
 	LinkStateDown              = iota
 )
 
-// Bandwidth represents bandwidth in bps.
+// Bandwidth represents bandwidth in Bps.
 type Bandwidth uint64
 
 // Bandwidth units.
 const (
-	Kbps Bandwidth = 1000
-	Mbps Bandwidth = 1000000
-	Gbps Bandwidth = 1000000000
+	KBps Bandwidth = 1000
+	MBps Bandwidth = 1000000
+	GBps Bandwidth = 1000000000
 )
 
 func init() {
