@@ -50,7 +50,10 @@ func (h LearningSwitch) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			Node: in.Node,
 			Match: nom.Match{
 				Fields: []nom.Field{
-					nom.EthDst{Addr: dst},
+					nom.EthDst{
+						Addr: dst,
+						Mask: nom.MaskNoneMAC,
+					},
 				},
 			},
 			Actions: []nom.Action{
