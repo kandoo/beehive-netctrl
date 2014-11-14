@@ -591,9 +591,16 @@ type DelFlowEntry struct {
 	Exact bool
 }
 
-// FlowEntryUpdated is emitted to the subscribers of flow entries. Subscribers
-// are registered in response to AddFlowEntry.
-type FlowEntryUpdated struct {
+// FlowEntryDeleted is emitted (broadcasted and also sent to the subscriber of
+// the flow) when a flow is deleted.
+type FlowEntryDeleted struct {
+	Flow FlowEntry
+}
+
+// FlowEntryAdded is emitted (broadcasted and also sent to the subscriber of the
+// flow) when a flow is added. If the flow already existed, the message is
+// emitted to the subscriber.
+type FlowEntryAdded struct {
 	Flow FlowEntry
 }
 
@@ -612,7 +619,8 @@ func init() {
 	gob.Register(EthSrc{})
 	gob.Register(EthType(0))
 	gob.Register(FlowEntry{})
-	gob.Register(FlowEntryUpdated{})
+	gob.Register(FlowEntryAdded{})
+	gob.Register(FlowEntryDeleted{})
 	gob.Register(FlowPriority(0))
 	gob.Register(InPort(0))
 	gob.Register(IPv4Dst{})
