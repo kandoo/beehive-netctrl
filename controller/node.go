@@ -30,7 +30,7 @@ func (h nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	}
 
 	if n.hasDriver(nc.Driver) {
-		return fmt.Errorf("Driver %v reconnects to %v", nc.Driver, n.Node)
+		return fmt.Errorf("driver %v reconnects to %v", nc.Driver, n.Node)
 	}
 
 	n.Drivers = append(n.Drivers, nc.Driver)
@@ -47,20 +47,25 @@ func (h nodeConnectedHandler) Map(msg bh.Msg,
 type nodeDisconnectedHandler struct{}
 
 func (h nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
-	nd := msg.Data().(nom.NodeDisconnected)
-	k := string(nd.Node.ID)
-	n := nodeDrivers{}
-	if err := ctx.Dict(driversDict).GetGob(k, &n); err != nil {
-		return fmt.Errorf("Driver %v disconnects from %v before connecting",
-			nd.Driver, nd.Node)
+	dc := msg.Data().(nom.NodeDisconnected)
+	d := ctx.Dict(driversDict)
+	k := string(dc.Node.ID)
+	nd := nodeDrivers{}
+	if err := d.GetGob(k, &nd); err != nil {
+		return fmt.Errorf("driver %v disconnects from %v before connecting",
+			dc.Driver, dc.Node)
 	}
 
-	if !n.removeDriver(nd.Driver) {
-		return fmt.Errorf("Driver %v disconnects from %v before connecting",
-			nd.Driver, nd.Node)
+	if !nd.removeDriver(dc.Driver) {
+		return fmt.Errorf("driver %v disconnects from %v before connecting",
+			dc.Driver, dc.Node)
 	}
 
-	return nil
+	if len(nd.Drivers) == 0 {
+		ctx.Emit(nom.NodeLeft(nd.Node))
+		return d.Del(k)
+	}
+	return d.PutGob(k, &nd)
 }
 
 func (h nodeDisconnectedHandler) Map(msg bh.Msg,
