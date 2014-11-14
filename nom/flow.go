@@ -3,6 +3,8 @@ package nom
 import (
 	"encoding/gob"
 	"time"
+
+	bh "github.com/kandoo/beehive"
 )
 
 // InPort is the input port field.
@@ -465,31 +467,92 @@ func (m Match) countFields(checker func(f Field) bool) int {
 	return count
 }
 
-type Action interface{}
+type Action interface {
+	Equals(a Action) bool
+}
 
 type ActionForward struct {
 	Ports []UID
 }
 
+func (a ActionForward) Equals(thata Action) bool {
+	thataf, ok := thata.(ActionForward)
+	if !ok {
+		return false
+	}
+	ports := make(map[UID]struct{})
+	for _, p := range a.Ports {
+		ports[p] = struct{}{}
+	}
+	for _, p := range thataf.Ports {
+		if _, ok := ports[p]; !ok {
+			return false
+		}
+	}
+	return true
+}
+
 type ActionDrop struct {
+}
+
+func (a ActionDrop) Equals(thata Action) bool {
+	_, ok := thata.(ActionDrop)
+	return ok
 }
 
 type ActionFlood struct {
 	InPort UID
 }
 
-type ActionSendToController struct {
+func (a ActionFlood) Equals(thata Action) bool {
+	thataf, ok := thata.(ActionFlood)
+	if !ok {
+		return false
+	}
+	return a.InPort == thataf.InPort
+}
+
+type ActionSendToController struct{}
+
+func (a ActionSendToController) Equals(thata Action) bool {
+	_, ok := thata.(ActionSendToController)
+	return ok
 }
 
 type ActionPushVLAN struct {
 	ID VLANID
 }
 
-type ActionPopVLAN struct {
+func (a ActionPushVLAN) Equals(thata Action) bool {
+	thatap, ok := thata.(ActionPushVLAN)
+	if !ok {
+		return false
+	}
+	return a.ID == thatap.ID
 }
 
-type WriteFields struct {
+type ActionPopVLAN struct{}
+
+func (a ActionPopVLAN) Equals(thata Action) bool {
+	_, ok := thata.(ActionPopVLAN)
+	return ok
+}
+
+type ActionWriteFields struct {
 	Fields []Field
+}
+
+func (a ActionWriteFields) Equals(thata Action) bool {
+	thataw, ok := thata.(ActionWriteFields)
+	if !ok {
+		return false
+	}
+	for i := range a.Fields {
+		if !a.Fields[i].Equals(thataw.Fields[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 // FlowPriority is the priority of a flow.
@@ -505,9 +568,19 @@ type FlowEntry struct {
 	HardTimeout time.Duration
 }
 
-// AddFlowEntry is emitted to install a flow entry.
+func (f FlowEntry) Equals(thatf FlowEntry) bool {
+	for i := range f.Actions {
+		if f.Actions[i].Equals(thatf.Actions[i]) {
+			return false
+		}
+	}
+	return f.Node == thatf.Node && f.Match.Equals(thatf.Match)
+}
+
+// AddFlowEntry is a message emitted to install a flow entry on a node.
 type AddFlowEntry struct {
-	Flow FlowEntry
+	Subscriber bh.AppCellKey
+	Flow       FlowEntry
 }
 
 // DelFlowEntry is emitted to remove the flow entries with the given match.
@@ -518,34 +591,28 @@ type DelFlowEntry struct {
 	Exact bool
 }
 
-// AddFlowEntryResult is emitted in response to a AddFlowEntry.
-type AddFlowEntryResult struct {
-	Err error
-	Add AddFlowEntry
-}
-
-// DelFlowEntryResult is emitted in response to a DelFlowEntry.
-type DelFlowEntryResult struct {
-	Err error
-	Del DelFlowEntry
+// FlowEntryUpdated is emitted to the subscribers of flow entries. Subscribers
+// are registered in response to AddFlowEntry.
+type FlowEntryUpdated struct {
+	Flow FlowEntry
 }
 
 func init() {
+	gob.Register(AddFlowEntry{})
 	gob.Register(ActionDrop{})
 	gob.Register(ActionFlood{})
 	gob.Register(ActionForward{})
 	gob.Register(ActionPopVLAN{})
 	gob.Register(ActionPushVLAN{})
 	gob.Register(ActionSendToController{})
-	gob.Register(AddFlowEntry{})
-	gob.Register(AddFlowEntryResult{})
+	gob.Register(ActionWriteFields{})
 	gob.Register(DelFlowEntry{})
-	gob.Register(DelFlowEntryResult{})
 	gob.Register(EthAddrField{})
 	gob.Register(EthDst{})
 	gob.Register(EthSrc{})
 	gob.Register(EthType(0))
 	gob.Register(FlowEntry{})
+	gob.Register(FlowEntryUpdated{})
 	gob.Register(FlowPriority(0))
 	gob.Register(InPort(0))
 	gob.Register(IPv4Dst{})
@@ -557,5 +624,4 @@ func init() {
 	gob.Register(TransportPortSrc(0))
 	gob.Register(VLANID(0))
 	gob.Register(VLANPCP(0))
-	gob.Register(WriteFields{})
 }
