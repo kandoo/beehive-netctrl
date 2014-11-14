@@ -14,7 +14,7 @@ type nodeConnectedHandler struct{}
 func (h nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	nc := msg.Data().(nom.NodeConnected)
 
-	dict := ctx.Dict(nodeDriversDict)
+	dict := ctx.Dict(driversDict)
 	k := string(nc.Node.ID)
 	n := nodeDrivers{}
 	if err := nom.DictGet(dict, k, &n); err != nil {
@@ -41,7 +41,7 @@ func (h nodeConnectedHandler) Map(msg bh.Msg,
 	ctx bh.MapContext) bh.MappedCells {
 
 	nc := msg.Data().(nom.NodeConnected)
-	return bh.MappedCells{{nodeDriversDict, string(nc.Node.ID)}}
+	return bh.MappedCells{{driversDict, string(nc.Node.ID)}}
 }
 
 type nodeDisconnectedHandler struct{}
@@ -50,7 +50,7 @@ func (h nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	nd := msg.Data().(nom.NodeDisconnected)
 	k := string(nd.Node.ID)
 	n := nodeDrivers{}
-	if err := ctx.Dict(nodeDriversDict).GetGob(k, &n); err != nil {
+	if err := ctx.Dict(driversDict).GetGob(k, &n); err != nil {
 		return fmt.Errorf("Driver %v disconnects from %v before connecting",
 			nd.Driver, nd.Node)
 	}
@@ -67,5 +67,5 @@ func (h nodeDisconnectedHandler) Map(msg bh.Msg,
 	ctx bh.MapContext) bh.MappedCells {
 
 	nd := msg.Data().(nom.NodeDisconnected)
-	return bh.MappedCells{{nodeDriversDict, string(nd.Node.ID)}}
+	return bh.MappedCells{{driversDict, string(nd.Node.ID)}}
 }

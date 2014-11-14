@@ -15,7 +15,7 @@ func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	// the change. Otherwise, we need to enque this message for that driver and
 	// make sure we apply the log to the port status
 	data := msg.Data().(nom.PortStatusChanged)
-	dict := ctx.Dict(nodeDriversDict)
+	dict := ctx.Dict(driversDict)
 	k := string(data.Port.Node)
 	n := nodeDrivers{}
 	if err := dict.GetGob(k, &n); err != nil {
@@ -23,8 +23,8 @@ func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	}
 
 	if n.master() != data.Driver {
-		return fmt.Errorf("NOMController: %v is ignored since %v is not master",
-			data.Port, data.Driver)
+		return fmt.Errorf("NOMController: %v is ignored, %v is not master, %v is",
+			data.Port, data.Driver, n.master())
 	}
 
 	if p, ok := n.Ports.GetPort(data.Port.UID()); ok {
@@ -43,6 +43,6 @@ func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 func (h portStatusHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{
-		{nodeDriversDict, string(msg.Data().(nom.PortStatusChanged).Port.Node)},
+		{driversDict, string(msg.Data().(nom.PortStatusChanged).Port.Node)},
 	}
 }

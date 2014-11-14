@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"time"
+
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
 )
@@ -18,4 +20,12 @@ func RegisterNOMController(h bh.Hive) {
 	app.Handle(nom.FlowStatsQuery{}, queryHandler{})
 
 	app.Handle(nom.PacketOut{}, pktOutHandler{})
+
+	app.Handle(AddTrigger{}, triggerHandler{})
+
+	app.Handle(nom.FlowStatsQueryResult{}, Consolidator{})
+	app.Handle(poll{}, Poller{})
+	app.Detached(bh.NewTimer(1*time.Second, func() {
+		h.Emit(poll{})
+	}))
 }
