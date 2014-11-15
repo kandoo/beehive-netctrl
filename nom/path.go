@@ -1,97 +1,112 @@
 package nom
 
-import "encoding/gob"
+import (
+	"encoding/gob"
 
-// Path represents a directed, logical multi-path among points in the network.
-// Each path start from one or more points in the network and is then connected
-// to other paths.
+	bh "github.com/kandoo/beehive"
+)
+
+// Path is a logical sequence of points, where point[i+1] will match the output
+// of point[i]. If point[i+1] matches on an incoming port p1, point[i] should
+// have a forward action that forwards to a port 2 directly connected to p1.
+// Clearly, this rule does not apply to the first and the last points in the
+// path.
 type Path struct {
-	ID UID // A universally unique ID of this path.
-
-	Match Match          // Match matches the flows that go into this path.
-	Src   PointGroup     // Src is the points that start this path.
-	Dst   []WeightedPath // Dst is the destination(s) of this path.
-
-	Redundancy int       // Number of redundant links to dst.
-	MinBW      Bandwidth // Minimum required BW of this path.
-	MaxBW      Bandwidth // Maximum required BW of this path.
+	ID     string  // ID needs to be unique only to the subscriber.
+	Points []Point // Points in the path.
 }
 
-// WeightedPath represents a path along with its weight. This is only used as a
-// destination for other paths.
-type WeightedPath struct {
-	Weight int
-	Path   *Path
-}
-
-// Point represents a connecting point in a path, denoted by an input port and
-// an output port. Input and output ports must be of the same node.
-//
-// The starting points of a path have no input port, and the terminal points
-// have no output port.
-//
-// For intermediary points, if the output port is "" meaning that the output
-// port should be automatically selected based on the next hub. If the input
-// port is "", it means that flows can be received from all ports of that node.
-type Point struct {
-	Node UID // The node.
-	In   UID // Input port.
-	Out  UID // Output port.
-}
-
-// PointGroup represents a collection of points in a path.
-type PointGroup struct {
-	Points []Point
-}
-
-// NewPortGroup creates a group of path points.
-func NewPointGroup(p ...Point) *PointGroup {
-	return &PointGroup{
-		Points: p,
+func (p Path) Equals(thatp Path) bool {
+	if len(p.Points) != len(thatp.Points) {
+		return false
 	}
+
+	for i := range p.Points {
+		if !p.Points[i].Equals(thatp.Points[i]) {
+			return false
+		}
+	}
+	return p.ID == thatp.ID
 }
 
-// CreatePath is a message emitted to create a path in the network.
-type CreatePath Path
+// TODO(soheil): add multi-path if there was a real need.
 
-// DeletePath is a message emitted to delete a path.
-type DeletePath struct {
-	Path UID
+// Point represents a logical connection point in a path, where incoming packets
+// matching Match are processing using Actions.
+type Point struct {
+	Match   Match    // Point's match.
+	Exclude []InPort // Exclude packets from these ports in the point.
+	Actions []Action // Action that are applied.
 }
 
-// ReplacePath is a message emitted to replace an old path with a new one.
-type ReplacePath struct {
-	OldPath Path
-	NewPath Path
+func (pt Point) Equals(thatpt Point) bool {
+	if len(pt.Actions) != len(thatpt.Actions) ||
+		len(pt.Exclude) != len(thatpt.Exclude) {
+
+		return false
+	}
+	if !pt.Match.Equals(thatpt.Match) {
+		return false
+	}
+	for i := range pt.Actions {
+		if !pt.Actions[i].Equals(thatpt.Actions[i]) {
+			return false
+		}
+	}
+	ports := make(map[InPort]struct{})
+	for _, ex := range pt.Exclude {
+		ports[ex] = struct{}{}
+	}
+	for _, ex := range thatpt.Exclude {
+		if _, ok := ports[ex]; !ok {
+			return false
+		}
+	}
+	return true
 }
 
-// QueryPath is emitted to query the stats of a path.
-type QueryPath struct {
-	Path UID
+// AddPath is emitted to install a path in the network.
+type AddPath struct {
+	Subscriber bh.AppCellKey
+	Path       Path
 }
 
-// PathStatistics is emitted as a reply to a QueryPath.
-type QueryPathResult struct {
-	Path  UID
-	Stats []PointStats
+// DelPath is emitted to delete a path from the network.
+type DelPath struct {
+	Path Path
 }
 
-// PointStats is the statistics of a specific point.
-type PointStats struct {
-	Point   Point
-	Bytes   uint64
-	Packets uint64
+// PathAdded is emitted to the subscriber when the path is successfully added.
+type PathAdded struct {
+	Path Path
 }
+
+// PathDeleted is emitted to the subscriber when the path is deleted (because it
+// cannot be installed in the network, or because it is explicitly removed).
+type PathDeleted struct {
+	Path   Path
+	Reason PathDelReason
+}
+
+// PathDelReason is the reason that a path is deleted.
+type PathDelReason int
+
+const (
+	// PathDelExplicit means that the path is explicitly deleted using a DelPath.
+	PathDelExplicit PathDelReason = iota
+	// PathDelInvalid means that the path has contradicting points.
+	PathDelInvalid
+	// PathDelInfeasible means that the path is valid but cannot be formed due to
+	// the current state of the network.
+	PathDelInfeasible
+)
 
 func init() {
-	gob.Register(CreatePath{})
-	gob.Register(DeletePath{})
+	gob.Register(AddPath{})
+	gob.Register(DelPath{})
 	gob.Register(Path{})
+	gob.Register(PathAdded{})
+	gob.Register(PathDeleted{})
+	gob.Register(PathDelReason(0))
 	gob.Register(Point{})
-	gob.Register(PointGroup{})
-	gob.Register(PointStats{})
-	gob.Register(QueryPath{})
-	gob.Register(QueryPathResult{})
-	gob.Register(ReplacePath{})
-	gob.Register(WeightedPath{})
 }
