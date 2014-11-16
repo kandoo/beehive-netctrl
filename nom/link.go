@@ -15,7 +15,7 @@ type LinkRemoved Link
 type Link struct {
 	ID    LinkID    // Link's ID.
 	From  UID       // From is the link's port.
-	To    []UID     // To stores the port(s) connected to From using this link.
+	To    UID       // To stores the port(s) connected to From using this link.
 	State LinkState // The link's state.
 }
 

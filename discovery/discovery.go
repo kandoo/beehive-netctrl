@@ -191,7 +191,7 @@ func (h *pktInHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	l := nom.Link{
 		ID:    nom.LinkID(port.UID()),
 		From:  pin.InPort,
-		To:    []nom.UID{port.UID()},
+		To:    port.UID(),
 		State: nom.LinkStateUp,
 	}
 	ctx.Emit(NewLink(l))
@@ -199,7 +199,7 @@ func (h *pktInHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	l = nom.Link{
 		ID:    nom.LinkID(pin.InPort),
 		From:  port.UID(),
-		To:    []nom.UID{pin.InPort},
+		To:    pin.InPort,
 		State: nom.LinkStateUp,
 	}
 	ctx.Emit(NewLink(l))
