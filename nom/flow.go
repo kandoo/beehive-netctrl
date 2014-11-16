@@ -555,15 +555,12 @@ func (a ActionWriteFields) Equals(thata Action) bool {
 	return true
 }
 
-// FlowPriority is the priority of a flow.
-type FlowPriority uint16
-
 // FlowEntry represents a match-action rule for a specific node.
 type FlowEntry struct {
 	Node        UID
 	Match       Match
 	Actions     []Action
-	Priority    FlowPriority
+	Priority    uint16
 	IdleTimeout time.Duration
 	HardTimeout time.Duration
 }
@@ -621,7 +618,6 @@ func init() {
 	gob.Register(FlowEntryAdded{})
 	gob.Register(FlowEntryDeleted{})
 	gob.Register(FlowEntry{})
-	gob.Register(FlowPriority(0))
 	gob.Register(IPv4Dst{})
 	gob.Register(IPv4Src{})
 	gob.Register(IPv6Dst{})
