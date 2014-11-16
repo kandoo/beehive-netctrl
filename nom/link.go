@@ -8,8 +8,8 @@ import (
 // LinkAdded is emitted when a new link is discovered.
 type LinkAdded Link
 
-// LinkRemoved is emitted when a new link is removed.
-type LinkRemoved Link
+// LinkDeleted is emitted when a new link is removed.
+type LinkDeleted Link
 
 // Link represents an outgoing link from a port.
 type Link struct {
@@ -76,7 +76,7 @@ const (
 
 func init() {
 	gob.Register(LinkAdded{})
-	gob.Register(LinkRemoved{})
+	gob.Register(LinkDeleted{})
 	gob.Register(Link{})
 	gob.Register(LinkID(""))
 	gob.Register(LinkState(0))

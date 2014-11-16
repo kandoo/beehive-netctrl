@@ -232,7 +232,7 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			return nil
 		}
 		np.removeLink(oldl)
-		ctx.Emit(nom.LinkRemoved(oldl))
+		ctx.Emit(nom.LinkDeleted(oldl))
 	}
 
 	glog.V(2).Infof("Link detected %v", l)
