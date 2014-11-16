@@ -50,6 +50,11 @@ func (n Node) String() string {
 // network.
 type NodeID string
 
+// UID converts id into a UID.
+func (id NodeID) UID() UID {
+	return UID(id)
+}
+
 // UID returns the node's unique ID. This id is in the form of net_id$$node_id.
 func (n Node) UID() UID {
 	return UID(string(n.ID))
