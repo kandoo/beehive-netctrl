@@ -582,7 +582,8 @@ func (f FlowEntry) Equals(thatf FlowEntry) bool {
 			return false
 		}
 	}
-	return f.Node == thatf.Node && f.Match.Equals(thatf.Match)
+	return f.Node == thatf.Node && f.Match.Equals(thatf.Match) &&
+		f.Priority == thatf.Priority
 }
 
 // AddFlowEntry is a message emitted to install a flow entry on a node.
