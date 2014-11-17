@@ -137,6 +137,17 @@ func LinksCentralized(node nom.UID, ctx bh.RcvContext) (links []nom.Link) {
 	return links
 }
 
+// NodesCentralized returns the nodes with outgoing links so far.
+//
+// Note that this methods should be used only when the GraphBuilderCentralized
+// is in use.
+func NodesCentralized(ctx bh.RcvContext) (nodes []nom.UID) {
+	ctx.Dict(GraphDict).ForEach(func(k string, v []byte) {
+		nodes = append(nodes, nom.UID(k))
+	})
+	return nodes
+}
+
 func allPaths(from, to nom.UID, visited map[nom.UID]distAndLinks) (
 	[][]nom.Link, int) {
 
