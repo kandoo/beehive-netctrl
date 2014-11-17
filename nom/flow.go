@@ -320,8 +320,18 @@ type Field interface {
 	Subsumes(f Field) bool
 }
 
+// Match is a collection of fields that will match packets.
 type Match struct {
 	Fields []Field
+}
+
+// Clone creates a copy of the match.
+func (m Match) Clone() Match {
+	clone := Match{
+		Fields: make([]Field, len(m.Fields)),
+	}
+	copy(clone.Fields, m.Fields)
+	return clone
 }
 
 func (m Match) InPort() (InPort, bool) {
@@ -557,6 +567,7 @@ func (a ActionWriteFields) Equals(thata Action) bool {
 
 // FlowEntry represents a match-action rule for a specific node.
 type FlowEntry struct {
+	ID          string // ID is defined by the subscriber, not globally unique.
 	Node        UID
 	Match       Match
 	Actions     []Action
