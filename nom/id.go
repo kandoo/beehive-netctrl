@@ -7,6 +7,10 @@ import "strings"
 // network and node ID along with an ID for the port.
 type UID string
 
+const (
+	Nil = ""
+)
+
 // UIDSeparator is the token added in between the parts of a UID.
 const UIDSeparator = "$$"
 
