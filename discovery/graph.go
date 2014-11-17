@@ -2,6 +2,7 @@ package discovery
 
 import (
 	"container/heap"
+	"encoding/gob"
 	"fmt"
 
 	bh "github.com/kandoo/beehive"
@@ -120,6 +121,22 @@ func ShortestPathCentralized(from, to nom.UID, ctx bh.RcvContext) (
 	return allPaths(from, to, visited)
 }
 
+// LinksCentralized returns links of node.
+//
+// Note that this method should be used only when the GraphBuilderCentralized is
+// in use.
+func LinksCentralized(node nom.UID, ctx bh.RcvContext) (links []nom.Link) {
+	nodeLinks := make(map[nom.UID][]nom.Link)
+	dict := ctx.Dict(GraphDict)
+	if err := dict.GetGob(string(node), &nodeLinks); err != nil {
+		return nil
+	}
+	for _, nl := range nodeLinks {
+		links = append(links, nl...)
+	}
+	return links
+}
+
 func allPaths(from, to nom.UID, visited map[nom.UID]distAndLinks) (
 	[][]nom.Link, int) {
 
@@ -181,31 +198,11 @@ type distAndLinks struct {
 	BackLinks []nom.Link
 }
 
-//func calcSPCentralized(from, to nom.UID, dict state.Dict, length int,
-//blacklist map[nom.UID]int) [][]nom.UID {
-
-//var paths [][]nom.UID
-//links := make(map[nom.UID]nom.Link)
-//dict.GetGob(string(from), &links)
-//sp := math.MaxInt64
-//for _, l := range links {
-//if prevlen, ok := blacklist[l.To]; ok && prevlen < length+1 {
-//continue
-//}
-
-//if l.To == to {
-//if sp != 1 {
-//paths = [][]nom.UID{[]nom.UID{l}}
-//sp = 1
-//} else {
-//paths = append(paths, []nom.UID{l})
-//}
-//blackList[l.To] = length + 1
-//continue
-//}
-
-//blackList[l.To]
-//calcSPCentralized(l.To, to, dict, blacklist)
-//}
-//return paths
-//}
+func init() {
+	gob.Register(distAndLinks{})
+	gob.Register(distMatrix{})
+	gob.Register(GraphBuilderCentralized{})
+	gob.Register(mentry{})
+	gob.Register(nodeAndDist{})
+	gob.Register(nodeAndDistSlice{})
+}
