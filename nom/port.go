@@ -48,6 +48,12 @@ func ParsePortUID(id UID) (NodeID, PortID) {
 	return NodeID(s[0]), PortID(s[1])
 }
 
+// NodeFromPortUID returns the node UID from the port's UID.
+func NodeFromPortUID(port UID) (node UID) {
+	n, _ := ParsePortUID(port)
+	return n.UID()
+}
+
 // GoDecode decodes the port from b using Gob.
 func (p *Port) GoDecode(b []byte) error {
 	return ObjGoDecode(p, b)
