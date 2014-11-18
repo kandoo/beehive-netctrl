@@ -23,7 +23,7 @@ func TestGraphBuilderCentralizedSinglePath(t *testing.T) {
 	ctx := &bh.MockRcvContext{}
 	for _, l := range links {
 		msg := &bh.MockMsg{
-			MData: nom.LinkAdded(l),
+			MsgData: nom.LinkAdded(l),
 		}
 		b.Rcv(msg, ctx)
 	}
