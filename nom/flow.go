@@ -467,6 +467,9 @@ func (m Match) Subsumes(thatm Match) bool {
 }
 
 func (m Match) Equals(thatm Match) bool {
+	if len(m.Fields) != len(thatm.Fields) {
+		return false
+	}
 	for _, thisf := range m.Fields {
 		if thatm.countFields(thisf.HasSameType) != 1 {
 			return false
@@ -597,13 +600,33 @@ type FlowEntry struct {
 }
 
 func (f FlowEntry) Equals(thatf FlowEntry) bool {
+	if f.Node != thatf.Node || f.Priority != thatf.Priority ||
+		len(f.Actions) != len(thatf.Actions) {
+
+		return false
+	}
 	for i := range f.Actions {
-		if f.Actions[i].Equals(thatf.Actions[i]) {
+		if !f.Actions[i].Equals(thatf.Actions[i]) {
 			return false
 		}
 	}
-	return f.Node == thatf.Node && f.Match.Equals(thatf.Match) &&
-		f.Priority == thatf.Priority
+	return f.Match.Equals(thatf.Match)
+}
+
+// Subsumes returns whether everything in f is equal to thatf except that f's
+// match subsumes thatf's match.
+func (f FlowEntry) Subsumes(thatf FlowEntry) bool {
+	if f.Node != thatf.Node || f.Priority != thatf.Priority ||
+		len(f.Actions) != len(thatf.Actions) {
+
+		return false
+	}
+	for i := range f.Actions {
+		if !f.Actions[i].Equals(thatf.Actions[i]) {
+			return false
+		}
+	}
+	return f.Match.Subsumes(thatf.Match)
 }
 
 // AddFlowEntry is a message emitted to install a flow entry on a node.
