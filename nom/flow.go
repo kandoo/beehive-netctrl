@@ -354,6 +354,26 @@ func (m Match) EthType() (EthType, bool) {
 	return EthType(0), false
 }
 
+func (m Match) EthSrc() (EthSrc, bool) {
+	for _, f := range m.Fields {
+		switch field := f.(type) {
+		case EthSrc:
+			return field, true
+		}
+	}
+	return EthSrc{}, false
+}
+
+func (m Match) EthDst() (EthDst, bool) {
+	for _, f := range m.Fields {
+		switch field := f.(type) {
+		case EthDst:
+			return field, true
+		}
+	}
+	return EthDst{}, false
+}
+
 func (m Match) IPv4Src() (IPv4Src, bool) {
 	for _, f := range m.Fields {
 		switch field := f.(type) {
