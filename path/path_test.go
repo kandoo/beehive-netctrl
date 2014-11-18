@@ -8,7 +8,7 @@ import (
 	"github.com/kandoo/beehive-netctrl/nom"
 )
 
-func TestAddPath(t *testing.T) {
+func buildTopologyForTest() *bh.MockRcvContext {
 	links := []nom.Link{
 		{From: "n1$$1", To: "n2$$1"},
 		{From: "n2$$1", To: "n1$$1"},
@@ -29,7 +29,11 @@ func TestAddPath(t *testing.T) {
 		}
 		b.Rcv(msg, ctx)
 	}
+	return ctx
+}
 
+func TestAddP2PPath(t *testing.T) {
+	ctx := buildTopologyForTest()
 	p := addHandler{}
 	msg := &bh.MockMsg{
 		MsgData: nom.AddPath{},
@@ -68,6 +72,9 @@ func TestAddPath(t *testing.T) {
 	oports := []nom.UID{"n1$$1", "n2$$2", "n4$$2", "n6$$3"}
 	for i, msg := range ctx.CtxMsgs {
 		add := msg.Data().(nom.AddFlowEntry)
+		if add.Flow.Priority != 1 {
+			t.Errorf("invalid flow priority: actual=%v want=1", add.Flow.Priority)
+		}
 		iport, ok := add.Flow.Match.InPort()
 		if !ok {
 			t.Errorf("flow #%v has no in ports", i)
@@ -81,5 +88,74 @@ func TestAddPath(t *testing.T) {
 			t.Errorf("invalid output port on flow #%v: actual=%v want=%v", i, oport,
 				oports[i])
 		}
+	}
+}
+
+func TestAddL2Path(t *testing.T) {
+	ctx := buildTopologyForTest()
+	p := addHandler{}
+	msg := &bh.MockMsg{
+		MsgData: nom.AddPath{},
+	}
+	err := p.Rcv(msg, ctx)
+	if err == nil {
+		t.Error("no error on invalid path")
+	}
+	ethDst := nom.EthDst{
+		Addr: nom.MACAddr{1, 2, 3, 4, 5, 6},
+		Mask: nom.MaskNoneMAC,
+	}
+	msg.MsgData = nom.AddPath{
+		Path: nom.Path{
+			Pathlets: []nom.Pathlet{
+				{
+					Match: nom.Match{
+						Fields: []nom.Field{
+							ethDst,
+						},
+					},
+					Actions: []nom.Action{
+						nom.ActionForward{
+							Ports: []nom.UID{"n6$$3"},
+						},
+					},
+				},
+			},
+			Priority: 1,
+		},
+	}
+	if err := p.Rcv(msg, ctx); err != nil {
+		t.Errorf("cannot install flows for path: %v", err)
+	}
+	if len(ctx.CtxMsgs) == 0 {
+		t.Error("no flows installed")
+	}
+
+	out := map[nom.UID]nom.UID{
+		"n1": "n1$$1",
+		"n2": "n2$$2",
+		"n3": "n3$$2",
+		"n4": "n4$$2",
+		"n5": "n5$$2",
+		"n6": "n6$$3",
+	}
+	for i, msg := range ctx.CtxMsgs {
+		add := msg.Data().(nom.AddFlowEntry)
+		if add.Flow.Priority != 1 {
+			t.Errorf("invalid flow priority: actual=%v want=1", add.Flow.Priority)
+		}
+		fethDst, ok := add.Flow.Match.EthDst()
+		if !ok {
+			t.Errorf("flow #%v has no destination eth addr", i)
+		} else if !fethDst.Equals(ethDst) {
+			t.Errorf("invalid eth address for flow #%v: actual=%v want=%v", i,
+				fethDst, ethDst)
+		}
+
+		delete(out, add.Flow.Node)
+	}
+
+	for _, p := range out {
+		t.Errorf("no flow installed on port %v", p)
 	}
 }

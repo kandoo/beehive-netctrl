@@ -51,6 +51,14 @@ func (h addHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 nextFlow:
 	for i, fi := range flows {
 		for j, fj := range flows {
+			if i == j {
+				continue
+			}
+
+			if fj.Subsumes(fi) {
+				continue nextFlow
+			}
+
 			// TODO(soheil): check for subsumption and merge flows if possible.
 			if j < i && fj.Equals(fi) {
 				continue nextFlow
