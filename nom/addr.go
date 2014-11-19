@@ -1,6 +1,7 @@
 package nom
 
 import (
+	"bytes"
 	"encoding/gob"
 	"fmt"
 )
@@ -157,6 +158,25 @@ func (ip IPv4Addr) Less(thatip IPv4Addr) bool {
 	return false
 }
 
+// AsCIDRMask returns the CIDR prefix number based on this address.
+// For example, it returns 24 for 255.255.255.0.
+func (ip IPv4Addr) AsCIDRMask() int {
+	m := 0
+	for i := len(ip) - 1; i >= 0; i-- {
+		for j := uint(0); j < 8; j++ {
+			if (ip[i]>>j)&0x1 != 0 {
+				return 32 - m
+			}
+			m++
+		}
+	}
+	return 0
+}
+
+func (ip IPv4Addr) String() string {
+	return fmt.Sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3])
+}
+
 // CIDRToMaskedIPv4 converts a CIDR-style IP address into a NOM masked IP
 // address. For example, if addr is 0x7F000001 and mask is 24, this function
 // returns {IPv4Addr{127, 0, 0, 1}, IPv4Addr{255, 255, 255, 0}}.
@@ -185,6 +205,10 @@ func (mi MaskedIPv4Addr) Subsumes(thatmi MaskedIPv4Addr) bool {
 	return mi.Addr.Mask(mi.Mask) == thatmi.Addr.Mask(mi.Mask)
 }
 
+func (mi MaskedIPv4Addr) String() string {
+	return fmt.Sprintf("%v/%d", mi.Addr, mi.Mask.AsCIDRMask())
+}
+
 // IPv6Addr represents an IP version 6 address in big-endian byte order.
 type IPv6Addr [16]byte
 
@@ -210,6 +234,47 @@ func (ip IPv6Addr) Less(thatip IPv6Addr) bool {
 	return false
 }
 
+func (ip IPv6Addr) String() string {
+	var buf bytes.Buffer
+	zeros := 0
+	for i := 0; i < 16; i += 2 {
+		if ip[i] == 0 && ip[i+1] == 0 {
+			zeros++
+			if zeros == 2 {
+				if zeros == i {
+					buf.WriteString("::")
+				} else {
+					buf.WriteString(":")
+				}
+			}
+			continue
+		}
+		if zeros == 1 {
+			buf.WriteString("0:")
+		}
+		buf.WriteString(fmt.Sprintf("%x", int(ip[i])<<8|int(ip[i+1])))
+		if i != 14 {
+			buf.WriteString(":")
+		}
+		zeros = 0
+	}
+	return buf.String()
+}
+
+// AsCIDRMask returns the CIDR prefix number based on this address.
+func (ip IPv6Addr) AsCIDRMask() int {
+	m := 0
+	for i := len(ip) - 1; i >= 0; i-- {
+		for j := uint(0); j < 8; j++ {
+			if (ip[i]>>j)&0x1 != 0 {
+				return 128 - m
+			}
+			m++
+		}
+	}
+	return 0
+}
+
 // MaskedIPv6Addr represents a masked IPv6 address.
 type MaskedIPv6Addr struct {
 	Addr IPv6Addr
@@ -226,6 +291,10 @@ func (mi MaskedIPv6Addr) Subsumes(thatmi MaskedIPv6Addr) bool {
 		return false
 	}
 	return mi.Addr.Mask(mi.Mask) == thatmi.Addr.Mask(mi.Mask)
+}
+
+func (mi MaskedIPv6Addr) String() string {
+	return fmt.Sprintf("%v/%d", mi.Addr, mi.Mask.AsCIDRMask())
 }
 
 func init() {

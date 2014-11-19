@@ -2,6 +2,7 @@ package nom
 
 import (
 	"encoding/gob"
+	"fmt"
 	"time"
 
 	bh "github.com/kandoo/beehive"
@@ -211,6 +212,10 @@ func (ip IPv4Dst) Subsumes(f Field) bool {
 	return false
 }
 
+func (ip IPv4Dst) String() string {
+	return MaskedIPv4Addr(ip).String()
+}
+
 type IPv6Src MaskedIPv6Addr
 
 func (ip IPv6Src) HasSameType(f Field) bool {
@@ -235,6 +240,10 @@ func (ip IPv6Src) Subsumes(f Field) bool {
 		return MaskedIPv6Addr(ip).Subsumes(MaskedIPv6Addr(field))
 	}
 	return false
+}
+
+func (ip IPv6Src) String() string {
+	return MaskedIPv6Addr(ip).String()
 }
 
 type IPv6Dst MaskedIPv6Addr
@@ -263,6 +272,10 @@ func (ip IPv6Dst) Subsumes(f Field) bool {
 	return false
 }
 
+func (ip IPv6Dst) String() string {
+	return MaskedIPv6Addr(ip).String()
+}
+
 type TransportPortSrc uint16
 
 func (p TransportPortSrc) HasSameType(f Field) bool {
@@ -285,6 +298,10 @@ func (p TransportPortSrc) Subsumes(f Field) bool {
 	return p.Equals(f)
 }
 
+func (p TransportPortSrc) String() string {
+	return fmt.Sprintf("tp_port_src=%v", p)
+}
+
 type TransportPortDst uint16
 
 func (p TransportPortDst) HasSameType(f Field) bool {
@@ -305,6 +322,10 @@ func (p TransportPortDst) Equals(f Field) bool {
 
 func (p TransportPortDst) Subsumes(f Field) bool {
 	return p.Equals(f)
+}
+
+func (p TransportPortDst) String() string {
+	return fmt.Sprintf("tp_port_dst=%v", p)
 }
 
 // Valid values for EthType.
