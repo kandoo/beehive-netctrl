@@ -6,6 +6,7 @@ import (
 	"time"
 
 	bh "github.com/kandoo/beehive"
+	"github.com/kandoo/beehive/strings"
 )
 
 // InPort is the input port field.
@@ -29,6 +30,10 @@ func (in InPort) Equals(f Field) bool {
 
 func (in InPort) Subsumes(f Field) bool {
 	return in.Equals(f)
+}
+
+func (in InPort) String() string {
+	return fmt.Sprintf("in_port=%v", UID(in))
 }
 
 // EthAddrField is a common type for EthDst and EthSrc.
@@ -64,6 +69,10 @@ func (e EthDst) Subsumes(f Field) bool {
 	return false
 }
 
+func (e EthDst) String() string {
+	return fmt.Sprintf("eth_dst=%v", MaskedMACAddr(e))
+}
+
 // EthSrc is the field for Ethernet source address.
 type EthSrc MaskedMACAddr
 
@@ -91,6 +100,10 @@ func (e EthSrc) Subsumes(f Field) bool {
 	return false
 }
 
+func (e EthSrc) String() string {
+	return fmt.Sprintf("eth_src=%v", MaskedMACAddr(e))
+}
+
 // EthType represents the field for an Ethernet type.
 type EthType uint16
 
@@ -112,6 +125,10 @@ func (e EthType) Equals(f Field) bool {
 
 func (e EthType) Subsumes(f Field) bool {
 	return e.Equals(f)
+}
+
+func (e EthType) String() string {
+	return fmt.Sprintf("eth_type=%v", uint16(e))
 }
 
 // VLANID represents the field for the VLAN ID.
@@ -137,6 +154,10 @@ func (e VLANID) Subsumes(f Field) bool {
 	return e.Equals(f)
 }
 
+func (e VLANID) String() string {
+	return fmt.Sprintf("vlan=%v", uint16(e))
+}
+
 // VLANPCP represents the field for the VLAN PCP.
 type VLANPCP uint8
 
@@ -158,6 +179,10 @@ func (e VLANPCP) Equals(f Field) bool {
 
 func (e VLANPCP) Subsumes(f Field) bool {
 	return e.Equals(f)
+}
+
+func (e VLANPCP) String() string {
+	return fmt.Sprintf("vlan_pcp=%v", uint8(e))
 }
 
 type IPv4Src MaskedIPv4Addr
@@ -184,6 +209,10 @@ func (ip IPv4Src) Subsumes(f Field) bool {
 		return MaskedIPv4Addr(ip).Subsumes(MaskedIPv4Addr(field))
 	}
 	return false
+}
+
+func (ip IPv4Src) String() string {
+	return MaskedIPv4Addr(ip).String()
 }
 
 type IPv4Dst MaskedIPv4Addr
@@ -213,7 +242,7 @@ func (ip IPv4Dst) Subsumes(f Field) bool {
 }
 
 func (ip IPv4Dst) String() string {
-	return MaskedIPv4Addr(ip).String()
+	return fmt.Sprintf("ipv4_dst=%v", MaskedIPv4Addr(ip))
 }
 
 type IPv6Src MaskedIPv6Addr
@@ -243,7 +272,7 @@ func (ip IPv6Src) Subsumes(f Field) bool {
 }
 
 func (ip IPv6Src) String() string {
-	return MaskedIPv6Addr(ip).String()
+	return fmt.Sprintf("ipv6_src=%v", MaskedIPv6Addr(ip))
 }
 
 type IPv6Dst MaskedIPv6Addr
@@ -273,7 +302,7 @@ func (ip IPv6Dst) Subsumes(f Field) bool {
 }
 
 func (ip IPv6Dst) String() string {
-	return MaskedIPv6Addr(ip).String()
+	return fmt.Sprintf("ipv6_dst=%v", MaskedIPv6Addr(ip))
 }
 
 type TransportPortSrc uint16
@@ -299,7 +328,7 @@ func (p TransportPortSrc) Subsumes(f Field) bool {
 }
 
 func (p TransportPortSrc) String() string {
-	return fmt.Sprintf("tp_port_src=%v", p)
+	return fmt.Sprintf("tp_port_src=%v", uint16(p))
 }
 
 type TransportPortDst uint16
@@ -325,7 +354,7 @@ func (p TransportPortDst) Subsumes(f Field) bool {
 }
 
 func (p TransportPortDst) String() string {
-	return fmt.Sprintf("tp_port_dst=%v", p)
+	return fmt.Sprintf("tp_port_dst=%v", uint16(p))
 }
 
 // Valid values for EthType.
@@ -344,6 +373,18 @@ type Field interface {
 // Match is a collection of fields that will match packets.
 type Match struct {
 	Fields []Field
+}
+
+func (m Match) String() string {
+	l := len(m.Fields)
+	if l == 0 {
+		return "match(*)"
+	}
+	a := make([]interface{}, len(m.Fields))
+	for i := range m.Fields {
+		a[i] = m.Fields[i]
+	}
+	return fmt.Sprintf("match(%v)", strings.Join(a, ","))
 }
 
 // Clone creates a copy of the match.
@@ -529,6 +570,10 @@ type ActionForward struct {
 	Ports []UID
 }
 
+func (a ActionForward) String() string {
+	return fmt.Sprintf("forward(to=%v)", a.Ports)
+}
+
 func (a ActionForward) Equals(thata Action) bool {
 	thataf, ok := thata.(ActionForward)
 	if !ok {
@@ -554,8 +599,16 @@ func (a ActionDrop) Equals(thata Action) bool {
 	return ok
 }
 
+func (a ActionDrop) String() string {
+	return fmt.Sprintf("drop")
+}
+
 type ActionFlood struct {
 	InPort UID
+}
+
+func (a ActionFlood) String() string {
+	return fmt.Sprintf("flood(except=%v)", a.InPort)
 }
 
 func (a ActionFlood) Equals(thata Action) bool {
@@ -618,6 +671,16 @@ type FlowEntry struct {
 	Priority    uint16
 	IdleTimeout time.Duration
 	HardTimeout time.Duration
+}
+
+func (f FlowEntry) String() string {
+	a := make([]interface{}, len(f.Actions))
+	for i := range f.Actions {
+		a[i] = f.Actions[i]
+	}
+	astr := strings.Join(a, ",")
+	return fmt.Sprintf("flow(%v=>%v,node=%v,priority=%v,idleto=%v,hardto=%v)",
+		f.Match, astr, f.Node, f.Priority, f.IdleTimeout, f.HardTimeout)
 }
 
 func (f FlowEntry) Equals(thatf FlowEntry) bool {
