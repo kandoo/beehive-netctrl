@@ -8,9 +8,8 @@ import (
 
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/controller"
-	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive-netctrl/discovery"
 	"github.com/kandoo/beehive-netctrl/openflow"
-	"github.com/kandoo/beehive-netctrl/switching"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
@@ -31,9 +30,8 @@ func main() {
 	controller.RegisterNOMController(h)
 	discovery.RegisterDiscovery(h)
 
-	//app := h.NewApp("Hub")
-	//app.Handle(nom.PacketIn{}, &switching.Hub{})
-	//app.SetFlags(0)
+	// app := h.NewApp("Hub", bh.NonTransactional())
+	// app.Handle(nom.PacketIn{}, &switching.Hub{})
 
 	h.Start()
 }
