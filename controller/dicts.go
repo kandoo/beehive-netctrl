@@ -3,10 +3,12 @@ package controller
 import (
 	"encoding/gob"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive/state"
 )
 
 const (
@@ -74,6 +76,9 @@ func sendToMaster(msg interface{}, node nom.UID, ctx bh.RcvContext) error {
 	d := ctx.Dict(driversDict)
 	var nd nodeDrivers
 	if err := d.GetGob(string(node), &nd); err != nil {
+		if err == state.ErrNoSuchKey {
+			return fmt.Errorf("nom: cannot find node %s", node)
+		}
 		return err
 	}
 	ctx.SendToBee(msg, nd.master().BeeID)
