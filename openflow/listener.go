@@ -10,17 +10,19 @@ import (
 )
 
 type ofListener struct {
-	cfg OFConfig
+	proto      string // The driver's listening protocol.
+	addr       string // The driver's listening address.
+	readBufLen int    // Maximum number of packets to read.
 }
 
 func (l *ofListener) Start(ctx bh.RcvContext) {
-	nl, err := net.Listen(l.cfg.Proto, l.cfg.Addr)
+	nl, err := net.Listen(l.proto, l.addr)
 	if err != nil {
 		glog.Errorf("Cannot start the OF listener: %v", err)
 		return
 	}
 
-	glog.Infof("OF listener started on %s:%s", l.cfg.Proto, l.cfg.Addr)
+	glog.Infof("OF listener started on %s:%s", l.proto, l.addr)
 
 	defer func() {
 		glog.Infof("OF listener closed")
@@ -41,9 +43,7 @@ func (l *ofListener) Start(ctx bh.RcvContext) {
 func (l *ofListener) startOFConn(conn net.Conn, ctx bh.RcvContext) {
 	ofc := &ofConn{
 		HeaderConn: of.NewHeaderConn(conn),
-		cfg: ofConnConfig{
-			readBufLen: l.cfg.ReadBufLen,
-		},
+		readBufLen: l.readBufLen,
 	}
 
 	ctx.StartDetached(ofc)

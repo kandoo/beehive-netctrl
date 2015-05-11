@@ -15,12 +15,15 @@ type ofConnConfig struct {
 
 type ofConn struct {
 	of.HeaderConn
-	cfg    ofConnConfig  // Configuration of this connection.
-	ctx    bh.RcvContext // RcvContext of the detached bee running the connection.
-	node   nom.Node      // Node that this connection represents.
-	driver ofDriver      // OpenFlow driver of this connection.
-	wCh    chan bh.Msg   // Messages to be written.
-	wErr   error         // Last error in write.
+
+	ctx bh.RcvContext // RcvContext of the detached bee running ofConn.
+
+	readBufLen int         // Maximum number of packets to read.
+	wCh        chan bh.Msg // Messages to be written.
+	wErr       error       // Last error in write.
+
+	node   nom.Node // Node that this connection represents.
+	driver ofDriver // OpenFlow driver of this connection.
 }
 
 func (c *ofConn) drainWCh() {
@@ -51,8 +54,76 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 		return
 	}
 
-	pkts := make([]of.Header, c.cfg.readBufLen)
+	stop := make(chan struct{})
+
+	wdone := make(chan struct{})
+	go c.doWrite(wdone, stop)
+
+	rdone := make(chan struct{})
+	go c.doRead(rdone, stop)
+
+	select {
+	case <-rdone:
+		close(stop)
+	case <-wdone:
+		close(stop)
+	}
+
+	<-rdone
+	<-wdone
+}
+
+func (c *ofConn) doWrite(done chan struct{}, stop chan struct{}) {
+	defer close(done)
+
+	written := false
+	var msg bh.Msg
 	for {
+		msg = nil
+		if !written {
+			select {
+			case msg = <-c.wCh:
+			case <-stop:
+				return
+			}
+		} else {
+			select {
+			case msg = <-c.wCh:
+			case <-stop:
+				return
+			default:
+				if c.wErr = c.HeaderConn.Flush(); c.wErr != nil {
+					return
+				}
+				written = false
+				continue
+			}
+		}
+
+		// Write the message.
+		err := c.driver.handleMsg(msg, c)
+		if c.wErr != nil {
+			return
+		}
+		if err != nil {
+			glog.Errorf("ofconn: Cannot convert NOM message to OpenFlow: %v",
+				err)
+		}
+		written = true
+	}
+}
+
+func (c *ofConn) doRead(done chan struct{}, stop chan struct{}) {
+	defer close(done)
+
+	pkts := make([]of.Header, c.readBufLen)
+	for {
+		select {
+		case <-stop:
+			return
+		default:
+		}
+
 		n, err := c.ReadHeaders(pkts)
 		if err != nil {
 			if err == io.EOF {
@@ -71,35 +142,9 @@ func (c *ofConn) Start(ctx bh.RcvContext) {
 			}
 		}
 
-		for {
-			select {
-			case msg := <-c.wCh:
-				if c.wErr != nil {
-					// Drain the channel.
-					continue
-				}
-
-				// If werr != nil, we loop and drain the wCh.
-				if err := c.driver.handleMsg(msg, c); err != nil {
-					glog.Errorf("ofconn: Cannot convert NOM message to OpenFlow: %v",
-						err)
-					continue
-				}
-			default:
-				goto flush
-			}
-		}
-
-	flush:
-		if c.wErr != nil {
-			return
-		}
-
-		c.HeaderConn.Flush()
-
 		pkts = pkts[n:]
 		if len(pkts) == 0 {
-			pkts = make([]of.Header, c.cfg.readBufLen)
+			pkts = make([]of.Header, c.readBufLen)
 		}
 	}
 }
@@ -118,10 +163,6 @@ func (c *ofConn) NodeUID() nom.UID {
 }
 
 func (c *ofConn) WriteHeader(pkt of.Header) error {
-	if c.wErr != nil {
-		return c.wErr
-	}
-
 	c.wErr = c.HeaderConn.WriteHeader(pkt)
 	return c.wErr
 }
