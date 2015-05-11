@@ -22,7 +22,9 @@ func (of *of10Driver) handlePacketIn(in of10.PacketIn, c *ofConn) error {
 		return fmt.Errorf("of10Driver: port not found %v", inPort)
 	}
 
-	glog.V(2).Infof("packet received: %v", in)
+	if glog.V(2) {
+		glog.Infof("packet received: %v", in)
+	}
 
 	nomIn := nom.PacketIn{
 		Node:     c.node.UID(),
