@@ -4,6 +4,7 @@ import (
 	"flag"
 
 	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
+	"github.com/kandoo/beehive/bucket"
 
 	bh "github.com/kandoo/beehive"
 )
@@ -14,6 +15,8 @@ var (
 		"address of the OpenFlow listener in the form of HOST:PORT")
 	readBufLen = flag.Int("of.rbuflen", 1<<8,
 		"maximum number of packets to read per each read call")
+	maxConnRate = flag.Int("of.maxrate", 1<<18,
+		"maximum number of messages an openflow connection can generate per second")
 )
 
 // Option represents an OpenFlow listener option.
@@ -46,7 +49,8 @@ func SetReadBufLen(rlen int) Option {
 // StartOpenFlow starts the OpenFlow driver on the given hive using the default
 // OpenFlow configuration that can be set through command line arguments.
 func StartOpenFlow(hive bh.Hive, options ...Option) error {
-	app := hive.NewApp("OFDriver")
+	app := hive.NewApp("OFDriver",
+		bh.LimitOutRate(bucket.Rate(*maxConnRate), 10*uint64(*maxConnRate)))
 	l := &ofListener{
 		proto:      *proto,
 		addr:       *addr,
