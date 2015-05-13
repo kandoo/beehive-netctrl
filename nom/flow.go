@@ -161,28 +161,46 @@ func (e VLANID) String() string {
 // VLANPCP represents the field for the VLAN PCP.
 type VLANPCP uint8
 
-func (e VLANPCP) HasSameType(f Field) bool {
-	switch f.(type) {
-	case VLANPCP:
-		return true
+func (p VLANPCP) HasSameType(f Field) bool {
+	_, ok := f.(VLANPCP)
+	return ok
+}
+
+func (p VLANPCP) Equals(f Field) bool {
+	if fp, ok := f.(VLANPCP); ok {
+		return p == fp
 	}
 	return false
 }
 
-func (e VLANPCP) Equals(f Field) bool {
-	switch field := f.(type) {
-	case VLANPCP:
-		return e == field
+func (p VLANPCP) Subsumes(f Field) bool {
+	return p.Equals(f)
+}
+
+func (p VLANPCP) String() string {
+	return fmt.Sprintf("vlan_pcp=%v", uint8(p))
+}
+
+type IPProto uint8
+
+func (p IPProto) HasSameType(f Field) bool {
+	_, ok := f.(IPProto)
+	return ok
+}
+
+func (p IPProto) Equals(f Field) bool {
+	if fp, ok := f.(IPProto); ok {
+		return p == fp
 	}
 	return false
 }
 
-func (e VLANPCP) Subsumes(f Field) bool {
-	return e.Equals(f)
+func (p IPProto) Subsumes(f Field) bool {
+	return p.Equals(f)
 }
 
-func (e VLANPCP) String() string {
-	return fmt.Sprintf("vlan_pcp=%v", uint8(e))
+func (p IPProto) String() string {
+	return fmt.Sprint("ip_proto=%v", uint8(p))
 }
 
 type IPv4Src MaskedIPv4Addr
