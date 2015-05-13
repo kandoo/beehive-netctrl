@@ -277,7 +277,7 @@ enum ActionType {
 # header and any padding used to make the action 64-bit aligned.
 # NB: The length of an action *must* always be a multiple of eight.
 @bigendian
-packet ActionHeader {
+packet Action {
   uint16 type;  # One of.PAT_*.
   @size
   uint16 len;   # Length of action, including this
@@ -291,7 +291,7 @@ packet ActionHeader {
 # number of bytes to send.  A 'max_len' of zero means no bytes of the
 # packet should be sent.
 @type_selector(type = ActionType.PAT_OUTPUT)
-packet ActionOutput(ActionHeader) {
+packet ActionOutput(Action) {
   uint16 port;     # Output port.
   uint16 max_len;  # Max length to send to controller.
 }
@@ -304,20 +304,20 @@ enum VlanIds {
 }
 
 @type_selector(type = ActionType.PAT_SET_VLAN_VID)
-packet ActionVlanVid(ActionHeader) {
+packet ActionVlanVid(Action) {
   uint16 vlan_vid;  # VLAN id.
   @repeated(count = 2)
   uint8 pad;
 }
 
 @type_selector(type = ActionType.PAT_SET_VLAN_PCP)
-packet ActionVlanPcp(ActionHeader) {
+packet ActionVlanPcp(Action) {
   uint8 vlan_pcp;               # VLAN priority.
   @repeated(count = 3) uint8 pad;
 }
 
 @type_selector(type = ActionType.PAT_SET_DL_SRC)
-packet ActionDlSrcAddr(ActionHeader) {
+packet ActionDlSrcAddr(Action) {
   @repeated(count = of.Constants.P_ETH_ALEN)
   uint8 dl_addr;  # Ethernet address.
 
@@ -326,7 +326,7 @@ packet ActionDlSrcAddr(ActionHeader) {
 }
 
 @type_selector(type = ActionType.PAT_SET_DL_DST)
-packet ActionDlDstAddr(ActionHeader) {
+packet ActionDlDstAddr(Action) {
   @repeated(count = of.Constants.P_ETH_ALEN)
   uint8 dl_addr;  # Ethernet address.
 
@@ -335,17 +335,17 @@ packet ActionDlDstAddr(ActionHeader) {
 }
 
 @type_selector(type = ActionType.PAT_SET_NW_SRC)
-packet ActionNwSrcAddr(ActionHeader) {
+packet ActionNwSrcAddr(Action) {
   uint32 nw_addr;               # IP address.
 }
 
 @type_selector(type = ActionType.PAT_SET_NW_DST)
-packet ActionNwDstAddr(ActionHeader) {
+packet ActionNwDstAddr(Action) {
   uint32 nw_addr;               # IP address.
 }
 
 @type_selector(type = ActionType.PAT_SET_TP_SRC)
-packet ActionTpSrcPort(ActionHeader) {
+packet ActionTpSrcPort(Action) {
   uint16 tp_port;               # TCP/UDP port.
 
   @repeated(count = 2)
@@ -353,7 +353,7 @@ packet ActionTpSrcPort(ActionHeader) {
 }
 
 @type_selector(type = ActionType.PAT_SET_TP_DST)
-packet ActionTpDstPort(ActionHeader) {
+packet ActionTpDstPort(Action) {
   uint16 tp_port;               # TCP/UDP port.
 
   @repeated(count = 2)
@@ -362,7 +362,7 @@ packet ActionTpDstPort(ActionHeader) {
 
 # Action packeture for PAT_SET_NW_TOS.
 @type_selector(type = ActionType.PAT_SET_NW_TOS)
-packet ActionNwTos(ActionHeader) {
+packet ActionNwTos(Action) {
   uint8 nw_tos;                 # IP ToS (DSCP field, 6 bits).
   @repeated(count = 3)
   uint8 pad;
@@ -370,7 +370,7 @@ packet ActionNwTos(ActionHeader) {
 
 # Action header for PAT_VENDOR. The rest of the body is vendor-defined.
 @type_selector(type = ActionType.PAT_VENDOR)
-packet ActionVendorHeader(ActionHeader) {
+packet ActionVendorHeader(Action) {
   uint32 vendor;                # Vendor ID, which takes the same form
                                 # as in "packet VendorHeader".
 }
@@ -383,7 +383,7 @@ packet PacketOut(Header10) {
   @size(actions)
   uint16 actions_len;         # Size of action array in bytes.
   @repeated
-  ActionHeader actions;
+  Action actions;
   @repeated uint8 data;        # Packet data.  The length is inferred
                                # from the length field in the header.
                                # (Only meaningful if buffer_id == -1.)
@@ -516,7 +516,7 @@ packet FlowMod(Header10) {
                           # indicates no restriction.
   uint16 flags;           # One of.PFF_*.
   @repeated
-  ActionHeader actions;   # The action length is inferred
+  Action actions;   # The action length is inferred
                           # from the length field in the
                           # header.
 }
@@ -747,7 +747,7 @@ packet FlowStats {
   uint64 byte_count;      # Number of bytes in flow.
 
   @repeated
-  ActionHeader actions; # Actions.
+  Action actions; # Actions.
 }
 
 # Body of reply to PST_FLOW request.
@@ -908,7 +908,7 @@ packet QueueGetConfigReply(Header10) {
 
 # PAT_ENQUEUE action packet: send packets to given queue on port.
 @type_selector(type = ActionType.PAT_ENQUEUE)
-packet ActionEnqueue(ActionHeader) {
+packet ActionEnqueue(Action) {
   uint16 port;            # Port that queue belongs. Should
                           # refer to a valid physical port
                           # (i.e. < PP_MAX) or PP_IN_PORT.

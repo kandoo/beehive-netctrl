@@ -26,6 +26,8 @@ type Constants int
 
 const (
 	P_ETH_ALEN           Constants = 6
+	P_IPV4_ALEN          Constants = 4
+	P_IPV6_ALEN          Constants = 16
 	P_MAX_PORT_NAME_LEN  Constants = 16
 	P_MAX_TABLE_NAME_LEN Constants = 32
 )

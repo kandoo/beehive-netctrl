@@ -32,6 +32,8 @@ enum Versions {
 
 enum Constants {
   P_ETH_ALEN = 6,  # Bytes in an Ethernet address.
+	P_IPV4_ALEN = 4,
+	P_IPV6_ALEN = 16,
   P_MAX_PORT_NAME_LEN = 16,
   P_MAX_TABLE_NAME_LEN = 32
 }

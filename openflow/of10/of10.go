@@ -2252,7 +2252,8 @@ func (this FeaturesReply) PortsOffset() int {
 
 func (this FeaturesReply) PortsSize() int {
 	offset := this.PortsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewPortStatusWithBuf(b []byte) PortStatus {
@@ -3034,55 +3035,56 @@ func (this PacketIn) DataOffset() int {
 
 func (this PacketIn) DataSize() int {
 	offset := this.DataOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
-func NewActionHeaderWithBuf(b []byte) ActionHeader {
-	return ActionHeader{packet.Packet{Buf: b}}
+func NewActionWithBuf(b []byte) Action {
+	return Action{packet.Packet{Buf: b}}
 }
 
-func NewActionHeader() ActionHeader {
+func NewAction() Action {
 	s := 4
 	b := make([]byte, s)
-	p := ActionHeader{packet.Packet{Buf: b}}
+	p := Action{packet.Packet{Buf: b}}
 	p.Init()
 	return p
 }
 
-type ActionHeader struct {
+type Action struct {
 	packet.Packet
 }
 
-func (this ActionHeader) minSize() int {
+func (this Action) minSize() int {
 	return 4
 }
 
-func (this ActionHeader) Clone() (ActionHeader, error) {
+func (this Action) Clone() (Action, error) {
 	var newBuf bytes.Buffer
 	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
 	if err != nil {
-		return NewActionHeader(), err
+		return NewAction(), err
 	}
 
-	return NewActionHeaderWithBuf(newBuf.Bytes()), nil
+	return NewActionWithBuf(newBuf.Bytes()), nil
 }
 
-type ActionHeaderConn struct {
+type ActionConn struct {
 	net.Conn
 	w      *bufio.Writer
 	buf    []byte
 	offset int
 }
 
-func NewActionHeaderConn(c net.Conn) ActionHeaderConn {
-	return ActionHeaderConn{
+func NewActionConn(c net.Conn) ActionConn {
+	return ActionConn{
 		Conn: c,
 		w:    bufio.NewWriter(c),
 		buf:  make([]byte, packet.DefaultBufSize),
 	}
 }
 
-func (c *ActionHeaderConn) WriteActionHeader(pkt ActionHeader) error {
+func (c *ActionConn) WriteAction(pkt Action) error {
 	s := pkt.Size()
 	b := pkt.Buffer()[:s]
 	n := 0
@@ -3097,30 +3099,30 @@ func (c *ActionHeaderConn) WriteActionHeader(pkt ActionHeader) error {
 	return nil
 }
 
-func (c *ActionHeaderConn) WriteActionHeaders(pkts []ActionHeader) error {
+func (c *ActionConn) WriteActions(pkts []Action) error {
 	for _, p := range pkts {
-		if err := c.WriteActionHeader(p); err != nil {
+		if err := c.WriteAction(p); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (c *ActionHeaderConn) Flush() error {
+func (c *ActionConn) Flush() error {
 	return c.w.Flush()
 }
 
-func (c *ActionHeaderConn) ReadActionHeader() (ActionHeader, error) {
-	pkts := make([]ActionHeader, 1)
-	_, err := c.ReadActionHeaders(pkts)
+func (c *ActionConn) ReadAction() (Action, error) {
+	pkts := make([]Action, 1)
+	_, err := c.ReadActions(pkts)
 	if err != nil {
-		return NewActionHeader(), err
+		return NewAction(), err
 	}
 
 	return pkts[0], nil
 }
 
-func (c *ActionHeaderConn) ReadActionHeaders(pkts []ActionHeader) (int, error) {
+func (c *ActionConn) ReadActions(pkts []Action) (int, error) {
 	if len(c.buf) == c.offset {
 		newSize := packet.DefaultBufSize
 		if newSize < len(c.buf) {
@@ -3142,7 +3144,7 @@ func (c *ActionHeaderConn) ReadActionHeaders(pkts []ActionHeader) (int, error) {
 	s := 0
 	n := 0
 	for i := range pkts {
-		p := NewActionHeaderWithBuf(c.buf[s:])
+		p := NewActionWithBuf(c.buf[s:])
 
 		pSize := p.Size()
 		if pSize == 0 || r < s+pSize {
@@ -3163,12 +3165,12 @@ func (c *ActionHeaderConn) ReadActionHeaders(pkts []ActionHeader) (int, error) {
 	return n, nil
 }
 
-func (this *ActionHeader) Init() {
+func (this *Action) Init() {
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 }
 
-func (this ActionHeader) Size() int {
+func (this Action) Size() int {
 	if len(this.Buf) < this.minSize() {
 		return 0
 	}
@@ -3177,66 +3179,66 @@ func (this ActionHeader) Size() int {
 	return size
 }
 
-func ToActionHeader(p packet.Packet) (ActionHeader, error) {
-	if !IsActionHeader(p) {
-		return NewActionHeaderWithBuf(nil), errors.New("Cannot convert to of10.ActionHeader")
+func ToAction(p packet.Packet) (Action, error) {
+	if !IsAction(p) {
+		return NewActionWithBuf(nil), errors.New("Cannot convert to of10.Action")
 	}
 
-	return NewActionHeaderWithBuf(p.Buf), nil
+	return NewActionWithBuf(p.Buf), nil
 }
 
-func IsActionHeader(p packet.Packet) bool {
+func IsAction(p packet.Packet) bool {
 	return true
 }
 
-func (this ActionHeader) Type() uint16 {
+func (this Action) Type() uint16 {
 	offset := this.TypeOffset()
 	res := binary.BigEndian.Uint16(this.Buf[offset:])
 	return res
 }
 
-func (this *ActionHeader) SetType(t uint16) {
+func (this *Action) SetType(t uint16) {
 	offset := this.TypeOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], t)
 	offset += 2
 }
 
-func (this ActionHeader) TypeOffset() int {
+func (this Action) TypeOffset() int {
 	offset := 0
 	return offset
 }
 
-func (this ActionHeader) Len() uint16 {
+func (this Action) Len() uint16 {
 	offset := this.LenOffset()
 	res := binary.BigEndian.Uint16(this.Buf[offset:])
 	return res
 }
 
-func (this *ActionHeader) SetLen(l uint16) {
+func (this *Action) SetLen(l uint16) {
 	offset := this.LenOffset()
 	binary.BigEndian.PutUint16(this.Buf[offset:], l)
 	offset += 2
 }
 
-func (this ActionHeader) LenOffset() int {
+func (this Action) LenOffset() int {
 	offset := 2
 	return offset
 }
 
 func NewActionOutputWithBuf(b []byte) ActionOutput {
-	return ActionOutput{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionOutput{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionOutput() ActionOutput {
 	s := 8
 	b := make([]byte, s)
-	p := ActionOutput{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionOutput{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionOutput struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionOutput) minSize() int {
@@ -3350,7 +3352,7 @@ func (c *ActionOutputConn) ReadActionOutputs(pkts []ActionOutput) (int, error) {
 }
 
 func (this *ActionOutput) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(0)) // type
@@ -3365,7 +3367,7 @@ func (this ActionOutput) Size() int {
 	return size
 }
 
-func ToActionOutput(p ActionHeader) (ActionOutput, error) {
+func ToActionOutput(p Action) (ActionOutput, error) {
 	if !IsActionOutput(p) {
 		return NewActionOutputWithBuf(nil), errors.New("Cannot convert to of10.ActionOutput")
 	}
@@ -3373,7 +3375,7 @@ func ToActionOutput(p ActionHeader) (ActionOutput, error) {
 	return NewActionOutputWithBuf(p.Buf), nil
 }
 
-func IsActionOutput(p ActionHeader) bool {
+func IsActionOutput(p Action) bool {
 	return p.Type() == 0 && true
 }
 
@@ -3412,19 +3414,19 @@ func (this ActionOutput) MaxLenOffset() int {
 }
 
 func NewActionVlanVidWithBuf(b []byte) ActionVlanVid {
-	return ActionVlanVid{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionVlanVid{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionVlanVid() ActionVlanVid {
 	s := 8
 	b := make([]byte, s)
-	p := ActionVlanVid{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionVlanVid{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionVlanVid struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionVlanVid) minSize() int {
@@ -3538,7 +3540,7 @@ func (c *ActionVlanVidConn) ReadActionVlanVids(pkts []ActionVlanVid) (int, error
 }
 
 func (this *ActionVlanVid) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(1)) // type
@@ -3553,7 +3555,7 @@ func (this ActionVlanVid) Size() int {
 	return size
 }
 
-func ToActionVlanVid(p ActionHeader) (ActionVlanVid, error) {
+func ToActionVlanVid(p Action) (ActionVlanVid, error) {
 	if !IsActionVlanVid(p) {
 		return NewActionVlanVidWithBuf(nil), errors.New("Cannot convert to of10.ActionVlanVid")
 	}
@@ -3561,7 +3563,7 @@ func ToActionVlanVid(p ActionHeader) (ActionVlanVid, error) {
 	return NewActionVlanVidWithBuf(p.Buf), nil
 }
 
-func IsActionVlanVid(p ActionHeader) bool {
+func IsActionVlanVid(p Action) bool {
 	return p.Type() == 1 && true
 }
 
@@ -3617,19 +3619,19 @@ func (this ActionVlanVid) PadOffset() int {
 }
 
 func NewActionVlanPcpWithBuf(b []byte) ActionVlanPcp {
-	return ActionVlanPcp{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionVlanPcp{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionVlanPcp() ActionVlanPcp {
 	s := 8
 	b := make([]byte, s)
-	p := ActionVlanPcp{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionVlanPcp{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionVlanPcp struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionVlanPcp) minSize() int {
@@ -3743,7 +3745,7 @@ func (c *ActionVlanPcpConn) ReadActionVlanPcps(pkts []ActionVlanPcp) (int, error
 }
 
 func (this *ActionVlanPcp) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(2)) // type
@@ -3758,7 +3760,7 @@ func (this ActionVlanPcp) Size() int {
 	return size
 }
 
-func ToActionVlanPcp(p ActionHeader) (ActionVlanPcp, error) {
+func ToActionVlanPcp(p Action) (ActionVlanPcp, error) {
 	if !IsActionVlanPcp(p) {
 		return NewActionVlanPcpWithBuf(nil), errors.New("Cannot convert to of10.ActionVlanPcp")
 	}
@@ -3766,7 +3768,7 @@ func ToActionVlanPcp(p ActionHeader) (ActionVlanPcp, error) {
 	return NewActionVlanPcpWithBuf(p.Buf), nil
 }
 
-func IsActionVlanPcp(p ActionHeader) bool {
+func IsActionVlanPcp(p Action) bool {
 	return p.Type() == 2 && true
 }
 
@@ -3822,19 +3824,19 @@ func (this ActionVlanPcp) PadOffset() int {
 }
 
 func NewActionDlSrcAddrWithBuf(b []byte) ActionDlSrcAddr {
-	return ActionDlSrcAddr{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionDlSrcAddr{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionDlSrcAddr() ActionDlSrcAddr {
 	s := 16
 	b := make([]byte, s)
-	p := ActionDlSrcAddr{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionDlSrcAddr{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionDlSrcAddr struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionDlSrcAddr) minSize() int {
@@ -3948,7 +3950,7 @@ func (c *ActionDlSrcAddrConn) ReadActionDlSrcAddrs(pkts []ActionDlSrcAddr) (int,
 }
 
 func (this *ActionDlSrcAddr) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(4)) // type
@@ -3963,7 +3965,7 @@ func (this ActionDlSrcAddr) Size() int {
 	return size
 }
 
-func ToActionDlSrcAddr(p ActionHeader) (ActionDlSrcAddr, error) {
+func ToActionDlSrcAddr(p Action) (ActionDlSrcAddr, error) {
 	if !IsActionDlSrcAddr(p) {
 		return NewActionDlSrcAddrWithBuf(nil), errors.New("Cannot convert to of10.ActionDlSrcAddr")
 	}
@@ -3971,7 +3973,7 @@ func ToActionDlSrcAddr(p ActionHeader) (ActionDlSrcAddr, error) {
 	return NewActionDlSrcAddrWithBuf(p.Buf), nil
 }
 
-func IsActionDlSrcAddr(p ActionHeader) bool {
+func IsActionDlSrcAddr(p Action) bool {
 	return p.Type() == 4 && true
 }
 
@@ -4044,19 +4046,19 @@ func (this ActionDlSrcAddr) PadOffset() int {
 }
 
 func NewActionDlDstAddrWithBuf(b []byte) ActionDlDstAddr {
-	return ActionDlDstAddr{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionDlDstAddr{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionDlDstAddr() ActionDlDstAddr {
 	s := 16
 	b := make([]byte, s)
-	p := ActionDlDstAddr{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionDlDstAddr{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionDlDstAddr struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionDlDstAddr) minSize() int {
@@ -4170,7 +4172,7 @@ func (c *ActionDlDstAddrConn) ReadActionDlDstAddrs(pkts []ActionDlDstAddr) (int,
 }
 
 func (this *ActionDlDstAddr) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(5)) // type
@@ -4185,7 +4187,7 @@ func (this ActionDlDstAddr) Size() int {
 	return size
 }
 
-func ToActionDlDstAddr(p ActionHeader) (ActionDlDstAddr, error) {
+func ToActionDlDstAddr(p Action) (ActionDlDstAddr, error) {
 	if !IsActionDlDstAddr(p) {
 		return NewActionDlDstAddrWithBuf(nil), errors.New("Cannot convert to of10.ActionDlDstAddr")
 	}
@@ -4193,7 +4195,7 @@ func ToActionDlDstAddr(p ActionHeader) (ActionDlDstAddr, error) {
 	return NewActionDlDstAddrWithBuf(p.Buf), nil
 }
 
-func IsActionDlDstAddr(p ActionHeader) bool {
+func IsActionDlDstAddr(p Action) bool {
 	return p.Type() == 5 && true
 }
 
@@ -4266,19 +4268,19 @@ func (this ActionDlDstAddr) PadOffset() int {
 }
 
 func NewActionNwSrcAddrWithBuf(b []byte) ActionNwSrcAddr {
-	return ActionNwSrcAddr{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionNwSrcAddr{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionNwSrcAddr() ActionNwSrcAddr {
 	s := 8
 	b := make([]byte, s)
-	p := ActionNwSrcAddr{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionNwSrcAddr{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionNwSrcAddr struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionNwSrcAddr) minSize() int {
@@ -4392,7 +4394,7 @@ func (c *ActionNwSrcAddrConn) ReadActionNwSrcAddrs(pkts []ActionNwSrcAddr) (int,
 }
 
 func (this *ActionNwSrcAddr) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(6)) // type
@@ -4407,7 +4409,7 @@ func (this ActionNwSrcAddr) Size() int {
 	return size
 }
 
-func ToActionNwSrcAddr(p ActionHeader) (ActionNwSrcAddr, error) {
+func ToActionNwSrcAddr(p Action) (ActionNwSrcAddr, error) {
 	if !IsActionNwSrcAddr(p) {
 		return NewActionNwSrcAddrWithBuf(nil), errors.New("Cannot convert to of10.ActionNwSrcAddr")
 	}
@@ -4415,7 +4417,7 @@ func ToActionNwSrcAddr(p ActionHeader) (ActionNwSrcAddr, error) {
 	return NewActionNwSrcAddrWithBuf(p.Buf), nil
 }
 
-func IsActionNwSrcAddr(p ActionHeader) bool {
+func IsActionNwSrcAddr(p Action) bool {
 	return p.Type() == 6 && true
 }
 
@@ -4437,19 +4439,19 @@ func (this ActionNwSrcAddr) NwAddrOffset() int {
 }
 
 func NewActionNwDstAddrWithBuf(b []byte) ActionNwDstAddr {
-	return ActionNwDstAddr{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionNwDstAddr{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionNwDstAddr() ActionNwDstAddr {
 	s := 8
 	b := make([]byte, s)
-	p := ActionNwDstAddr{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionNwDstAddr{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionNwDstAddr struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionNwDstAddr) minSize() int {
@@ -4563,7 +4565,7 @@ func (c *ActionNwDstAddrConn) ReadActionNwDstAddrs(pkts []ActionNwDstAddr) (int,
 }
 
 func (this *ActionNwDstAddr) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(7)) // type
@@ -4578,7 +4580,7 @@ func (this ActionNwDstAddr) Size() int {
 	return size
 }
 
-func ToActionNwDstAddr(p ActionHeader) (ActionNwDstAddr, error) {
+func ToActionNwDstAddr(p Action) (ActionNwDstAddr, error) {
 	if !IsActionNwDstAddr(p) {
 		return NewActionNwDstAddrWithBuf(nil), errors.New("Cannot convert to of10.ActionNwDstAddr")
 	}
@@ -4586,7 +4588,7 @@ func ToActionNwDstAddr(p ActionHeader) (ActionNwDstAddr, error) {
 	return NewActionNwDstAddrWithBuf(p.Buf), nil
 }
 
-func IsActionNwDstAddr(p ActionHeader) bool {
+func IsActionNwDstAddr(p Action) bool {
 	return p.Type() == 7 && true
 }
 
@@ -4608,19 +4610,19 @@ func (this ActionNwDstAddr) NwAddrOffset() int {
 }
 
 func NewActionTpSrcPortWithBuf(b []byte) ActionTpSrcPort {
-	return ActionTpSrcPort{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionTpSrcPort{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionTpSrcPort() ActionTpSrcPort {
 	s := 8
 	b := make([]byte, s)
-	p := ActionTpSrcPort{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionTpSrcPort{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionTpSrcPort struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionTpSrcPort) minSize() int {
@@ -4734,7 +4736,7 @@ func (c *ActionTpSrcPortConn) ReadActionTpSrcPorts(pkts []ActionTpSrcPort) (int,
 }
 
 func (this *ActionTpSrcPort) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(9)) // type
@@ -4749,7 +4751,7 @@ func (this ActionTpSrcPort) Size() int {
 	return size
 }
 
-func ToActionTpSrcPort(p ActionHeader) (ActionTpSrcPort, error) {
+func ToActionTpSrcPort(p Action) (ActionTpSrcPort, error) {
 	if !IsActionTpSrcPort(p) {
 		return NewActionTpSrcPortWithBuf(nil), errors.New("Cannot convert to of10.ActionTpSrcPort")
 	}
@@ -4757,7 +4759,7 @@ func ToActionTpSrcPort(p ActionHeader) (ActionTpSrcPort, error) {
 	return NewActionTpSrcPortWithBuf(p.Buf), nil
 }
 
-func IsActionTpSrcPort(p ActionHeader) bool {
+func IsActionTpSrcPort(p Action) bool {
 	return p.Type() == 9 && true
 }
 
@@ -4813,19 +4815,19 @@ func (this ActionTpSrcPort) PadOffset() int {
 }
 
 func NewActionTpDstPortWithBuf(b []byte) ActionTpDstPort {
-	return ActionTpDstPort{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionTpDstPort{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionTpDstPort() ActionTpDstPort {
 	s := 8
 	b := make([]byte, s)
-	p := ActionTpDstPort{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionTpDstPort{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionTpDstPort struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionTpDstPort) minSize() int {
@@ -4939,7 +4941,7 @@ func (c *ActionTpDstPortConn) ReadActionTpDstPorts(pkts []ActionTpDstPort) (int,
 }
 
 func (this *ActionTpDstPort) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(10)) // type
@@ -4954,7 +4956,7 @@ func (this ActionTpDstPort) Size() int {
 	return size
 }
 
-func ToActionTpDstPort(p ActionHeader) (ActionTpDstPort, error) {
+func ToActionTpDstPort(p Action) (ActionTpDstPort, error) {
 	if !IsActionTpDstPort(p) {
 		return NewActionTpDstPortWithBuf(nil), errors.New("Cannot convert to of10.ActionTpDstPort")
 	}
@@ -4962,7 +4964,7 @@ func ToActionTpDstPort(p ActionHeader) (ActionTpDstPort, error) {
 	return NewActionTpDstPortWithBuf(p.Buf), nil
 }
 
-func IsActionTpDstPort(p ActionHeader) bool {
+func IsActionTpDstPort(p Action) bool {
 	return p.Type() == 10 && true
 }
 
@@ -5018,19 +5020,19 @@ func (this ActionTpDstPort) PadOffset() int {
 }
 
 func NewActionNwTosWithBuf(b []byte) ActionNwTos {
-	return ActionNwTos{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionNwTos{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionNwTos() ActionNwTos {
 	s := 8
 	b := make([]byte, s)
-	p := ActionNwTos{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionNwTos{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionNwTos struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionNwTos) minSize() int {
@@ -5144,7 +5146,7 @@ func (c *ActionNwTosConn) ReadActionNwToss(pkts []ActionNwTos) (int, error) {
 }
 
 func (this *ActionNwTos) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(8)) // type
@@ -5159,7 +5161,7 @@ func (this ActionNwTos) Size() int {
 	return size
 }
 
-func ToActionNwTos(p ActionHeader) (ActionNwTos, error) {
+func ToActionNwTos(p Action) (ActionNwTos, error) {
 	if !IsActionNwTos(p) {
 		return NewActionNwTosWithBuf(nil), errors.New("Cannot convert to of10.ActionNwTos")
 	}
@@ -5167,7 +5169,7 @@ func ToActionNwTos(p ActionHeader) (ActionNwTos, error) {
 	return NewActionNwTosWithBuf(p.Buf), nil
 }
 
-func IsActionNwTos(p ActionHeader) bool {
+func IsActionNwTos(p Action) bool {
 	return p.Type() == 8 && true
 }
 
@@ -5223,19 +5225,19 @@ func (this ActionNwTos) PadOffset() int {
 }
 
 func NewActionVendorHeaderWithBuf(b []byte) ActionVendorHeader {
-	return ActionVendorHeader{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionVendorHeader{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionVendorHeader() ActionVendorHeader {
 	s := 8
 	b := make([]byte, s)
-	p := ActionVendorHeader{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionVendorHeader{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionVendorHeader struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionVendorHeader) minSize() int {
@@ -5349,7 +5351,7 @@ func (c *ActionVendorHeaderConn) ReadActionVendorHeaders(pkts []ActionVendorHead
 }
 
 func (this *ActionVendorHeader) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(65535)) // type
@@ -5364,7 +5366,7 @@ func (this ActionVendorHeader) Size() int {
 	return size
 }
 
-func ToActionVendorHeader(p ActionHeader) (ActionVendorHeader, error) {
+func ToActionVendorHeader(p Action) (ActionVendorHeader, error) {
 	if !IsActionVendorHeader(p) {
 		return NewActionVendorHeaderWithBuf(nil), errors.New("Cannot convert to of10.ActionVendorHeader")
 	}
@@ -5372,7 +5374,7 @@ func ToActionVendorHeader(p ActionHeader) (ActionVendorHeader, error) {
 	return NewActionVendorHeaderWithBuf(p.Buf), nil
 }
 
-func IsActionVendorHeader(p ActionHeader) bool {
+func IsActionVendorHeader(p Action) bool {
 	return p.Type() == 65535 && true
 }
 
@@ -5599,14 +5601,14 @@ func (this PacketOut) ActionsLenOffset() int {
 	return offset
 }
 
-func (this PacketOut) Actions() []ActionHeader {
+func (this PacketOut) Actions() []Action {
 	offset := this.ActionsOffset()
 	packet_size := this.Size()
 	size := int(this.ActionsLen())
 	count := this.Size() - offset
-	var res []ActionHeader
+	var res []Action
 	for size > 0 && count > 0 && packet_size > offset {
-		elem := NewActionHeaderWithBuf(this.Buf[offset:])
+		elem := NewActionWithBuf(this.Buf[offset:])
 		if elem.Size() > size {
 			break
 		}
@@ -5618,7 +5620,7 @@ func (this PacketOut) Actions() []ActionHeader {
 	return res
 }
 
-func (this *PacketOut) AddActions(a ActionHeader) {
+func (this *PacketOut) AddActions(a Action) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
@@ -5665,7 +5667,8 @@ func (this PacketOut) DataOffset() int {
 
 func (this PacketOut) DataSize() int {
 	offset := this.DataOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewMatchWithBuf(b []byte) Match {
@@ -6445,14 +6448,14 @@ func (this FlowMod) FlagsOffset() int {
 	return offset
 }
 
-func (this FlowMod) Actions() []ActionHeader {
+func (this FlowMod) Actions() []Action {
 	offset := this.ActionsOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
 	count := this.Size() - offset
-	var res []ActionHeader
+	var res []Action
 	for size > 0 && count > 0 && packet_size > offset {
-		elem := NewActionHeaderWithBuf(this.Buf[offset:])
+		elem := NewActionWithBuf(this.Buf[offset:])
 		if elem.Size() > size {
 			break
 		}
@@ -6464,7 +6467,7 @@ func (this FlowMod) Actions() []ActionHeader {
 	return res
 }
 
-func (this *FlowMod) AddActions(a ActionHeader) {
+func (this *FlowMod) AddActions(a Action) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
@@ -6482,7 +6485,8 @@ func (this FlowMod) ActionsOffset() int {
 
 func (this FlowMod) ActionsSize() int {
 	offset := this.ActionsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewFlowRemovedWithBuf(b []byte) FlowRemoved {
@@ -7075,7 +7079,8 @@ func (this ErrorMsg) DataOffset() int {
 
 func (this ErrorMsg) DataSize() int {
 	offset := this.DataOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewStatsRequestWithBuf(b []byte) StatsRequest {
@@ -8396,14 +8401,14 @@ func (this FlowStats) ByteCountOffset() int {
 	return offset
 }
 
-func (this FlowStats) Actions() []ActionHeader {
+func (this FlowStats) Actions() []Action {
 	offset := this.ActionsOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
 	count := this.Size() - offset
-	var res []ActionHeader
+	var res []Action
 	for size > 0 && count > 0 && packet_size > offset {
-		elem := NewActionHeaderWithBuf(this.Buf[offset:])
+		elem := NewActionWithBuf(this.Buf[offset:])
 		if elem.Size() > size {
 			break
 		}
@@ -8415,7 +8420,7 @@ func (this FlowStats) Actions() []ActionHeader {
 	return res
 }
 
-func (this *FlowStats) AddActions(a ActionHeader) {
+func (this *FlowStats) AddActions(a Action) {
 	offset := this.ActionsOffset()
 	offset += this.ActionsSize()
 	size := a.Size()
@@ -8433,7 +8438,8 @@ func (this FlowStats) ActionsOffset() int {
 
 func (this FlowStats) ActionsSize() int {
 	offset := this.ActionsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewFlowStatsReplyWithBuf(b []byte) FlowStatsReply {
@@ -8629,7 +8635,8 @@ func (this FlowStatsReply) FlowStatsOffset() int {
 
 func (this FlowStatsReply) FlowStatsSize() int {
 	offset := this.FlowStatsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewAggregateStatsRequestWithBuf(b []byte) AggregateStatsRequest {
@@ -10895,7 +10902,8 @@ func (this PacketQueue) PropertiesOffset() int {
 
 func (this PacketQueue) PropertiesSize() int {
 	offset := this.PropertiesOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewQueueGetConfigRequestWithBuf(b []byte) QueueGetConfigRequest {
@@ -11095,7 +11103,8 @@ func (this QueueGetConfigRequest) PadOffset() int {
 
 func (this QueueGetConfigRequest) PadSize() int {
 	offset := this.PadOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewQueueGetConfigReplyWithBuf(b []byte) QueueGetConfigReply {
@@ -11341,23 +11350,24 @@ func (this QueueGetConfigReply) QueuesOffset() int {
 
 func (this QueueGetConfigReply) QueuesSize() int {
 	offset := this.QueuesOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewActionEnqueueWithBuf(b []byte) ActionEnqueue {
-	return ActionEnqueue{ActionHeader{packet.Packet{Buf: b}}}
+	return ActionEnqueue{Action{packet.Packet{Buf: b}}}
 }
 
 func NewActionEnqueue() ActionEnqueue {
 	s := 16
 	b := make([]byte, s)
-	p := ActionEnqueue{ActionHeader{packet.Packet{Buf: b}}}
+	p := ActionEnqueue{Action{packet.Packet{Buf: b}}}
 	p.Init()
 	return p
 }
 
 type ActionEnqueue struct {
-	ActionHeader
+	Action
 }
 
 func (this ActionEnqueue) minSize() int {
@@ -11471,7 +11481,7 @@ func (c *ActionEnqueueConn) ReadActionEnqueues(pkts []ActionEnqueue) (int, error
 }
 
 func (this *ActionEnqueue) Init() {
-	this.ActionHeader.Init()
+	this.Action.Init()
 	this.SetLen(uint16(this.minSize()))
 	// Invariants.
 	this.SetType(uint16(11)) // type
@@ -11486,7 +11496,7 @@ func (this ActionEnqueue) Size() int {
 	return size
 }
 
-func ToActionEnqueue(p ActionHeader) (ActionEnqueue, error) {
+func ToActionEnqueue(p Action) (ActionEnqueue, error) {
 	if !IsActionEnqueue(p) {
 		return NewActionEnqueueWithBuf(nil), errors.New("Cannot convert to of10.ActionEnqueue")
 	}
@@ -11494,7 +11504,7 @@ func ToActionEnqueue(p ActionHeader) (ActionEnqueue, error) {
 	return NewActionEnqueueWithBuf(p.Buf), nil
 }
 
-func IsActionEnqueue(p ActionHeader) bool {
+func IsActionEnqueue(p Action) bool {
 	return p.Type() == 11 && true
 }
 

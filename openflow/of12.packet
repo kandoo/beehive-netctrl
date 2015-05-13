@@ -34,6 +34,14 @@ enum Ports {
   PP_ANY = 0xffffffff
 }
 
+enum Groups {
+    PG_MAX = 0xffffff00,
+    PG_ALL = 0xfffffffc,  # Represents all groups for group delete commands.
+    PG_ANY = 0xffffffff   # Wildcard group used only for flow stats
+                          # requests. Selects all flows regardless
+                          # of group (including flows with no group).
+}
+
 enum Type {
   # Asynchronous messages.
   PT_PACKET_IN = 10,  # Async message.
@@ -239,30 +247,6 @@ packet PortMod(Header12) {
   @repeated(count = 4) uint8 pad;  # Pad to 64-bits.
 }
 
-# Why is this packet being sent to the controller?
-enum PacketInReason {
-  PR_NO_MATCH = 0,          # No matching flow.
-  PR_ACTION = 1             # Action explicitly output to controller.
-}
-
-# Packet received on port (datapath -> controller).
-@type_selector(type = Type.PT_PACKET_IN)
-packet PacketIn(Header12) {
-  uint32 buffer_id;     # ID assigned by datapath.
-  uint16 total_len;     # Full length of frame.
-  uint16 in_port;       # Port on which frame was received.
-  uint8 reason;         # Reason packet is being sent (one of.PR_*)
-  uint8 pad;
-
-  @repeated
-  uint8 data;           # Ethernet frame, halfway through 32-bit word,
-                        # so the IP header is 32-bit aligned.  The
-                        # amount of data is inferred from the length
-                        # field in the header.  Because of padding,
-                        # offsetof(packet PacketIn, data) ==
-                        # sizeof(packet PacketIn) - 2.
-}
-
 enum ActionType {
   PAT_OUTPUT = 0,
   PAT_COPY_TTL_OUT = 11,
@@ -389,11 +373,6 @@ enum FlowWildcards {
   PFW_ALL = ((1 << 22) - 1)
 }
 
-enum MatchType {
-  PMT_STANDARD = 0,
-  PMT_OXM = 1
-}
-
 enum OxmClass {
   PXMC_NXM_0 = 0x0000,
   PXMC_NXM_1 = 0x0001,
@@ -401,73 +380,80 @@ enum OxmClass {
   PXMC_EXPERIMENTER = 0xFFFF
 }
 
-enum OxmMatchFields {
-  PXMT_B_IN_PORT = 0,  # Switch input port.
-  PXMT_B_IN_PHY_PORT = 1 << 1,  # Switch physical input port.
+enum OXMatchFields {
+  PXMT_IN_PORT = 0,  # Switch input port.
+  PXMT_IN_PHY_PORT = 1 << 1,  # Switch physical input port.
 
-  PXMT_B_METADATA = 2 << 1,  # Metadata passed between tables.
+  PXMT_METADATA = 2 << 1,  # Metadata passed between tables.
 
-  PXMT_B_ETH_DST = 3 << 1,  # Ethernet destination address.
-  PXMT_B_ETH_DST_MASKED = (3 << 1) + 1,
+  PXMT_ETH_DST = 3 << 1,  # Ethernet destination address.
+  PXMT_ETH_DST_MASKED = (3 << 1) + 1,
 
-  PXMT_B_ETH_SRC = 4 << 1,  # Ethernet source address.
-  PXMT_B_ETH_SRC_MASKED = (4 << 1) + 1,
+  PXMT_ETH_SRC = 4 << 1,  # Ethernet source address.
+  PXMT_ETH_SRC_MASKED = (4 << 1) + 1,
 
-  PXMT_B_ETH_TYPE = 5 << 1,  # Ethernet frame type.
+  PXMT_ETH_TYPE = 5 << 1,  # Ethernet frame type.
 
-  PXMT_B_VLAN_VID = 6 << 1,  # VLAN id.
-  PXMT_B_VLAN_PCP = 7 << 1,  # VLAN priority.
-  PXMT_B_IP_DSCP = 8 << 1,  # IP DSCP (6 bits in ToS field).
-  PXMT_B_IP_ECN = 9 << 1,  # IP ECN (2 bits in ToS field).
-  PXMT_B_IP_PROTO = 10 << 1,  # IP protocol.
+  PXMT_VLAN_VID = 6 << 1,  # VLAN id.
+  PXMT_VLAN_PCP = 7 << 1,  # VLAN priority.
+  PXMT_IP_DSCP = 8 << 1,  # IP DSCP (6 bits in ToS field).
+  PXMT_IP_ECN = 9 << 1,  # IP ECN (2 bits in ToS field).
+  PXMT_IP_PROTO = 10 << 1,  # IP protocol.
 
-  PXMT_B_IPV4_SRC = 11 << 1,  # IPv4 source address.
-  PXMT_B_IPV4_SRC_MASKED = (11 << 1) + 1,
+  PXMT_IPV4_SRC = 11 << 1,  # IPv4 source address.
+  PXMT_IPV4_SRC_MASKED = (11 << 1) + 1,
 
-  PXMT_B_IPV4_DST = 12 << 1,  # IPv4 destination address.
-  PXMT_B_IPV4_DST_MASKED = (12 << 1) + 1,
+  PXMT_IPV4_DST = 12 << 1,  # IPv4 destination address.
+  PXMT_IPV4_DST_MASKED = (12 << 1) + 1,
 
-  PXMT_B_TCP_SRC = 13 << 1,  # TCP source port.
-  PXMT_B_TCP_DST = 14 << 1,  # TCP destination port.
-  PXMT_B_UDP_SRC = 15 << 1,  # UDP source port.
-  PXMT_B_UDP_DST = 16 << 1,  # UDP destination port.
-  PXMT_B_SCTP_SRC = 17 << 1,  # SCTP source port.
-  PXMT_B_SCTP_DST = 18 << 1,  # SCTP destination port.
-  PXMT_B_ICMPV4_TYPE = 19 << 1,  # ICMP type.
-  PXMT_B_ICMPV4_CODE = 20 << 1,  # ICMP code.
-  PXMT_B_ARP_OP = 21 << 1,  # ARP opcode.
-  PXMT_B_ARP_SPA = 22 << 1,  # ARP source IPv4 address.
-  PXMT_B_ARP_TPA = 23 << 1,  # ARP target IPv4 address.
-  PXMT_B_ARP_SHA = 24 << 1,  # ARP source hardware address.
-  PXMT_B_ARP_THA = 25 << 1,  # ARP target hardware address.
-  PXMT_B_IPV6_SRC = 26 << 1,  # IPv6 source address.
-  PXMT_B_IPV6_DST = 27 << 1,  # IPv6 destination address.
-  PXMT_B_IPV6_FLABEL = 28 << 1,  # IPv6 Flow Label
-  PXMT_B_ICMPV6_TYPE = 29 << 1,  # ICMPv6 type.
-  PXMT_B_ICMPV6_CODE = 30 << 1,  # ICMPv6 code.
-  PXMT_B_IPV6_ND_TARGET = 31 << 1,  # Target address for ND.
-  PXMT_B_IPV6_ND_SLL = 32 << 1,  # Source link-layer for ND.
-  PXMT_B_IPV6_ND_TLL = 33 << 1,  # Target link-layer for ND.
-  PXMT_B_MPLS_LABEL = 34 << 1,  # MPLS label.
-  PXMT_B_MPLS_TC = 35 << 1  # MPLS TC.
+  PXMT_TCP_SRC = 13 << 1,  # TCP source port.
+  PXMT_TCP_DST = 14 << 1,  # TCP destination port.
+  PXMT_UDP_SRC = 15 << 1,  # UDP source port.
+  PXMT_UDP_DST = 16 << 1,  # UDP destination port.
+  PXMT_SCTP_SRC = 17 << 1,  # SCTP source port.
+  PXMT_SCTP_DST = 18 << 1,  # SCTP destination port.
+  PXMT_ICMPV4_TYPE = 19 << 1,  # ICMP type.
+  PXMT_ICMPV4_CODE = 20 << 1,  # ICMP code.
+  PXMT_ARP_OP = 21 << 1,  # ARP opcode.
+  PXMT_ARP_SPA = 22 << 1,  # ARP source IPv4 address.
+  PXMT_ARP_TPA = 23 << 1,  # ARP target IPv4 address.
+  PXMT_ARP_SHA = 24 << 1,  # ARP source hardware address.
+  PXMT_ARP_THA = 25 << 1,  # ARP target hardware address.
+
+  PXMT_IPV6_SRC = 26 << 1,  # IPv6 source address.
+	PXMT_IPV6_SRC_MASKED = (26 << 1) + 1,
+
+  PXMT_IPV6_DST = 27 << 1,  # IPv6 destination address.
+	PXMT_IPV6_DST_MASKED = (27 << 1) + 1,
+
+  PXMT_IPV6_FLABEL = 28 << 1,  # IPv6 Flow Label
+  PXMT_ICMPV6_TYPE = 29 << 1,  # ICMPv6 type.
+  PXMT_ICMPV6_CODE = 30 << 1,  # ICMPv6 code.
+  PXMT_IPV6_ND_TARGET = 31 << 1,  # Target address for ND.
+  PXMT_IPV6_ND_SLL = 32 << 1,  # Source link-layer for ND.
+  PXMT_IPV6_ND_TLL = 33 << 1,  # Target link-layer for ND.
+  PXMT_MPLS_LABEL = 34 << 1,  # MPLS label.
+  PXMT_MPLS_TC = 35 << 1  # MPLS TC.
 }
 
 @bigendian
+@padded(constant = 4, excluded = 1)
 packet OxmField {
   uint16 oxm_class;
   uint8 oxm_field;
-  uint8 oxm_length;
+  @size
+	uint8 oxm_length;
 }
 
 @type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
-               oxm_field = OxmMatchFields.PXMT_B_IN_PORT,
+               oxm_field = OXMatchFields.PXMT_IN_PORT,
                oxm_length = 4)
 packet OxmInPort(OxmField) {
   uint32 in_port;
 }
 
 @type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
-               oxm_field = OxmMatchFields.PXMT_B_ETH_DST,
+               oxm_field = OXMatchFields.PXMT_ETH_DST,
                oxm_length = 6)
 packet OxmEthDst(OxmField) {
   @repeated(count = of.Constants.P_ETH_ALEN)
@@ -475,7 +461,7 @@ packet OxmEthDst(OxmField) {
 }
 
 @type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
-               oxm_field = OxmMatchFields.PXMT_B_ETH_DST_MASKED,
+               oxm_field = OXMatchFields.PXMT_ETH_DST_MASKED,
                oxm_length = 12)
 packet OxmEthDstMasked(OxmField) {
   @repeated(count = of.Constants.P_ETH_ALEN)
@@ -486,7 +472,7 @@ packet OxmEthDstMasked(OxmField) {
 }
 
 @type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
-               oxm_field = OxmMatchFields.PXMT_B_ETH_SRC,
+               oxm_field = OXMatchFields.PXMT_ETH_SRC,
                oxm_length = 6)
 packet OxmEthSrc(OxmField) {
   @repeated(count = of.Constants.P_ETH_ALEN)
@@ -494,7 +480,7 @@ packet OxmEthSrc(OxmField) {
 }
 
 @type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
-               oxm_field = OxmMatchFields.PXMT_B_ETH_SRC_MASKED,
+               oxm_field = OXMatchFields.PXMT_ETH_SRC_MASKED,
                oxm_length = 12)
 packet OxmEthSrcMasked(OxmField) {
   @repeated(count = of.Constants.P_ETH_ALEN)
@@ -504,14 +490,194 @@ packet OxmEthSrcMasked(OxmField) {
   uint8 mask;
 }
 
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_ETH_TYPE,
+               oxm_length = 2)
+packet OxmEthType(OxmField) {
+  uint16 type;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IP_PROTO,
+               oxm_length = 1)
+packet OxmIpProto(OxmField) {
+  uint8 proto;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV4_SRC,
+               oxm_length = 4)
+packet OxmIpV4Src(OxmField) {
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 addr;
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 mask;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV4_SRC_MASKED,
+               oxm_length = 8)
+packet OxmIpV4SrcMasked(OxmField) {
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 addr;
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 mask;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV4_DST,
+               oxm_length = 4)
+packet OxmIpV4Dst(OxmField) {
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 addr;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV4_DST_MASKED,
+               oxm_length = 8)
+packet OxmIpV4DstMasked(OxmField) {
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 addr;
+	@repeated(count = of.Constants.P_IPV4_ALEN)
+  uint8 mask;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV6_SRC,
+               oxm_length = 16)
+packet OxmIpV6Src(OxmField) {
+	@repeated(count = of.Constants.P_IPV6_ALEN)
+  uint8 addr;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV6_SRC_MASKED,
+               oxm_length = 32)
+packet OxmIpV6SrcMasked(OxmField) {
+	@repeated(count = of.Constants.P_IPV6_ALEN)
+  uint8 addr;
+	@repeated(count = of.Constants.P_IPV6_ALEN)
+  uint8 mask;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV6_DST,
+               oxm_length = 16)
+packet OxmIpV6Dst(OxmField) {
+	@repeated(count = of.Constants.P_IPV6_ALEN)
+  uint8 addr;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_IPV6_DST_MASKED,
+               oxm_length = 32)
+packet OxmIpV6DstMasked(OxmField) {
+	@repeated(count = of.Constants.P_IPV6_ALEN)
+  uint8 addr;
+	@repeated(count = of.Constants.P_IPV6_ALEN)
+  uint8 mask;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_TCP_SRC,
+               oxm_length = 2)
+packet OxmTcpSrc(OxmField) {
+  uint16 port;
+}
+
+@type_selector(oxm_class = OxmClass.PXMC_OPENFLOW_BASIC,
+               oxm_field = OXMatchFields.PXMT_TCP_DST,
+               oxm_length = 2)
+packet OxmTcpDst(OxmField) {
+  uint16 port;
+}
+
+
+
+# Valid MatchType.
+enum MatchType {
+	PMT_STANDARD = 0, # Deprecated.
+	PMT_OXM = 1			  # OpenFlow Extensible Match.
+}
+
 # Fields to match against flows
 @bigendian
 @padded(multiple = 8, excluded = 1)
 packet Match {
   uint16 type;
   @size uint16 length;
-  @repeated OxmField oxm_fields;
 }
+
+@type_selector(type = MatchType.PMT_STANDARD)
+packet StdMatch(Match) {
+	uint32 in_port; # Input switch port.
+	uint32 wildcards; # Wildcard fields.
+
+  @repeated(count = of.Constants.P_ETH_ALEN)
+	uint8 dl_src; # Ethernet source address.
+  @repeated(count = of.Constants.P_ETH_ALEN)
+	uint8 dl_src_mask; # Ethernet source address mask.
+  @repeated(count = of.Constants.P_ETH_ALEN)
+	uint8 dl_dst; # Ethernet destination address.
+  @repeated(count = of.Constants.P_ETH_ALEN)
+	uint8 dl_dst_mask; # Ethernet destination address mask.
+
+	uint16 dl_vlan; # Input VLAN id.
+	uint8 dl_vlan_pcp; # Input VLAN priority.
+
+	uint8 pad1; # Align to 32-bits
+
+	uint16 dl_type; # Ethernet frame type.
+	uint8 nw_tos; # IP ToS (actually DSCP field, 6 bits).
+	uint8 nw_proto; # IP protocol or lower 8 bits of ARP opcode.
+	uint32 nw_src; # IP source address.
+	uint32 nw_src_mask; # IP source address mask.
+	uint32 nw_dst; # IP destination address.
+	uint32 nw_dst_mask; # IP destination address mask.
+	uint16 tp_src; # TCP/UDP/SCTP source port.
+	uint16 tp_dst; # TCP/UDP/SCTP destination port.
+	uint32 mpls_label; # MPLS label.
+	uint8 mpls_tc; # MPLS TC.
+
+	@repeated(count = 3)
+	uint8 pad2; # Align to 64-bits
+
+	uint64 metadata; # Metadata passed between tables.
+	uint64 metadata_mask; # Mask for metadata.
+}
+
+@type_selector(type = MatchType.PMT_OXM)
+packet OXMatch(Match) {
+	@repeated OxmField fields;
+}
+
+# Why is this packet being sent to the controller?
+enum PacketInReason {
+  PR_NO_MATCH = 0,          # No matching flow.
+  PR_ACTION = 1             # Action explicitly output to controller.
+}
+
+# Packet received on port (datapath -> controller).
+@type_selector(type = Type.PT_PACKET_IN)
+packet PacketIn(Header12) {
+  uint32 buffer_id;     # ID assigned by datapath.
+  uint16 total_len;     # Full length of frame.
+  uint8 reason;         # Reason packet is being sent (one of.PR_*).
+	uint8 table_id;				# ID of the table that was looked up.
+	Match match;					# Packet metadata. Variable Size.
+
+	@repeated(count=2)
+  uint8 pad;
+
+  @repeated
+  uint8 data;           # Ethernet frame, halfway through 32-bit word,
+                        # so the IP header is 32-bit aligned.  The
+                        # amount of data is inferred from the length
+                        # field in the header.  Because of padding,
+                        # offsetof(packet PacketIn, data) ==
+                        # sizeof(packet PacketIn) - 2.
+}
+
 
 enum FlowModFlags {
   PFF_SEND_FLOW_REM = 1 << 0,  # Send flow removed message when flow
@@ -684,22 +850,35 @@ enum StatsTypes {
   # The reply body is an array of packet PortStats.
   PST_PORT = 4,
 
-  # Queue statistics for a port
-  # The request body defines the port
-  # The reply body is an array of packet QueueStats
+  # Queue statistics for a port.
+  # The request body defines the port.
+  # The reply body is an array of packet QueueStats.
   PST_QUEUE = 5,
+
+	# Group counter statistics.
+	# The request body is empty.
+  # The reply is struct ofp_group_stats.
+	OFPST_GROUP = 6,
+
+	# Group description statistics.
+	# The request body is empty.
+  # The reply body is struct ofp_group_desc_stats.
+	OFPST_GROUP_DESC = 7,
 
   # Vendor extension.
   # The request and reply bodies begin with a 32-bit vendor ID, which takes
   # the same form as in "packet VendorHeader".  The request and reply
   # bodies are otherwise vendor-defined.
-  PST_VENDOR = 0xffff
+  PST_EXPERIMENTER = 0xffff
 }
 
 @type_selector(type = Type.PT_STATS_REQUEST)
 packet StatsRequest(Header12) {
   uint16 stats_type;        # One of the PST_* constants.
   uint16 flags;             # PSF_REQ_* flags (none yet defined).
+	
+	@repeated(count = 4)
+	uint8 pad;
 }
 
 enum StatsReplyFlags {
@@ -710,6 +889,9 @@ enum StatsReplyFlags {
 packet StatsReply(Header12) {
   uint16 stats_type;  # One of the PST_* constants.
   uint16 flags;       # PSF_REPLY_* flags.
+
+	@repeated(count = 4)
+	uint8 pad;
 }
 
 enum DescStatsConstants {
@@ -738,13 +920,24 @@ packet DescStats(StatsReply) {
 # Body for OpenflowStatsRequest of type PST_FLOW.
 @type_selector(stats_type = StatsTypes.PST_FLOW)
 packet FlowStatsRequest(StatsRequest) {
-  Match match;  # Fields to match.
-  uint8 table_id;       # ID of table to read (from OpenflowTableStats),
-                        # 0xff for all tables or 0xfe for emergency.
-  uint8 pad;            # Align to 32 bits.
-  uint16 out_port;      # Require matching entries to include this
-                        # as an output port.  A value of.PP_NONE
+	uint8 table_id;       # ID of table to read (from OpenflowTableStats),
+												# 0xff for all tables or 0xfe for emergency.
+	@repeated(count = 3)
+  uint8 pad1;           # Align to 32 bits.
+
+  uint32 out_port;      # Require matching entries to include this
+                        # as an output port.  A value of PP_NONE.
                         # indicates no restriction.
+  uint32 out_group;	    # Require matching entries to include this
+												# as an output group. A value of PG_ANY
+												# indicates no restriction.
+	@repeated(count = 4)
+  uint8 pad2;
+
+	uint64 cookie;
+	uint64 cookie_mask;
+
+	Match match;					# Fields to match.
 }
 
 # The Openflow flow stats.
@@ -754,7 +947,6 @@ packet FlowStats {
   uint16 length;          # Length of this entry.
   uint8 table_id;         # ID of table flow came from.
   uint8 pad;
-  Match match;    # Description of fields.
   uint32 duration_sec;    # Time flow has been alive in seconds.
   uint32 duration_nsec;   # Time flow has been alive in nanoseconds beyond
                           # duration_sec.
@@ -767,9 +959,10 @@ packet FlowStats {
   uint64 cookie;          # Opaque controller-issued identifier.
   uint64 packet_count;    # Number of packets in flow.
   uint64 byte_count;      # Number of bytes in flow.
-
-  @repeated
-  Action actions; # Actions.
+	
+	Match match;						# Description of fields.
+	@repeated
+	Instruction instructions;	# Instruction set.
 }
 
 # Body of reply to PST_FLOW request.
@@ -787,7 +980,7 @@ packet AggregateStatsRequest(StatsRequest) {
                           # 0xff for all tables or 0xfe for emergency.
   uint8 pad;              # Align to 32 bits.
   uint16 out_port;        # Require matching entries to include this
-                          # as an output port.  A value of.PP_NONE
+                          # as an output port.  A value of PP_NONE
                           # indicates no restriction.
 }
 
@@ -945,5 +1138,33 @@ packet QueueStats(StatsReply) {
   uint64 tx_bytes;       # Number of transmitted bytes.
   uint64 tx_packets;     # Number of transmitted packets.
   uint64 tx_errors;      # Number of packets dropped due to overrun.
+}
+
+
+# Role request and reply message.
+@type_selector(type = Type.PT_ROLE_REQUEST)
+packet RoleRequest(Header12) {
+    uint32 role;            # One of ControllerRole.
+	  @repeated(count = 4)
+    uint8 pad;							# Align to 64 bits.
+    uint64 generation_id;   # Master Election Generation Id.
+}
+
+# Role request and reply message.
+@type_selector(type = Type.PT_ROLE_REPLY)
+packet RoleReply(Header12) {
+    uint32 role;            # One of ControllerRole.
+	  @repeated(count = 4)
+    uint8 pad;							# Align to 64 bits.
+    uint64 generation_id;   # Master Election Generation Id.
+}
+
+
+# Controller roles.
+enum ControllerRole {
+    ROLE_NOCHANGE = 0,    # Don't change current role.
+    ROLE_EQUAL = 1,       # Default role, full access.
+    ROLE_MASTER = 2,      # Full access, at most one master.
+    ROLE_SLAVE = 3				# Read-only access.
 }
 

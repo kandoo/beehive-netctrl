@@ -29,6 +29,14 @@ const (
 	PP_ANY        Ports = 4294967295
 )
 
+type Groups int
+
+const (
+	PG_MAX Groups = 4294967040
+	PG_ALL Groups = 4294967292
+	PG_ANY Groups = 4294967295
+)
+
 type Type int
 
 const (
@@ -119,13 +127,6 @@ const (
 	PPR_MODIFY PortReason = 2
 )
 
-type PacketInReason int
-
-const (
-	PR_NO_MATCH PacketInReason = 0
-	PR_ACTION   PacketInReason = 1
-)
-
 type ActionType int
 
 const (
@@ -197,13 +198,6 @@ const (
 	PFW_ALL          FlowWildcards = 4194303
 )
 
-type MatchType int
-
-const (
-	PMT_STANDARD MatchType = 0
-	PMT_OXM      MatchType = 1
-)
-
 type OxmClass int
 
 const (
@@ -213,49 +207,65 @@ const (
 	PXMC_EXPERIMENTER   OxmClass = 65535
 )
 
-type OxmMatchFields int
+type OXMatchFields int
 
 const (
-	PXMT_B_IN_PORT         OxmMatchFields = 0
-	PXMT_B_IN_PHY_PORT     OxmMatchFields = 2
-	PXMT_B_METADATA        OxmMatchFields = 4
-	PXMT_B_ETH_DST         OxmMatchFields = 6
-	PXMT_B_ETH_DST_MASKED  OxmMatchFields = 7
-	PXMT_B_ETH_SRC         OxmMatchFields = 8
-	PXMT_B_ETH_SRC_MASKED  OxmMatchFields = 9
-	PXMT_B_ETH_TYPE        OxmMatchFields = 10
-	PXMT_B_VLAN_VID        OxmMatchFields = 12
-	PXMT_B_VLAN_PCP        OxmMatchFields = 14
-	PXMT_B_IP_DSCP         OxmMatchFields = 16
-	PXMT_B_IP_ECN          OxmMatchFields = 18
-	PXMT_B_IP_PROTO        OxmMatchFields = 20
-	PXMT_B_IPV4_SRC        OxmMatchFields = 22
-	PXMT_B_IPV4_SRC_MASKED OxmMatchFields = 23
-	PXMT_B_IPV4_DST        OxmMatchFields = 24
-	PXMT_B_IPV4_DST_MASKED OxmMatchFields = 25
-	PXMT_B_TCP_SRC         OxmMatchFields = 26
-	PXMT_B_TCP_DST         OxmMatchFields = 28
-	PXMT_B_UDP_SRC         OxmMatchFields = 30
-	PXMT_B_UDP_DST         OxmMatchFields = 32
-	PXMT_B_SCTP_SRC        OxmMatchFields = 34
-	PXMT_B_SCTP_DST        OxmMatchFields = 36
-	PXMT_B_ICMPV4_TYPE     OxmMatchFields = 38
-	PXMT_B_ICMPV4_CODE     OxmMatchFields = 40
-	PXMT_B_ARP_OP          OxmMatchFields = 42
-	PXMT_B_ARP_SPA         OxmMatchFields = 44
-	PXMT_B_ARP_TPA         OxmMatchFields = 46
-	PXMT_B_ARP_SHA         OxmMatchFields = 48
-	PXMT_B_ARP_THA         OxmMatchFields = 50
-	PXMT_B_IPV6_SRC        OxmMatchFields = 52
-	PXMT_B_IPV6_DST        OxmMatchFields = 54
-	PXMT_B_IPV6_FLABEL     OxmMatchFields = 56
-	PXMT_B_ICMPV6_TYPE     OxmMatchFields = 58
-	PXMT_B_ICMPV6_CODE     OxmMatchFields = 60
-	PXMT_B_IPV6_ND_TARGET  OxmMatchFields = 62
-	PXMT_B_IPV6_ND_SLL     OxmMatchFields = 64
-	PXMT_B_IPV6_ND_TLL     OxmMatchFields = 66
-	PXMT_B_MPLS_LABEL      OxmMatchFields = 68
-	PXMT_B_MPLS_TC         OxmMatchFields = 70
+	PXMT_IN_PORT         OXMatchFields = 0
+	PXMT_IN_PHY_PORT     OXMatchFields = 2
+	PXMT_METADATA        OXMatchFields = 4
+	PXMT_ETH_DST         OXMatchFields = 6
+	PXMT_ETH_DST_MASKED  OXMatchFields = 7
+	PXMT_ETH_SRC         OXMatchFields = 8
+	PXMT_ETH_SRC_MASKED  OXMatchFields = 9
+	PXMT_ETH_TYPE        OXMatchFields = 10
+	PXMT_VLAN_VID        OXMatchFields = 12
+	PXMT_VLAN_PCP        OXMatchFields = 14
+	PXMT_IP_DSCP         OXMatchFields = 16
+	PXMT_IP_ECN          OXMatchFields = 18
+	PXMT_IP_PROTO        OXMatchFields = 20
+	PXMT_IPV4_SRC        OXMatchFields = 22
+	PXMT_IPV4_SRC_MASKED OXMatchFields = 23
+	PXMT_IPV4_DST        OXMatchFields = 24
+	PXMT_IPV4_DST_MASKED OXMatchFields = 25
+	PXMT_TCP_SRC         OXMatchFields = 26
+	PXMT_TCP_DST         OXMatchFields = 28
+	PXMT_UDP_SRC         OXMatchFields = 30
+	PXMT_UDP_DST         OXMatchFields = 32
+	PXMT_SCTP_SRC        OXMatchFields = 34
+	PXMT_SCTP_DST        OXMatchFields = 36
+	PXMT_ICMPV4_TYPE     OXMatchFields = 38
+	PXMT_ICMPV4_CODE     OXMatchFields = 40
+	PXMT_ARP_OP          OXMatchFields = 42
+	PXMT_ARP_SPA         OXMatchFields = 44
+	PXMT_ARP_TPA         OXMatchFields = 46
+	PXMT_ARP_SHA         OXMatchFields = 48
+	PXMT_ARP_THA         OXMatchFields = 50
+	PXMT_IPV6_SRC        OXMatchFields = 52
+	PXMT_IPV6_SRC_MASKED OXMatchFields = 53
+	PXMT_IPV6_DST        OXMatchFields = 54
+	PXMT_IPV6_DST_MASKED OXMatchFields = 55
+	PXMT_IPV6_FLABEL     OXMatchFields = 56
+	PXMT_ICMPV6_TYPE     OXMatchFields = 58
+	PXMT_ICMPV6_CODE     OXMatchFields = 60
+	PXMT_IPV6_ND_TARGET  OXMatchFields = 62
+	PXMT_IPV6_ND_SLL     OXMatchFields = 64
+	PXMT_IPV6_ND_TLL     OXMatchFields = 66
+	PXMT_MPLS_LABEL      OXMatchFields = 68
+	PXMT_MPLS_TC         OXMatchFields = 70
+)
+
+type MatchType int
+
+const (
+	PMT_STANDARD MatchType = 0
+	PMT_OXM      MatchType = 1
+)
+
+type PacketInReason int
+
+const (
+	PR_NO_MATCH PacketInReason = 0
+	PR_ACTION   PacketInReason = 1
 )
 
 type FlowModFlags int
@@ -349,13 +359,15 @@ const (
 type StatsTypes int
 
 const (
-	PST_DESC      StatsTypes = 0
-	PST_FLOW      StatsTypes = 1
-	PST_AGGREGATE StatsTypes = 2
-	PST_TABLE     StatsTypes = 3
-	PST_PORT      StatsTypes = 4
-	PST_QUEUE     StatsTypes = 5
-	PST_VENDOR    StatsTypes = 65535
+	PST_DESC         StatsTypes = 0
+	PST_FLOW         StatsTypes = 1
+	PST_AGGREGATE    StatsTypes = 2
+	PST_TABLE        StatsTypes = 3
+	PST_PORT         StatsTypes = 4
+	PST_QUEUE        StatsTypes = 5
+	OFPST_GROUP      StatsTypes = 6
+	OFPST_GROUP_DESC StatsTypes = 7
+	PST_EXPERIMENTER StatsTypes = 65535
 )
 
 type StatsReplyFlags int
@@ -376,6 +388,15 @@ type QueueProperties int
 const (
 	PQT_NONE     QueueProperties = 0
 	PQT_MIN_RATE QueueProperties = 1
+)
+
+type ControllerRole int
+
+const (
+	ROLE_NOCHANGE ControllerRole = 0
+	ROLE_EQUAL    ControllerRole = 1
+	ROLE_MASTER   ControllerRole = 2
+	ROLE_SLAVE    ControllerRole = 3
 )
 
 func NewHeader12WithBuf(b []byte) Header12 {
@@ -2431,7 +2452,8 @@ func (this FeaturesReply) PortsOffset() int {
 
 func (this FeaturesReply) PortsSize() int {
 	offset := this.PortsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewPortStatusWithBuf(b []byte) PortStatus {
@@ -2946,274 +2968,6 @@ func (this *PortMod) SetPad(p [4]uint8) {
 func (this PortMod) PadOffset() int {
 	offset := 28
 	return offset
-}
-
-func NewPacketInWithBuf(b []byte) PacketIn {
-	return PacketIn{Header12{of.Header{packet.Packet{Buf: b}}}}
-}
-
-func NewPacketIn() PacketIn {
-	s := 18
-	b := make([]byte, s)
-	p := PacketIn{Header12{of.Header{packet.Packet{Buf: b}}}}
-	p.Init()
-	return p
-}
-
-type PacketIn struct {
-	Header12
-}
-
-func (this PacketIn) minSize() int {
-	return 18
-}
-
-func (this PacketIn) Clone() (PacketIn, error) {
-	var newBuf bytes.Buffer
-	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
-	if err != nil {
-		return NewPacketIn(), err
-	}
-
-	return NewPacketInWithBuf(newBuf.Bytes()), nil
-}
-
-type PacketInConn struct {
-	net.Conn
-	w      *bufio.Writer
-	buf    []byte
-	offset int
-}
-
-func NewPacketInConn(c net.Conn) PacketInConn {
-	return PacketInConn{
-		Conn: c,
-		w:    bufio.NewWriter(c),
-		buf:  make([]byte, packet.DefaultBufSize),
-	}
-}
-
-func (c *PacketInConn) WritePacketIn(pkt PacketIn) error {
-	s := pkt.Size()
-	b := pkt.Buffer()[:s]
-	n := 0
-	for s > 0 {
-		var err error
-		if n, err = c.w.Write(b); err != nil {
-			return fmt.Errorf("Error in write: %v", err)
-		}
-		s -= n
-	}
-
-	return nil
-}
-
-func (c *PacketInConn) WritePacketIns(pkts []PacketIn) error {
-	for _, p := range pkts {
-		if err := c.WritePacketIn(p); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (c *PacketInConn) Flush() error {
-	return c.w.Flush()
-}
-
-func (c *PacketInConn) ReadPacketIn() (PacketIn, error) {
-	pkts := make([]PacketIn, 1)
-	_, err := c.ReadPacketIns(pkts)
-	if err != nil {
-		return NewPacketIn(), err
-	}
-
-	return pkts[0], nil
-}
-
-func (c *PacketInConn) ReadPacketIns(pkts []PacketIn) (int, error) {
-	if len(c.buf) == c.offset {
-		newSize := packet.DefaultBufSize
-		if newSize < len(c.buf) {
-			newSize = 2 * len(c.buf)
-		}
-
-		buf := make([]byte, newSize)
-		copy(buf, c.buf[:c.offset])
-		c.buf = buf
-	}
-
-	r, err := c.Conn.Read(c.buf[c.offset:])
-	if err != nil {
-		return 0, err
-	}
-
-	r += c.offset
-
-	s := 0
-	n := 0
-	for i := range pkts {
-		p := NewPacketInWithBuf(c.buf[s:])
-
-		pSize := p.Size()
-		if pSize == 0 || r < s+pSize {
-			break
-		}
-
-		pkts[i] = p
-		s += pSize
-		n++
-	}
-
-	c.offset = r - s
-	if c.offset < 0 {
-		panic("Invalid value for offset")
-	}
-
-	c.buf = c.buf[s:]
-	return n, nil
-}
-
-func (this *PacketIn) Init() {
-	this.Header12.Init()
-	this.SetLength(uint16(this.minSize()))
-	// Invariants.
-	this.SetType(uint8(10))   // type
-	this.SetVersion(uint8(3)) // version
-}
-
-func (this PacketIn) Size() int {
-	if len(this.Buf) < this.minSize() {
-		return 0
-	}
-
-	size := int(this.Length())
-	return size
-}
-
-func ToPacketIn(p Header12) (PacketIn, error) {
-	if !IsPacketIn(p) {
-		return NewPacketInWithBuf(nil), errors.New("Cannot convert to of12.PacketIn")
-	}
-
-	return NewPacketInWithBuf(p.Buf), nil
-}
-
-func IsPacketIn(p Header12) bool {
-	return p.Type() == 10 && true
-}
-
-func (this PacketIn) BufferId() uint32 {
-	offset := this.BufferIdOffset()
-	res := binary.BigEndian.Uint32(this.Buf[offset:])
-	return res
-}
-
-func (this *PacketIn) SetBufferId(b uint32) {
-	offset := this.BufferIdOffset()
-	binary.BigEndian.PutUint32(this.Buf[offset:], b)
-	offset += 4
-}
-
-func (this PacketIn) BufferIdOffset() int {
-	offset := 8
-	return offset
-}
-
-func (this PacketIn) TotalLen() uint16 {
-	offset := this.TotalLenOffset()
-	res := binary.BigEndian.Uint16(this.Buf[offset:])
-	return res
-}
-
-func (this *PacketIn) SetTotalLen(t uint16) {
-	offset := this.TotalLenOffset()
-	binary.BigEndian.PutUint16(this.Buf[offset:], t)
-	offset += 2
-}
-
-func (this PacketIn) TotalLenOffset() int {
-	offset := 12
-	return offset
-}
-
-func (this PacketIn) InPort() uint16 {
-	offset := this.InPortOffset()
-	res := binary.BigEndian.Uint16(this.Buf[offset:])
-	return res
-}
-
-func (this *PacketIn) SetInPort(i uint16) {
-	offset := this.InPortOffset()
-	binary.BigEndian.PutUint16(this.Buf[offset:], i)
-	offset += 2
-}
-
-func (this PacketIn) InPortOffset() int {
-	offset := 14
-	return offset
-}
-
-func (this PacketIn) Reason() uint8 {
-	offset := this.ReasonOffset()
-	res := uint8(this.Buf[offset])
-	return res
-}
-
-func (this *PacketIn) SetReason(r uint8) {
-	offset := this.ReasonOffset()
-	this.Buf[offset] = byte(r)
-	offset++
-}
-
-func (this PacketIn) ReasonOffset() int {
-	offset := 16
-	return offset
-}
-
-func (this PacketIn) Pad() uint8 {
-	offset := this.PadOffset()
-	res := uint8(this.Buf[offset])
-	return res
-}
-
-func (this *PacketIn) SetPad(p uint8) {
-	offset := this.PadOffset()
-	this.Buf[offset] = byte(p)
-	offset++
-}
-
-func (this PacketIn) PadOffset() int {
-	offset := 17
-	return offset
-}
-
-func (this PacketIn) Data() []uint8 {
-	offset := this.DataOffset()
-	packet_size := this.Size()
-	size := packet_size - offset
-	return []uint8(this.Buf[offset : offset+size])
-}
-
-func (this *PacketIn) AddData(d uint8) {
-	offset := this.DataOffset()
-	offset += this.DataSize()
-	size := 1
-	pSize := this.Size()
-	this.OpenGap(offset, size, pSize)
-	this.SetLength(uint16(pSize + size))
-	this.Buf[offset] = byte(d)
-	offset++
-}
-
-func (this PacketIn) DataOffset() int {
-	offset := 18
-	return offset
-}
-
-func (this PacketIn) DataSize() int {
-	offset := this.DataOffset()
-	return this.Size() - offset
 }
 
 func NewActionWithBuf(b []byte) Action {
@@ -4035,7 +3789,8 @@ func (this ApplyActions) ActionsOffset() int {
 
 func (this ApplyActions) ActionsSize() int {
 	offset := this.ActionsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewPacketOutWithBuf(b []byte) PacketOut {
@@ -4344,7 +4099,8 @@ func (this PacketOut) DataOffset() int {
 
 func (this PacketOut) DataSize() int {
 	offset := this.DataOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewOxmFieldWithBuf(b []byte) OxmField {
@@ -4352,7 +4108,7 @@ func NewOxmFieldWithBuf(b []byte) OxmField {
 }
 
 func NewOxmField() OxmField {
-	s := 4
+	s := packet.PaddedSize(4, 1, 4)
 	b := make([]byte, s)
 	p := OxmField{packet.Packet{Buf: b}}
 	p.Init()
@@ -4474,11 +4230,17 @@ func (c *OxmFieldConn) ReadOxmFields(pkts []OxmField) (int, error) {
 }
 
 func (this *OxmField) Init() {
+	this.SetOxmLength(uint8(this.minSize()))
 	// Invariants.
 }
 
 func (this OxmField) Size() int {
-	return 4
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
 }
 
 func ToOxmField(p packet.Packet) (OxmField, error) {
@@ -4549,7 +4311,7 @@ func NewOxmInPortWithBuf(b []byte) OxmInPort {
 }
 
 func NewOxmInPort() OxmInPort {
-	s := 8
+	s := packet.PaddedSize(8, 1, 4)
 	b := make([]byte, s)
 	p := OxmInPort{OxmField{packet.Packet{Buf: b}}}
 	p.Init()
@@ -4672,6 +4434,7 @@ func (c *OxmInPortConn) ReadOxmInPorts(pkts []OxmInPort) (int, error) {
 
 func (this *OxmInPort) Init() {
 	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
 	this.SetOxmField(uint8(0))      // oxm_field
@@ -4679,7 +4442,12 @@ func (this *OxmInPort) Init() {
 }
 
 func (this OxmInPort) Size() int {
-	return 8
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
 }
 
 func ToOxmInPort(p OxmField) (OxmInPort, error) {
@@ -4716,7 +4484,7 @@ func NewOxmEthDstWithBuf(b []byte) OxmEthDst {
 }
 
 func NewOxmEthDst() OxmEthDst {
-	s := 10
+	s := packet.PaddedSize(10, 1, 4)
 	b := make([]byte, s)
 	p := OxmEthDst{OxmField{packet.Packet{Buf: b}}}
 	p.Init()
@@ -4839,6 +4607,7 @@ func (c *OxmEthDstConn) ReadOxmEthDsts(pkts []OxmEthDst) (int, error) {
 
 func (this *OxmEthDst) Init() {
 	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
 	this.SetOxmField(uint8(6))      // oxm_field
@@ -4846,7 +4615,12 @@ func (this *OxmEthDst) Init() {
 }
 
 func (this OxmEthDst) Size() int {
-	return 10
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
 }
 
 func ToOxmEthDst(p OxmField) (OxmEthDst, error) {
@@ -4900,7 +4674,7 @@ func NewOxmEthDstMaskedWithBuf(b []byte) OxmEthDstMasked {
 }
 
 func NewOxmEthDstMasked() OxmEthDstMasked {
-	s := 16
+	s := packet.PaddedSize(16, 1, 4)
 	b := make([]byte, s)
 	p := OxmEthDstMasked{OxmField{packet.Packet{Buf: b}}}
 	p.Init()
@@ -5023,6 +4797,7 @@ func (c *OxmEthDstMaskedConn) ReadOxmEthDstMaskeds(pkts []OxmEthDstMasked) (int,
 
 func (this *OxmEthDstMasked) Init() {
 	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
 	this.SetOxmField(uint8(7))      // oxm_field
@@ -5030,7 +4805,12 @@ func (this *OxmEthDstMasked) Init() {
 }
 
 func (this OxmEthDstMasked) Size() int {
-	return 16
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
 }
 
 func ToOxmEthDstMasked(p OxmField) (OxmEthDstMasked, error) {
@@ -5118,7 +4898,7 @@ func NewOxmEthSrcWithBuf(b []byte) OxmEthSrc {
 }
 
 func NewOxmEthSrc() OxmEthSrc {
-	s := 10
+	s := packet.PaddedSize(10, 1, 4)
 	b := make([]byte, s)
 	p := OxmEthSrc{OxmField{packet.Packet{Buf: b}}}
 	p.Init()
@@ -5241,6 +5021,7 @@ func (c *OxmEthSrcConn) ReadOxmEthSrcs(pkts []OxmEthSrc) (int, error) {
 
 func (this *OxmEthSrc) Init() {
 	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
 	this.SetOxmField(uint8(8))      // oxm_field
@@ -5248,7 +5029,12 @@ func (this *OxmEthSrc) Init() {
 }
 
 func (this OxmEthSrc) Size() int {
-	return 10
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
 }
 
 func ToOxmEthSrc(p OxmField) (OxmEthSrc, error) {
@@ -5302,7 +5088,7 @@ func NewOxmEthSrcMaskedWithBuf(b []byte) OxmEthSrcMasked {
 }
 
 func NewOxmEthSrcMasked() OxmEthSrcMasked {
-	s := 16
+	s := packet.PaddedSize(16, 1, 4)
 	b := make([]byte, s)
 	p := OxmEthSrcMasked{OxmField{packet.Packet{Buf: b}}}
 	p.Init()
@@ -5425,6 +5211,7 @@ func (c *OxmEthSrcMaskedConn) ReadOxmEthSrcMaskeds(pkts []OxmEthSrcMasked) (int,
 
 func (this *OxmEthSrcMasked) Init() {
 	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
 	// Invariants.
 	this.SetOxmClass(uint16(32768)) // oxm_class
 	this.SetOxmField(uint8(9))      // oxm_field
@@ -5432,7 +5219,12 @@ func (this *OxmEthSrcMasked) Init() {
 }
 
 func (this OxmEthSrcMasked) Size() int {
-	return 16
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
 }
 
 func ToOxmEthSrcMasked(p OxmField) (OxmEthSrcMasked, error) {
@@ -5515,12 +5307,2394 @@ func (this OxmEthSrcMasked) MaskOffset() int {
 	return offset
 }
 
+func NewOxmEthTypeWithBuf(b []byte) OxmEthType {
+	return OxmEthType{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmEthType() OxmEthType {
+	s := packet.PaddedSize(6, 1, 4)
+	b := make([]byte, s)
+	p := OxmEthType{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmEthType struct {
+	OxmField
+}
+
+func (this OxmEthType) minSize() int {
+	return 6
+}
+
+func (this OxmEthType) Clone() (OxmEthType, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmEthType(), err
+	}
+
+	return NewOxmEthTypeWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmEthTypeConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmEthTypeConn(c net.Conn) OxmEthTypeConn {
+	return OxmEthTypeConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmEthTypeConn) WriteOxmEthType(pkt OxmEthType) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmEthTypeConn) WriteOxmEthTypes(pkts []OxmEthType) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmEthType(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmEthTypeConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmEthTypeConn) ReadOxmEthType() (OxmEthType, error) {
+	pkts := make([]OxmEthType, 1)
+	_, err := c.ReadOxmEthTypes(pkts)
+	if err != nil {
+		return NewOxmEthType(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmEthTypeConn) ReadOxmEthTypes(pkts []OxmEthType) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmEthTypeWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmEthType) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(10))     // oxm_field
+	this.SetOxmLength(uint8(2))     // oxm_length
+}
+
+func (this OxmEthType) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmEthType(p OxmField) (OxmEthType, error) {
+	if !IsOxmEthType(p) {
+		return NewOxmEthTypeWithBuf(nil), errors.New("Cannot convert to of12.OxmEthType")
+	}
+
+	return NewOxmEthTypeWithBuf(p.Buf), nil
+}
+
+func IsOxmEthType(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 10 && p.OxmLength() == 2 && true
+}
+
+func (this OxmEthType) Type() uint16 {
+	offset := this.TypeOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *OxmEthType) SetType(t uint16) {
+	offset := this.TypeOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], t)
+	offset += 2
+}
+
+func (this OxmEthType) TypeOffset() int {
+	offset := 4
+	return offset
+}
+
+func NewOxmIpProtoWithBuf(b []byte) OxmIpProto {
+	return OxmIpProto{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpProto() OxmIpProto {
+	s := packet.PaddedSize(5, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpProto{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpProto struct {
+	OxmField
+}
+
+func (this OxmIpProto) minSize() int {
+	return 5
+}
+
+func (this OxmIpProto) Clone() (OxmIpProto, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpProto(), err
+	}
+
+	return NewOxmIpProtoWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpProtoConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpProtoConn(c net.Conn) OxmIpProtoConn {
+	return OxmIpProtoConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpProtoConn) WriteOxmIpProto(pkt OxmIpProto) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpProtoConn) WriteOxmIpProtos(pkts []OxmIpProto) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpProto(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpProtoConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpProtoConn) ReadOxmIpProto() (OxmIpProto, error) {
+	pkts := make([]OxmIpProto, 1)
+	_, err := c.ReadOxmIpProtos(pkts)
+	if err != nil {
+		return NewOxmIpProto(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpProtoConn) ReadOxmIpProtos(pkts []OxmIpProto) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpProtoWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpProto) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(20))     // oxm_field
+	this.SetOxmLength(uint8(1))     // oxm_length
+}
+
+func (this OxmIpProto) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpProto(p OxmField) (OxmIpProto, error) {
+	if !IsOxmIpProto(p) {
+		return NewOxmIpProtoWithBuf(nil), errors.New("Cannot convert to of12.OxmIpProto")
+	}
+
+	return NewOxmIpProtoWithBuf(p.Buf), nil
+}
+
+func IsOxmIpProto(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 20 && p.OxmLength() == 1 && true
+}
+
+func (this OxmIpProto) Proto() uint8 {
+	offset := this.ProtoOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *OxmIpProto) SetProto(p uint8) {
+	offset := this.ProtoOffset()
+	this.Buf[offset] = byte(p)
+	offset++
+}
+
+func (this OxmIpProto) ProtoOffset() int {
+	offset := 4
+	return offset
+}
+
+func NewOxmIpV4SrcWithBuf(b []byte) OxmIpV4Src {
+	return OxmIpV4Src{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV4Src() OxmIpV4Src {
+	s := packet.PaddedSize(12, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV4Src{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV4Src struct {
+	OxmField
+}
+
+func (this OxmIpV4Src) minSize() int {
+	return 12
+}
+
+func (this OxmIpV4Src) Clone() (OxmIpV4Src, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV4Src(), err
+	}
+
+	return NewOxmIpV4SrcWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV4SrcConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV4SrcConn(c net.Conn) OxmIpV4SrcConn {
+	return OxmIpV4SrcConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV4SrcConn) WriteOxmIpV4Src(pkt OxmIpV4Src) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV4SrcConn) WriteOxmIpV4Srcs(pkts []OxmIpV4Src) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV4Src(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV4SrcConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV4SrcConn) ReadOxmIpV4Src() (OxmIpV4Src, error) {
+	pkts := make([]OxmIpV4Src, 1)
+	_, err := c.ReadOxmIpV4Srcs(pkts)
+	if err != nil {
+		return NewOxmIpV4Src(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV4SrcConn) ReadOxmIpV4Srcs(pkts []OxmIpV4Src) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV4SrcWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV4Src) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(22))     // oxm_field
+	this.SetOxmLength(uint8(4))     // oxm_length
+}
+
+func (this OxmIpV4Src) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV4Src(p OxmField) (OxmIpV4Src, error) {
+	if !IsOxmIpV4Src(p) {
+		return NewOxmIpV4SrcWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV4Src")
+	}
+
+	return NewOxmIpV4SrcWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV4Src(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 22 && p.OxmLength() == 4 && true
+}
+
+func (this OxmIpV4Src) Addr() [4]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4Src) SetAddr(a [4]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4Src) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func (this OxmIpV4Src) Mask() [4]uint8 {
+	offset := this.MaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4Src) SetMask(m [4]uint8) {
+	offset := this.MaskOffset()
+	for _, e := range m {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4Src) MaskOffset() int {
+	offset := 8
+	return offset
+}
+
+func NewOxmIpV4SrcMaskedWithBuf(b []byte) OxmIpV4SrcMasked {
+	return OxmIpV4SrcMasked{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV4SrcMasked() OxmIpV4SrcMasked {
+	s := packet.PaddedSize(12, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV4SrcMasked{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV4SrcMasked struct {
+	OxmField
+}
+
+func (this OxmIpV4SrcMasked) minSize() int {
+	return 12
+}
+
+func (this OxmIpV4SrcMasked) Clone() (OxmIpV4SrcMasked, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV4SrcMasked(), err
+	}
+
+	return NewOxmIpV4SrcMaskedWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV4SrcMaskedConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV4SrcMaskedConn(c net.Conn) OxmIpV4SrcMaskedConn {
+	return OxmIpV4SrcMaskedConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV4SrcMaskedConn) WriteOxmIpV4SrcMasked(pkt OxmIpV4SrcMasked) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV4SrcMaskedConn) WriteOxmIpV4SrcMaskeds(pkts []OxmIpV4SrcMasked) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV4SrcMasked(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV4SrcMaskedConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV4SrcMaskedConn) ReadOxmIpV4SrcMasked() (OxmIpV4SrcMasked, error) {
+	pkts := make([]OxmIpV4SrcMasked, 1)
+	_, err := c.ReadOxmIpV4SrcMaskeds(pkts)
+	if err != nil {
+		return NewOxmIpV4SrcMasked(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV4SrcMaskedConn) ReadOxmIpV4SrcMaskeds(pkts []OxmIpV4SrcMasked) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV4SrcMaskedWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV4SrcMasked) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(23))     // oxm_field
+	this.SetOxmLength(uint8(8))     // oxm_length
+}
+
+func (this OxmIpV4SrcMasked) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV4SrcMasked(p OxmField) (OxmIpV4SrcMasked, error) {
+	if !IsOxmIpV4SrcMasked(p) {
+		return NewOxmIpV4SrcMaskedWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV4SrcMasked")
+	}
+
+	return NewOxmIpV4SrcMaskedWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV4SrcMasked(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 23 && p.OxmLength() == 8 && true
+}
+
+func (this OxmIpV4SrcMasked) Addr() [4]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4SrcMasked) SetAddr(a [4]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4SrcMasked) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func (this OxmIpV4SrcMasked) Mask() [4]uint8 {
+	offset := this.MaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4SrcMasked) SetMask(m [4]uint8) {
+	offset := this.MaskOffset()
+	for _, e := range m {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4SrcMasked) MaskOffset() int {
+	offset := 8
+	return offset
+}
+
+func NewOxmIpV4DstWithBuf(b []byte) OxmIpV4Dst {
+	return OxmIpV4Dst{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV4Dst() OxmIpV4Dst {
+	s := packet.PaddedSize(8, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV4Dst{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV4Dst struct {
+	OxmField
+}
+
+func (this OxmIpV4Dst) minSize() int {
+	return 8
+}
+
+func (this OxmIpV4Dst) Clone() (OxmIpV4Dst, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV4Dst(), err
+	}
+
+	return NewOxmIpV4DstWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV4DstConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV4DstConn(c net.Conn) OxmIpV4DstConn {
+	return OxmIpV4DstConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV4DstConn) WriteOxmIpV4Dst(pkt OxmIpV4Dst) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV4DstConn) WriteOxmIpV4Dsts(pkts []OxmIpV4Dst) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV4Dst(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV4DstConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV4DstConn) ReadOxmIpV4Dst() (OxmIpV4Dst, error) {
+	pkts := make([]OxmIpV4Dst, 1)
+	_, err := c.ReadOxmIpV4Dsts(pkts)
+	if err != nil {
+		return NewOxmIpV4Dst(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV4DstConn) ReadOxmIpV4Dsts(pkts []OxmIpV4Dst) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV4DstWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV4Dst) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(24))     // oxm_field
+	this.SetOxmLength(uint8(4))     // oxm_length
+}
+
+func (this OxmIpV4Dst) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV4Dst(p OxmField) (OxmIpV4Dst, error) {
+	if !IsOxmIpV4Dst(p) {
+		return NewOxmIpV4DstWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV4Dst")
+	}
+
+	return NewOxmIpV4DstWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV4Dst(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 24 && p.OxmLength() == 4 && true
+}
+
+func (this OxmIpV4Dst) Addr() [4]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4Dst) SetAddr(a [4]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4Dst) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func NewOxmIpV4DstMaskedWithBuf(b []byte) OxmIpV4DstMasked {
+	return OxmIpV4DstMasked{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV4DstMasked() OxmIpV4DstMasked {
+	s := packet.PaddedSize(12, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV4DstMasked{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV4DstMasked struct {
+	OxmField
+}
+
+func (this OxmIpV4DstMasked) minSize() int {
+	return 12
+}
+
+func (this OxmIpV4DstMasked) Clone() (OxmIpV4DstMasked, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV4DstMasked(), err
+	}
+
+	return NewOxmIpV4DstMaskedWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV4DstMaskedConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV4DstMaskedConn(c net.Conn) OxmIpV4DstMaskedConn {
+	return OxmIpV4DstMaskedConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV4DstMaskedConn) WriteOxmIpV4DstMasked(pkt OxmIpV4DstMasked) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV4DstMaskedConn) WriteOxmIpV4DstMaskeds(pkts []OxmIpV4DstMasked) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV4DstMasked(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV4DstMaskedConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV4DstMaskedConn) ReadOxmIpV4DstMasked() (OxmIpV4DstMasked, error) {
+	pkts := make([]OxmIpV4DstMasked, 1)
+	_, err := c.ReadOxmIpV4DstMaskeds(pkts)
+	if err != nil {
+		return NewOxmIpV4DstMasked(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV4DstMaskedConn) ReadOxmIpV4DstMaskeds(pkts []OxmIpV4DstMasked) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV4DstMaskedWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV4DstMasked) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(25))     // oxm_field
+	this.SetOxmLength(uint8(8))     // oxm_length
+}
+
+func (this OxmIpV4DstMasked) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV4DstMasked(p OxmField) (OxmIpV4DstMasked, error) {
+	if !IsOxmIpV4DstMasked(p) {
+		return NewOxmIpV4DstMaskedWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV4DstMasked")
+	}
+
+	return NewOxmIpV4DstMaskedWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV4DstMasked(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 25 && p.OxmLength() == 8 && true
+}
+
+func (this OxmIpV4DstMasked) Addr() [4]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4DstMasked) SetAddr(a [4]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4DstMasked) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func (this OxmIpV4DstMasked) Mask() [4]uint8 {
+	offset := this.MaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV4DstMasked) SetMask(m [4]uint8) {
+	offset := this.MaskOffset()
+	for _, e := range m {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV4DstMasked) MaskOffset() int {
+	offset := 8
+	return offset
+}
+
+func NewOxmIpV6SrcWithBuf(b []byte) OxmIpV6Src {
+	return OxmIpV6Src{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV6Src() OxmIpV6Src {
+	s := packet.PaddedSize(20, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV6Src{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV6Src struct {
+	OxmField
+}
+
+func (this OxmIpV6Src) minSize() int {
+	return 20
+}
+
+func (this OxmIpV6Src) Clone() (OxmIpV6Src, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV6Src(), err
+	}
+
+	return NewOxmIpV6SrcWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV6SrcConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV6SrcConn(c net.Conn) OxmIpV6SrcConn {
+	return OxmIpV6SrcConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV6SrcConn) WriteOxmIpV6Src(pkt OxmIpV6Src) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV6SrcConn) WriteOxmIpV6Srcs(pkts []OxmIpV6Src) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV6Src(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV6SrcConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV6SrcConn) ReadOxmIpV6Src() (OxmIpV6Src, error) {
+	pkts := make([]OxmIpV6Src, 1)
+	_, err := c.ReadOxmIpV6Srcs(pkts)
+	if err != nil {
+		return NewOxmIpV6Src(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV6SrcConn) ReadOxmIpV6Srcs(pkts []OxmIpV6Src) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV6SrcWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV6Src) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(52))     // oxm_field
+	this.SetOxmLength(uint8(16))    // oxm_length
+}
+
+func (this OxmIpV6Src) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV6Src(p OxmField) (OxmIpV6Src, error) {
+	if !IsOxmIpV6Src(p) {
+		return NewOxmIpV6SrcWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV6Src")
+	}
+
+	return NewOxmIpV6SrcWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV6Src(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 52 && p.OxmLength() == 16 && true
+}
+
+func (this OxmIpV6Src) Addr() [16]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 16
+	i := 0
+	var res [16]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV6Src) SetAddr(a [16]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV6Src) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func NewOxmIpV6SrcMaskedWithBuf(b []byte) OxmIpV6SrcMasked {
+	return OxmIpV6SrcMasked{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV6SrcMasked() OxmIpV6SrcMasked {
+	s := packet.PaddedSize(36, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV6SrcMasked{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV6SrcMasked struct {
+	OxmField
+}
+
+func (this OxmIpV6SrcMasked) minSize() int {
+	return 36
+}
+
+func (this OxmIpV6SrcMasked) Clone() (OxmIpV6SrcMasked, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV6SrcMasked(), err
+	}
+
+	return NewOxmIpV6SrcMaskedWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV6SrcMaskedConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV6SrcMaskedConn(c net.Conn) OxmIpV6SrcMaskedConn {
+	return OxmIpV6SrcMaskedConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV6SrcMaskedConn) WriteOxmIpV6SrcMasked(pkt OxmIpV6SrcMasked) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV6SrcMaskedConn) WriteOxmIpV6SrcMaskeds(pkts []OxmIpV6SrcMasked) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV6SrcMasked(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV6SrcMaskedConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV6SrcMaskedConn) ReadOxmIpV6SrcMasked() (OxmIpV6SrcMasked, error) {
+	pkts := make([]OxmIpV6SrcMasked, 1)
+	_, err := c.ReadOxmIpV6SrcMaskeds(pkts)
+	if err != nil {
+		return NewOxmIpV6SrcMasked(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV6SrcMaskedConn) ReadOxmIpV6SrcMaskeds(pkts []OxmIpV6SrcMasked) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV6SrcMaskedWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV6SrcMasked) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(53))     // oxm_field
+	this.SetOxmLength(uint8(32))    // oxm_length
+}
+
+func (this OxmIpV6SrcMasked) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV6SrcMasked(p OxmField) (OxmIpV6SrcMasked, error) {
+	if !IsOxmIpV6SrcMasked(p) {
+		return NewOxmIpV6SrcMaskedWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV6SrcMasked")
+	}
+
+	return NewOxmIpV6SrcMaskedWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV6SrcMasked(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 53 && p.OxmLength() == 32 && true
+}
+
+func (this OxmIpV6SrcMasked) Addr() [16]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 16
+	i := 0
+	var res [16]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV6SrcMasked) SetAddr(a [16]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV6SrcMasked) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func (this OxmIpV6SrcMasked) Mask() [16]uint8 {
+	offset := this.MaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 16
+	i := 0
+	var res [16]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV6SrcMasked) SetMask(m [16]uint8) {
+	offset := this.MaskOffset()
+	for _, e := range m {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV6SrcMasked) MaskOffset() int {
+	offset := 20
+	return offset
+}
+
+func NewOxmIpV6DstWithBuf(b []byte) OxmIpV6Dst {
+	return OxmIpV6Dst{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV6Dst() OxmIpV6Dst {
+	s := packet.PaddedSize(20, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV6Dst{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV6Dst struct {
+	OxmField
+}
+
+func (this OxmIpV6Dst) minSize() int {
+	return 20
+}
+
+func (this OxmIpV6Dst) Clone() (OxmIpV6Dst, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV6Dst(), err
+	}
+
+	return NewOxmIpV6DstWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV6DstConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV6DstConn(c net.Conn) OxmIpV6DstConn {
+	return OxmIpV6DstConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV6DstConn) WriteOxmIpV6Dst(pkt OxmIpV6Dst) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV6DstConn) WriteOxmIpV6Dsts(pkts []OxmIpV6Dst) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV6Dst(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV6DstConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV6DstConn) ReadOxmIpV6Dst() (OxmIpV6Dst, error) {
+	pkts := make([]OxmIpV6Dst, 1)
+	_, err := c.ReadOxmIpV6Dsts(pkts)
+	if err != nil {
+		return NewOxmIpV6Dst(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV6DstConn) ReadOxmIpV6Dsts(pkts []OxmIpV6Dst) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV6DstWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV6Dst) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(54))     // oxm_field
+	this.SetOxmLength(uint8(16))    // oxm_length
+}
+
+func (this OxmIpV6Dst) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV6Dst(p OxmField) (OxmIpV6Dst, error) {
+	if !IsOxmIpV6Dst(p) {
+		return NewOxmIpV6DstWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV6Dst")
+	}
+
+	return NewOxmIpV6DstWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV6Dst(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 54 && p.OxmLength() == 16 && true
+}
+
+func (this OxmIpV6Dst) Addr() [16]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 16
+	i := 0
+	var res [16]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV6Dst) SetAddr(a [16]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV6Dst) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func NewOxmIpV6DstMaskedWithBuf(b []byte) OxmIpV6DstMasked {
+	return OxmIpV6DstMasked{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmIpV6DstMasked() OxmIpV6DstMasked {
+	s := packet.PaddedSize(36, 1, 4)
+	b := make([]byte, s)
+	p := OxmIpV6DstMasked{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmIpV6DstMasked struct {
+	OxmField
+}
+
+func (this OxmIpV6DstMasked) minSize() int {
+	return 36
+}
+
+func (this OxmIpV6DstMasked) Clone() (OxmIpV6DstMasked, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmIpV6DstMasked(), err
+	}
+
+	return NewOxmIpV6DstMaskedWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmIpV6DstMaskedConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmIpV6DstMaskedConn(c net.Conn) OxmIpV6DstMaskedConn {
+	return OxmIpV6DstMaskedConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmIpV6DstMaskedConn) WriteOxmIpV6DstMasked(pkt OxmIpV6DstMasked) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmIpV6DstMaskedConn) WriteOxmIpV6DstMaskeds(pkts []OxmIpV6DstMasked) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmIpV6DstMasked(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmIpV6DstMaskedConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmIpV6DstMaskedConn) ReadOxmIpV6DstMasked() (OxmIpV6DstMasked, error) {
+	pkts := make([]OxmIpV6DstMasked, 1)
+	_, err := c.ReadOxmIpV6DstMaskeds(pkts)
+	if err != nil {
+		return NewOxmIpV6DstMasked(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmIpV6DstMaskedConn) ReadOxmIpV6DstMaskeds(pkts []OxmIpV6DstMasked) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmIpV6DstMaskedWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmIpV6DstMasked) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(55))     // oxm_field
+	this.SetOxmLength(uint8(32))    // oxm_length
+}
+
+func (this OxmIpV6DstMasked) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmIpV6DstMasked(p OxmField) (OxmIpV6DstMasked, error) {
+	if !IsOxmIpV6DstMasked(p) {
+		return NewOxmIpV6DstMaskedWithBuf(nil), errors.New("Cannot convert to of12.OxmIpV6DstMasked")
+	}
+
+	return NewOxmIpV6DstMaskedWithBuf(p.Buf), nil
+}
+
+func IsOxmIpV6DstMasked(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 55 && p.OxmLength() == 32 && true
+}
+
+func (this OxmIpV6DstMasked) Addr() [16]uint8 {
+	offset := this.AddrOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 16
+	i := 0
+	var res [16]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV6DstMasked) SetAddr(a [16]uint8) {
+	offset := this.AddrOffset()
+	for _, e := range a {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV6DstMasked) AddrOffset() int {
+	offset := 4
+	return offset
+}
+
+func (this OxmIpV6DstMasked) Mask() [16]uint8 {
+	offset := this.MaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 16
+	i := 0
+	var res [16]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *OxmIpV6DstMasked) SetMask(m [16]uint8) {
+	offset := this.MaskOffset()
+	for _, e := range m {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this OxmIpV6DstMasked) MaskOffset() int {
+	offset := 20
+	return offset
+}
+
+func NewOxmTcpSrcWithBuf(b []byte) OxmTcpSrc {
+	return OxmTcpSrc{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmTcpSrc() OxmTcpSrc {
+	s := packet.PaddedSize(6, 1, 4)
+	b := make([]byte, s)
+	p := OxmTcpSrc{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmTcpSrc struct {
+	OxmField
+}
+
+func (this OxmTcpSrc) minSize() int {
+	return 6
+}
+
+func (this OxmTcpSrc) Clone() (OxmTcpSrc, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmTcpSrc(), err
+	}
+
+	return NewOxmTcpSrcWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmTcpSrcConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmTcpSrcConn(c net.Conn) OxmTcpSrcConn {
+	return OxmTcpSrcConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmTcpSrcConn) WriteOxmTcpSrc(pkt OxmTcpSrc) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmTcpSrcConn) WriteOxmTcpSrcs(pkts []OxmTcpSrc) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmTcpSrc(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmTcpSrcConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmTcpSrcConn) ReadOxmTcpSrc() (OxmTcpSrc, error) {
+	pkts := make([]OxmTcpSrc, 1)
+	_, err := c.ReadOxmTcpSrcs(pkts)
+	if err != nil {
+		return NewOxmTcpSrc(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmTcpSrcConn) ReadOxmTcpSrcs(pkts []OxmTcpSrc) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmTcpSrcWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmTcpSrc) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(26))     // oxm_field
+	this.SetOxmLength(uint8(2))     // oxm_length
+}
+
+func (this OxmTcpSrc) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmTcpSrc(p OxmField) (OxmTcpSrc, error) {
+	if !IsOxmTcpSrc(p) {
+		return NewOxmTcpSrcWithBuf(nil), errors.New("Cannot convert to of12.OxmTcpSrc")
+	}
+
+	return NewOxmTcpSrcWithBuf(p.Buf), nil
+}
+
+func IsOxmTcpSrc(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 26 && p.OxmLength() == 2 && true
+}
+
+func (this OxmTcpSrc) Port() uint16 {
+	offset := this.PortOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *OxmTcpSrc) SetPort(p uint16) {
+	offset := this.PortOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], p)
+	offset += 2
+}
+
+func (this OxmTcpSrc) PortOffset() int {
+	offset := 4
+	return offset
+}
+
+func NewOxmTcpDstWithBuf(b []byte) OxmTcpDst {
+	return OxmTcpDst{OxmField{packet.Packet{Buf: b}}}
+}
+
+func NewOxmTcpDst() OxmTcpDst {
+	s := packet.PaddedSize(6, 1, 4)
+	b := make([]byte, s)
+	p := OxmTcpDst{OxmField{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OxmTcpDst struct {
+	OxmField
+}
+
+func (this OxmTcpDst) minSize() int {
+	return 6
+}
+
+func (this OxmTcpDst) Clone() (OxmTcpDst, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOxmTcpDst(), err
+	}
+
+	return NewOxmTcpDstWithBuf(newBuf.Bytes()), nil
+}
+
+type OxmTcpDstConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOxmTcpDstConn(c net.Conn) OxmTcpDstConn {
+	return OxmTcpDstConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OxmTcpDstConn) WriteOxmTcpDst(pkt OxmTcpDst) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OxmTcpDstConn) WriteOxmTcpDsts(pkts []OxmTcpDst) error {
+	for _, p := range pkts {
+		if err := c.WriteOxmTcpDst(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OxmTcpDstConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OxmTcpDstConn) ReadOxmTcpDst() (OxmTcpDst, error) {
+	pkts := make([]OxmTcpDst, 1)
+	_, err := c.ReadOxmTcpDsts(pkts)
+	if err != nil {
+		return NewOxmTcpDst(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OxmTcpDstConn) ReadOxmTcpDsts(pkts []OxmTcpDst) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOxmTcpDstWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OxmTcpDst) Init() {
+	this.OxmField.Init()
+	this.SetOxmLength(uint8(this.minSize()))
+	// Invariants.
+	this.SetOxmClass(uint16(32768)) // oxm_class
+	this.SetOxmField(uint8(28))     // oxm_field
+	this.SetOxmLength(uint8(2))     // oxm_length
+}
+
+func (this OxmTcpDst) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.OxmLength())
+	return packet.PaddedSize(size, 1, 4)
+}
+
+func ToOxmTcpDst(p OxmField) (OxmTcpDst, error) {
+	if !IsOxmTcpDst(p) {
+		return NewOxmTcpDstWithBuf(nil), errors.New("Cannot convert to of12.OxmTcpDst")
+	}
+
+	return NewOxmTcpDstWithBuf(p.Buf), nil
+}
+
+func IsOxmTcpDst(p OxmField) bool {
+	return p.OxmClass() == 32768 && p.OxmField() == 28 && p.OxmLength() == 2 && true
+}
+
+func (this OxmTcpDst) Port() uint16 {
+	offset := this.PortOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *OxmTcpDst) SetPort(p uint16) {
+	offset := this.PortOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], p)
+	offset += 2
+}
+
+func (this OxmTcpDst) PortOffset() int {
+	offset := 4
+	return offset
+}
+
 func NewMatchWithBuf(b []byte) Match {
 	return Match{packet.Packet{Buf: b}}
 }
 
 func NewMatch() Match {
-	s := packet.PaddedSize(4, 8)
+	s := packet.PaddedSize(4, 8, 0)
 	b := make([]byte, s)
 	p := Match{packet.Packet{Buf: b}}
 	p.Init()
@@ -5652,7 +7826,7 @@ func (this Match) Size() int {
 	}
 
 	size := int(this.Length())
-	return packet.PaddedSize(size, 8)
+	return packet.PaddedSize(size, 8, 0)
 }
 
 func ToMatch(p packet.Packet) (Match, error) {
@@ -5701,8 +7875,792 @@ func (this Match) LengthOffset() int {
 	return offset
 }
 
-func (this Match) OxmFields() []OxmField {
-	offset := this.OxmFieldsOffset()
+func NewStdMatchWithBuf(b []byte) StdMatch {
+	return StdMatch{Match{packet.Packet{Buf: b}}}
+}
+
+func NewStdMatch() StdMatch {
+	s := packet.PaddedSize(88, 8, 0)
+	b := make([]byte, s)
+	p := StdMatch{Match{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type StdMatch struct {
+	Match
+}
+
+func (this StdMatch) minSize() int {
+	return 88
+}
+
+func (this StdMatch) Clone() (StdMatch, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewStdMatch(), err
+	}
+
+	return NewStdMatchWithBuf(newBuf.Bytes()), nil
+}
+
+type StdMatchConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewStdMatchConn(c net.Conn) StdMatchConn {
+	return StdMatchConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *StdMatchConn) WriteStdMatch(pkt StdMatch) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *StdMatchConn) WriteStdMatchs(pkts []StdMatch) error {
+	for _, p := range pkts {
+		if err := c.WriteStdMatch(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *StdMatchConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *StdMatchConn) ReadStdMatch() (StdMatch, error) {
+	pkts := make([]StdMatch, 1)
+	_, err := c.ReadStdMatchs(pkts)
+	if err != nil {
+		return NewStdMatch(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *StdMatchConn) ReadStdMatchs(pkts []StdMatch) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewStdMatchWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *StdMatch) Init() {
+	this.Match.Init()
+	this.SetLength(uint16(this.minSize()))
+	// Invariants.
+	this.SetType(uint16(0)) // type
+}
+
+func (this StdMatch) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.Length())
+	return packet.PaddedSize(size, 8, 0)
+}
+
+func ToStdMatch(p Match) (StdMatch, error) {
+	if !IsStdMatch(p) {
+		return NewStdMatchWithBuf(nil), errors.New("Cannot convert to of12.StdMatch")
+	}
+
+	return NewStdMatchWithBuf(p.Buf), nil
+}
+
+func IsStdMatch(p Match) bool {
+	return p.Type() == 0 && true
+}
+
+func (this StdMatch) InPort() uint32 {
+	offset := this.InPortOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetInPort(i uint32) {
+	offset := this.InPortOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], i)
+	offset += 4
+}
+
+func (this StdMatch) InPortOffset() int {
+	offset := 4
+	return offset
+}
+
+func (this StdMatch) Wildcards() uint32 {
+	offset := this.WildcardsOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetWildcards(w uint32) {
+	offset := this.WildcardsOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], w)
+	offset += 4
+}
+
+func (this StdMatch) WildcardsOffset() int {
+	offset := 8
+	return offset
+}
+
+func (this StdMatch) DlSrc() [6]uint8 {
+	offset := this.DlSrcOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 6
+	i := 0
+	var res [6]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StdMatch) SetDlSrc(d [6]uint8) {
+	offset := this.DlSrcOffset()
+	for _, e := range d {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StdMatch) DlSrcOffset() int {
+	offset := 12
+	return offset
+}
+
+func (this StdMatch) DlSrcMask() [6]uint8 {
+	offset := this.DlSrcMaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 6
+	i := 0
+	var res [6]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StdMatch) SetDlSrcMask(d [6]uint8) {
+	offset := this.DlSrcMaskOffset()
+	for _, e := range d {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StdMatch) DlSrcMaskOffset() int {
+	offset := 18
+	return offset
+}
+
+func (this StdMatch) DlDst() [6]uint8 {
+	offset := this.DlDstOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 6
+	i := 0
+	var res [6]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StdMatch) SetDlDst(d [6]uint8) {
+	offset := this.DlDstOffset()
+	for _, e := range d {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StdMatch) DlDstOffset() int {
+	offset := 24
+	return offset
+}
+
+func (this StdMatch) DlDstMask() [6]uint8 {
+	offset := this.DlDstMaskOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 6
+	i := 0
+	var res [6]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StdMatch) SetDlDstMask(d [6]uint8) {
+	offset := this.DlDstMaskOffset()
+	for _, e := range d {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StdMatch) DlDstMaskOffset() int {
+	offset := 30
+	return offset
+}
+
+func (this StdMatch) DlVlan() uint16 {
+	offset := this.DlVlanOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetDlVlan(d uint16) {
+	offset := this.DlVlanOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], d)
+	offset += 2
+}
+
+func (this StdMatch) DlVlanOffset() int {
+	offset := 36
+	return offset
+}
+
+func (this StdMatch) DlVlanPcp() uint8 {
+	offset := this.DlVlanPcpOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *StdMatch) SetDlVlanPcp(d uint8) {
+	offset := this.DlVlanPcpOffset()
+	this.Buf[offset] = byte(d)
+	offset++
+}
+
+func (this StdMatch) DlVlanPcpOffset() int {
+	offset := 38
+	return offset
+}
+
+func (this StdMatch) Pad1() uint8 {
+	offset := this.Pad1Offset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *StdMatch) SetPad1(p uint8) {
+	offset := this.Pad1Offset()
+	this.Buf[offset] = byte(p)
+	offset++
+}
+
+func (this StdMatch) Pad1Offset() int {
+	offset := 39
+	return offset
+}
+
+func (this StdMatch) DlType() uint16 {
+	offset := this.DlTypeOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetDlType(d uint16) {
+	offset := this.DlTypeOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], d)
+	offset += 2
+}
+
+func (this StdMatch) DlTypeOffset() int {
+	offset := 40
+	return offset
+}
+
+func (this StdMatch) NwTos() uint8 {
+	offset := this.NwTosOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *StdMatch) SetNwTos(n uint8) {
+	offset := this.NwTosOffset()
+	this.Buf[offset] = byte(n)
+	offset++
+}
+
+func (this StdMatch) NwTosOffset() int {
+	offset := 42
+	return offset
+}
+
+func (this StdMatch) NwProto() uint8 {
+	offset := this.NwProtoOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *StdMatch) SetNwProto(n uint8) {
+	offset := this.NwProtoOffset()
+	this.Buf[offset] = byte(n)
+	offset++
+}
+
+func (this StdMatch) NwProtoOffset() int {
+	offset := 43
+	return offset
+}
+
+func (this StdMatch) NwSrc() uint32 {
+	offset := this.NwSrcOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetNwSrc(n uint32) {
+	offset := this.NwSrcOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], n)
+	offset += 4
+}
+
+func (this StdMatch) NwSrcOffset() int {
+	offset := 44
+	return offset
+}
+
+func (this StdMatch) NwSrcMask() uint32 {
+	offset := this.NwSrcMaskOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetNwSrcMask(n uint32) {
+	offset := this.NwSrcMaskOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], n)
+	offset += 4
+}
+
+func (this StdMatch) NwSrcMaskOffset() int {
+	offset := 48
+	return offset
+}
+
+func (this StdMatch) NwDst() uint32 {
+	offset := this.NwDstOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetNwDst(n uint32) {
+	offset := this.NwDstOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], n)
+	offset += 4
+}
+
+func (this StdMatch) NwDstOffset() int {
+	offset := 52
+	return offset
+}
+
+func (this StdMatch) NwDstMask() uint32 {
+	offset := this.NwDstMaskOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetNwDstMask(n uint32) {
+	offset := this.NwDstMaskOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], n)
+	offset += 4
+}
+
+func (this StdMatch) NwDstMaskOffset() int {
+	offset := 56
+	return offset
+}
+
+func (this StdMatch) TpSrc() uint16 {
+	offset := this.TpSrcOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetTpSrc(t uint16) {
+	offset := this.TpSrcOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], t)
+	offset += 2
+}
+
+func (this StdMatch) TpSrcOffset() int {
+	offset := 60
+	return offset
+}
+
+func (this StdMatch) TpDst() uint16 {
+	offset := this.TpDstOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetTpDst(t uint16) {
+	offset := this.TpDstOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], t)
+	offset += 2
+}
+
+func (this StdMatch) TpDstOffset() int {
+	offset := 62
+	return offset
+}
+
+func (this StdMatch) MplsLabel() uint32 {
+	offset := this.MplsLabelOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetMplsLabel(m uint32) {
+	offset := this.MplsLabelOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], m)
+	offset += 4
+}
+
+func (this StdMatch) MplsLabelOffset() int {
+	offset := 64
+	return offset
+}
+
+func (this StdMatch) MplsTc() uint8 {
+	offset := this.MplsTcOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *StdMatch) SetMplsTc(m uint8) {
+	offset := this.MplsTcOffset()
+	this.Buf[offset] = byte(m)
+	offset++
+}
+
+func (this StdMatch) MplsTcOffset() int {
+	offset := 68
+	return offset
+}
+
+func (this StdMatch) Pad2() [3]uint8 {
+	offset := this.Pad2Offset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 3
+	i := 0
+	var res [3]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StdMatch) SetPad2(p [3]uint8) {
+	offset := this.Pad2Offset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StdMatch) Pad2Offset() int {
+	offset := 69
+	return offset
+}
+
+func (this StdMatch) Metadata() uint64 {
+	offset := this.MetadataOffset()
+	res := binary.BigEndian.Uint64(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetMetadata(m uint64) {
+	offset := this.MetadataOffset()
+	binary.BigEndian.PutUint64(this.Buf[offset:], m)
+	offset += 8
+}
+
+func (this StdMatch) MetadataOffset() int {
+	offset := 72
+	return offset
+}
+
+func (this StdMatch) MetadataMask() uint64 {
+	offset := this.MetadataMaskOffset()
+	res := binary.BigEndian.Uint64(this.Buf[offset:])
+	return res
+}
+
+func (this *StdMatch) SetMetadataMask(m uint64) {
+	offset := this.MetadataMaskOffset()
+	binary.BigEndian.PutUint64(this.Buf[offset:], m)
+	offset += 8
+}
+
+func (this StdMatch) MetadataMaskOffset() int {
+	offset := 80
+	return offset
+}
+
+func NewOXMatchWithBuf(b []byte) OXMatch {
+	return OXMatch{Match{packet.Packet{Buf: b}}}
+}
+
+func NewOXMatch() OXMatch {
+	s := packet.PaddedSize(4, 8, 0)
+	b := make([]byte, s)
+	p := OXMatch{Match{packet.Packet{Buf: b}}}
+	p.Init()
+	return p
+}
+
+type OXMatch struct {
+	Match
+}
+
+func (this OXMatch) minSize() int {
+	return 4
+}
+
+func (this OXMatch) Clone() (OXMatch, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewOXMatch(), err
+	}
+
+	return NewOXMatchWithBuf(newBuf.Bytes()), nil
+}
+
+type OXMatchConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewOXMatchConn(c net.Conn) OXMatchConn {
+	return OXMatchConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *OXMatchConn) WriteOXMatch(pkt OXMatch) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *OXMatchConn) WriteOXMatchs(pkts []OXMatch) error {
+	for _, p := range pkts {
+		if err := c.WriteOXMatch(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *OXMatchConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *OXMatchConn) ReadOXMatch() (OXMatch, error) {
+	pkts := make([]OXMatch, 1)
+	_, err := c.ReadOXMatchs(pkts)
+	if err != nil {
+		return NewOXMatch(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *OXMatchConn) ReadOXMatchs(pkts []OXMatch) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewOXMatchWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *OXMatch) Init() {
+	this.Match.Init()
+	this.SetLength(uint16(this.minSize()))
+	// Invariants.
+	this.SetType(uint16(1)) // type
+}
+
+func (this OXMatch) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.Length())
+	return packet.PaddedSize(size, 8, 0)
+}
+
+func ToOXMatch(p Match) (OXMatch, error) {
+	if !IsOXMatch(p) {
+		return NewOXMatchWithBuf(nil), errors.New("Cannot convert to of12.OXMatch")
+	}
+
+	return NewOXMatchWithBuf(p.Buf), nil
+}
+
+func IsOXMatch(p Match) bool {
+	return p.Type() == 1 && true
+}
+
+func (this OXMatch) Fields() []OxmField {
+	offset := this.FieldsOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
 	count := this.Size() - offset
@@ -5720,25 +8678,347 @@ func (this Match) OxmFields() []OxmField {
 	return res
 }
 
-func (this *Match) AddOxmFields(o OxmField) {
-	offset := this.OxmFieldsOffset()
-	offset += this.OxmFieldsSize()
-	size := o.Size()
-	pSize := this.Size()
+func (this *OXMatch) AddFields(f OxmField) {
+	offset := this.FieldsOffset()
+	offset += this.FieldsSize()
+	size := f.Size()
+	pSize := int(this.Length())
 	this.OpenGap(offset, size, pSize)
 	this.SetLength(uint16(pSize + size))
-	copy(this.Buf[offset:], o.Buf[:size])
+	this.OpenGap(size+pSize, this.Size()-pSize, size+pSize)
+	copy(this.Buf[offset:], f.Buf[:size])
 	offset += size
 }
 
-func (this Match) OxmFieldsOffset() int {
+func (this OXMatch) FieldsOffset() int {
 	offset := 4
 	return offset
 }
 
-func (this Match) OxmFieldsSize() int {
-	offset := this.OxmFieldsOffset()
-	return this.Size() - offset
+func (this OXMatch) FieldsSize() int {
+	offset := this.FieldsOffset()
+	size := int(this.Length())
+	return size - offset
+}
+
+func NewPacketInWithBuf(b []byte) PacketIn {
+	return PacketIn{Header12{of.Header{packet.Packet{Buf: b}}}}
+}
+
+func NewPacketIn() PacketIn {
+	s := 18
+	b := make([]byte, s)
+	p := PacketIn{Header12{of.Header{packet.Packet{Buf: b}}}}
+	p.Init()
+	return p
+}
+
+type PacketIn struct {
+	Header12
+}
+
+func (this PacketIn) minSize() int {
+	return 18
+}
+
+func (this PacketIn) Clone() (PacketIn, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewPacketIn(), err
+	}
+
+	return NewPacketInWithBuf(newBuf.Bytes()), nil
+}
+
+type PacketInConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewPacketInConn(c net.Conn) PacketInConn {
+	return PacketInConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *PacketInConn) WritePacketIn(pkt PacketIn) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *PacketInConn) WritePacketIns(pkts []PacketIn) error {
+	for _, p := range pkts {
+		if err := c.WritePacketIn(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *PacketInConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *PacketInConn) ReadPacketIn() (PacketIn, error) {
+	pkts := make([]PacketIn, 1)
+	_, err := c.ReadPacketIns(pkts)
+	if err != nil {
+		return NewPacketIn(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *PacketInConn) ReadPacketIns(pkts []PacketIn) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewPacketInWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *PacketIn) Init() {
+	this.Header12.Init()
+	this.SetLength(uint16(this.minSize()))
+	// Invariants.
+	this.SetType(uint8(10))   // type
+	this.SetVersion(uint8(3)) // version
+}
+
+func (this PacketIn) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.Length())
+	return size
+}
+
+func ToPacketIn(p Header12) (PacketIn, error) {
+	if !IsPacketIn(p) {
+		return NewPacketInWithBuf(nil), errors.New("Cannot convert to of12.PacketIn")
+	}
+
+	return NewPacketInWithBuf(p.Buf), nil
+}
+
+func IsPacketIn(p Header12) bool {
+	return p.Type() == 10 && true
+}
+
+func (this PacketIn) BufferId() uint32 {
+	offset := this.BufferIdOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *PacketIn) SetBufferId(b uint32) {
+	offset := this.BufferIdOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], b)
+	offset += 4
+}
+
+func (this PacketIn) BufferIdOffset() int {
+	offset := 8
+	return offset
+}
+
+func (this PacketIn) TotalLen() uint16 {
+	offset := this.TotalLenOffset()
+	res := binary.BigEndian.Uint16(this.Buf[offset:])
+	return res
+}
+
+func (this *PacketIn) SetTotalLen(t uint16) {
+	offset := this.TotalLenOffset()
+	binary.BigEndian.PutUint16(this.Buf[offset:], t)
+	offset += 2
+}
+
+func (this PacketIn) TotalLenOffset() int {
+	offset := 12
+	return offset
+}
+
+func (this PacketIn) Reason() uint8 {
+	offset := this.ReasonOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *PacketIn) SetReason(r uint8) {
+	offset := this.ReasonOffset()
+	this.Buf[offset] = byte(r)
+	offset++
+}
+
+func (this PacketIn) ReasonOffset() int {
+	offset := 14
+	return offset
+}
+
+func (this PacketIn) TableId() uint8 {
+	offset := this.TableIdOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *PacketIn) SetTableId(t uint8) {
+	offset := this.TableIdOffset()
+	this.Buf[offset] = byte(t)
+	offset++
+}
+
+func (this PacketIn) TableIdOffset() int {
+	offset := 15
+	return offset
+}
+
+func (this PacketIn) Match() Match {
+	offset := this.MatchOffset()
+	res := NewMatchWithBuf(this.Buf[offset:])
+	return res
+}
+
+func (this *PacketIn) SetMatch(m Match) {
+	offset := this.MatchOffset()
+	if this.MatchSize() != 0 {
+		panic("Repeated field match is already set.")
+	}
+	size := m.Size()
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
+	copy(this.Buf[offset:], m.Buf[:m.Size()])
+	offset += m.Size()
+}
+
+func (this PacketIn) MatchOffset() int {
+	offset := 16
+	return offset
+}
+
+func (this PacketIn) MatchSize() int {
+	offset := this.MatchOffset()
+	if offset >= this.Size() {
+		return 0
+	}
+	return this.Match().Size()
+}
+
+func (this PacketIn) Pad() [2]uint8 {
+	offset := this.PadOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 2
+	i := 0
+	var res [2]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *PacketIn) SetPad(p [2]uint8) {
+	offset := this.PadOffset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this PacketIn) PadOffset() int {
+	offset := 16
+	offset += this.MatchSize()
+	return offset
+}
+
+func (this PacketIn) Data() []uint8 {
+	offset := this.DataOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	return []uint8(this.Buf[offset : offset+size])
+}
+
+func (this *PacketIn) AddData(d uint8) {
+	offset := this.DataOffset()
+	offset += this.DataSize()
+	size := 1
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
+	this.Buf[offset] = byte(d)
+	offset++
+}
+
+func (this PacketIn) DataOffset() int {
+	offset := 18
+	offset += this.MatchSize()
+	return offset
+}
+
+func (this PacketIn) DataSize() int {
+	offset := this.DataOffset()
+	size := this.Size()
+	return size - offset
 }
 
 func NewFlowModWithBuf(b []byte) FlowMod {
@@ -6187,7 +9467,8 @@ func (this FlowMod) InstructionsOffset() int {
 
 func (this FlowMod) InstructionsSize() int {
 	offset := this.InstructionsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewFlowRemovedWithBuf(b []byte) FlowRemoved {
@@ -6805,7 +10086,8 @@ func (this ErrorMsg) DataOffset() int {
 
 func (this ErrorMsg) DataSize() int {
 	offset := this.DataOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewStatsRequestWithBuf(b []byte) StatsRequest {
@@ -6813,7 +10095,7 @@ func NewStatsRequestWithBuf(b []byte) StatsRequest {
 }
 
 func NewStatsRequest() StatsRequest {
-	s := 12
+	s := 16
 	b := make([]byte, s)
 	p := StatsRequest{Header12{of.Header{packet.Packet{Buf: b}}}}
 	p.Init()
@@ -6825,7 +10107,7 @@ type StatsRequest struct {
 }
 
 func (this StatsRequest) minSize() int {
-	return 12
+	return 16
 }
 
 func (this StatsRequest) Clone() (StatsRequest, error) {
@@ -6997,12 +10279,46 @@ func (this StatsRequest) FlagsOffset() int {
 	return offset
 }
 
+func (this StatsRequest) Pad() [4]uint8 {
+	offset := this.PadOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StatsRequest) SetPad(p [4]uint8) {
+	offset := this.PadOffset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StatsRequest) PadOffset() int {
+	offset := 12
+	return offset
+}
+
 func NewStatsReplyWithBuf(b []byte) StatsReply {
 	return StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}
 }
 
 func NewStatsReply() StatsReply {
-	s := 12
+	s := 16
 	b := make([]byte, s)
 	p := StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}
 	p.Init()
@@ -7014,7 +10330,7 @@ type StatsReply struct {
 }
 
 func (this StatsReply) minSize() int {
-	return 12
+	return 16
 }
 
 func (this StatsReply) Clone() (StatsReply, error) {
@@ -7186,12 +10502,46 @@ func (this StatsReply) FlagsOffset() int {
 	return offset
 }
 
+func (this StatsReply) Pad() [4]uint8 {
+	offset := this.PadOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *StatsReply) SetPad(p [4]uint8) {
+	offset := this.PadOffset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this StatsReply) PadOffset() int {
+	offset := 12
+	return offset
+}
+
 func NewDescStatsWithBuf(b []byte) DescStats {
 	return DescStats{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 }
 
 func NewDescStats() DescStats {
-	s := 1068
+	s := 1072
 	b := make([]byte, s)
 	p := DescStats{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -7203,7 +10553,7 @@ type DescStats struct {
 }
 
 func (this DescStats) minSize() int {
-	return 1068
+	return 1072
 }
 
 func (this DescStats) Clone() (DescStats, error) {
@@ -7372,7 +10722,7 @@ func (this *DescStats) SetMfrDesc(m [256]byte) {
 }
 
 func (this DescStats) MfrDescOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -7406,7 +10756,7 @@ func (this *DescStats) SetHwDesc(h [256]byte) {
 }
 
 func (this DescStats) HwDescOffset() int {
-	offset := 268
+	offset := 272
 	return offset
 }
 
@@ -7440,7 +10790,7 @@ func (this *DescStats) SetSwDesc(s [256]byte) {
 }
 
 func (this DescStats) SwDescOffset() int {
-	offset := 524
+	offset := 528
 	return offset
 }
 
@@ -7474,7 +10824,7 @@ func (this *DescStats) SetSerialNum(s [32]byte) {
 }
 
 func (this DescStats) SerialNumOffset() int {
-	offset := 780
+	offset := 784
 	return offset
 }
 
@@ -7508,7 +10858,7 @@ func (this *DescStats) SetDpDesc(d [256]byte) {
 }
 
 func (this DescStats) DpDescOffset() int {
-	offset := 812
+	offset := 816
 	return offset
 }
 
@@ -7517,7 +10867,7 @@ func NewFlowStatsRequestWithBuf(b []byte) FlowStatsRequest {
 }
 
 func NewFlowStatsRequest() FlowStatsRequest {
-	s := 16
+	s := 48
 	b := make([]byte, s)
 	p := FlowStatsRequest{StatsRequest{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -7529,7 +10879,7 @@ type FlowStatsRequest struct {
 }
 
 func (this FlowStatsRequest) minSize() int {
-	return 16
+	return 48
 }
 
 func (this FlowStatsRequest) Clone() (FlowStatsRequest, error) {
@@ -7668,6 +11018,159 @@ func IsFlowStatsRequest(p StatsRequest) bool {
 	return p.StatsType() == 1 && true
 }
 
+func (this FlowStatsRequest) TableId() uint8 {
+	offset := this.TableIdOffset()
+	res := uint8(this.Buf[offset])
+	return res
+}
+
+func (this *FlowStatsRequest) SetTableId(t uint8) {
+	offset := this.TableIdOffset()
+	this.Buf[offset] = byte(t)
+	offset++
+}
+
+func (this FlowStatsRequest) TableIdOffset() int {
+	offset := 16
+	return offset
+}
+
+func (this FlowStatsRequest) Pad1() [3]uint8 {
+	offset := this.Pad1Offset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 3
+	i := 0
+	var res [3]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *FlowStatsRequest) SetPad1(p [3]uint8) {
+	offset := this.Pad1Offset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this FlowStatsRequest) Pad1Offset() int {
+	offset := 17
+	return offset
+}
+
+func (this FlowStatsRequest) OutPort() uint32 {
+	offset := this.OutPortOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *FlowStatsRequest) SetOutPort(o uint32) {
+	offset := this.OutPortOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], o)
+	offset += 4
+}
+
+func (this FlowStatsRequest) OutPortOffset() int {
+	offset := 20
+	return offset
+}
+
+func (this FlowStatsRequest) OutGroup() uint32 {
+	offset := this.OutGroupOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *FlowStatsRequest) SetOutGroup(o uint32) {
+	offset := this.OutGroupOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], o)
+	offset += 4
+}
+
+func (this FlowStatsRequest) OutGroupOffset() int {
+	offset := 24
+	return offset
+}
+
+func (this FlowStatsRequest) Pad2() [4]uint8 {
+	offset := this.Pad2Offset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *FlowStatsRequest) SetPad2(p [4]uint8) {
+	offset := this.Pad2Offset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this FlowStatsRequest) Pad2Offset() int {
+	offset := 28
+	return offset
+}
+
+func (this FlowStatsRequest) Cookie() uint64 {
+	offset := this.CookieOffset()
+	res := binary.BigEndian.Uint64(this.Buf[offset:])
+	return res
+}
+
+func (this *FlowStatsRequest) SetCookie(c uint64) {
+	offset := this.CookieOffset()
+	binary.BigEndian.PutUint64(this.Buf[offset:], c)
+	offset += 8
+}
+
+func (this FlowStatsRequest) CookieOffset() int {
+	offset := 32
+	return offset
+}
+
+func (this FlowStatsRequest) CookieMask() uint64 {
+	offset := this.CookieMaskOffset()
+	res := binary.BigEndian.Uint64(this.Buf[offset:])
+	return res
+}
+
+func (this *FlowStatsRequest) SetCookieMask(c uint64) {
+	offset := this.CookieMaskOffset()
+	binary.BigEndian.PutUint64(this.Buf[offset:], c)
+	offset += 8
+}
+
+func (this FlowStatsRequest) CookieMaskOffset() int {
+	offset := 40
+	return offset
+}
+
 func (this FlowStatsRequest) Match() Match {
 	offset := this.MatchOffset()
 	res := NewMatchWithBuf(this.Buf[offset:])
@@ -7688,7 +11191,7 @@ func (this *FlowStatsRequest) SetMatch(m Match) {
 }
 
 func (this FlowStatsRequest) MatchOffset() int {
-	offset := 12
+	offset := 48
 	return offset
 }
 
@@ -7698,60 +11201,6 @@ func (this FlowStatsRequest) MatchSize() int {
 		return 0
 	}
 	return this.Match().Size()
-}
-
-func (this FlowStatsRequest) TableId() uint8 {
-	offset := this.TableIdOffset()
-	res := uint8(this.Buf[offset])
-	return res
-}
-
-func (this *FlowStatsRequest) SetTableId(t uint8) {
-	offset := this.TableIdOffset()
-	this.Buf[offset] = byte(t)
-	offset++
-}
-
-func (this FlowStatsRequest) TableIdOffset() int {
-	offset := 12
-	offset += this.MatchSize()
-	return offset
-}
-
-func (this FlowStatsRequest) Pad() uint8 {
-	offset := this.PadOffset()
-	res := uint8(this.Buf[offset])
-	return res
-}
-
-func (this *FlowStatsRequest) SetPad(p uint8) {
-	offset := this.PadOffset()
-	this.Buf[offset] = byte(p)
-	offset++
-}
-
-func (this FlowStatsRequest) PadOffset() int {
-	offset := 13
-	offset += this.MatchSize()
-	return offset
-}
-
-func (this FlowStatsRequest) OutPort() uint16 {
-	offset := this.OutPortOffset()
-	res := binary.BigEndian.Uint16(this.Buf[offset:])
-	return res
-}
-
-func (this *FlowStatsRequest) SetOutPort(o uint16) {
-	offset := this.OutPortOffset()
-	binary.BigEndian.PutUint16(this.Buf[offset:], o)
-	offset += 2
-}
-
-func (this FlowStatsRequest) OutPortOffset() int {
-	offset := 14
-	offset += this.MatchSize()
-	return offset
 }
 
 func NewFlowStatsWithBuf(b []byte) FlowStats {
@@ -7957,38 +11406,6 @@ func (this FlowStats) PadOffset() int {
 	return offset
 }
 
-func (this FlowStats) Match() Match {
-	offset := this.MatchOffset()
-	res := NewMatchWithBuf(this.Buf[offset:])
-	return res
-}
-
-func (this *FlowStats) SetMatch(m Match) {
-	offset := this.MatchOffset()
-	if this.MatchSize() != 0 {
-		panic("Repeated field match is already set.")
-	}
-	size := m.Size()
-	pSize := this.Size()
-	this.OpenGap(offset, size, pSize)
-	this.SetLength(uint16(pSize + size))
-	copy(this.Buf[offset:], m.Buf[:m.Size()])
-	offset += m.Size()
-}
-
-func (this FlowStats) MatchOffset() int {
-	offset := 4
-	return offset
-}
-
-func (this FlowStats) MatchSize() int {
-	offset := this.MatchOffset()
-	if offset >= this.Size() {
-		return 0
-	}
-	return this.Match().Size()
-}
-
 func (this FlowStats) DurationSec() uint32 {
 	offset := this.DurationSecOffset()
 	res := binary.BigEndian.Uint32(this.Buf[offset:])
@@ -8003,7 +11420,6 @@ func (this *FlowStats) SetDurationSec(d uint32) {
 
 func (this FlowStats) DurationSecOffset() int {
 	offset := 4
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8021,7 +11437,6 @@ func (this *FlowStats) SetDurationNsec(d uint32) {
 
 func (this FlowStats) DurationNsecOffset() int {
 	offset := 8
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8039,7 +11454,6 @@ func (this *FlowStats) SetPriority(p uint16) {
 
 func (this FlowStats) PriorityOffset() int {
 	offset := 12
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8057,7 +11471,6 @@ func (this *FlowStats) SetIdleTimeout(i uint16) {
 
 func (this FlowStats) IdleTimeoutOffset() int {
 	offset := 14
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8075,7 +11488,6 @@ func (this *FlowStats) SetHardTimeout(h uint16) {
 
 func (this FlowStats) HardTimeoutOffset() int {
 	offset := 16
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8110,7 +11522,6 @@ func (this *FlowStats) SetPad2(p [6]uint8) {
 
 func (this FlowStats) Pad2Offset() int {
 	offset := 18
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8128,7 +11539,6 @@ func (this *FlowStats) SetCookie(c uint64) {
 
 func (this FlowStats) CookieOffset() int {
 	offset := 24
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8146,7 +11556,6 @@ func (this *FlowStats) SetPacketCount(p uint64) {
 
 func (this FlowStats) PacketCountOffset() int {
 	offset := 32
-	offset += this.MatchSize()
 	return offset
 }
 
@@ -8164,18 +11573,49 @@ func (this *FlowStats) SetByteCount(b uint64) {
 
 func (this FlowStats) ByteCountOffset() int {
 	offset := 40
-	offset += this.MatchSize()
 	return offset
 }
 
-func (this FlowStats) Actions() []Action {
-	offset := this.ActionsOffset()
+func (this FlowStats) Match() Match {
+	offset := this.MatchOffset()
+	res := NewMatchWithBuf(this.Buf[offset:])
+	return res
+}
+
+func (this *FlowStats) SetMatch(m Match) {
+	offset := this.MatchOffset()
+	if this.MatchSize() != 0 {
+		panic("Repeated field match is already set.")
+	}
+	size := m.Size()
+	pSize := this.Size()
+	this.OpenGap(offset, size, pSize)
+	this.SetLength(uint16(pSize + size))
+	copy(this.Buf[offset:], m.Buf[:m.Size()])
+	offset += m.Size()
+}
+
+func (this FlowStats) MatchOffset() int {
+	offset := 48
+	return offset
+}
+
+func (this FlowStats) MatchSize() int {
+	offset := this.MatchOffset()
+	if offset >= this.Size() {
+		return 0
+	}
+	return this.Match().Size()
+}
+
+func (this FlowStats) Instructions() []Instruction {
+	offset := this.InstructionsOffset()
 	packet_size := this.Size()
 	size := packet_size - offset
 	count := this.Size() - offset
-	var res []Action
+	var res []Instruction
 	for size > 0 && count > 0 && packet_size > offset {
-		elem := NewActionWithBuf(this.Buf[offset:])
+		elem := NewInstructionWithBuf(this.Buf[offset:])
 		if elem.Size() > size {
 			break
 		}
@@ -8187,26 +11627,27 @@ func (this FlowStats) Actions() []Action {
 	return res
 }
 
-func (this *FlowStats) AddActions(a Action) {
-	offset := this.ActionsOffset()
-	offset += this.ActionsSize()
-	size := a.Size()
+func (this *FlowStats) AddInstructions(i Instruction) {
+	offset := this.InstructionsOffset()
+	offset += this.InstructionsSize()
+	size := i.Size()
 	pSize := this.Size()
 	this.OpenGap(offset, size, pSize)
 	this.SetLength(uint16(pSize + size))
-	copy(this.Buf[offset:], a.Buf[:size])
+	copy(this.Buf[offset:], i.Buf[:size])
 	offset += size
 }
 
-func (this FlowStats) ActionsOffset() int {
+func (this FlowStats) InstructionsOffset() int {
 	offset := 48
 	offset += this.MatchSize()
 	return offset
 }
 
-func (this FlowStats) ActionsSize() int {
-	offset := this.ActionsOffset()
-	return this.Size() - offset
+func (this FlowStats) InstructionsSize() int {
+	offset := this.InstructionsOffset()
+	size := this.Size()
+	return size - offset
 }
 
 func NewFlowStatsReplyWithBuf(b []byte) FlowStatsReply {
@@ -8214,7 +11655,7 @@ func NewFlowStatsReplyWithBuf(b []byte) FlowStatsReply {
 }
 
 func NewFlowStatsReply() FlowStatsReply {
-	s := 12
+	s := 16
 	b := make([]byte, s)
 	p := FlowStatsReply{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -8226,7 +11667,7 @@ type FlowStatsReply struct {
 }
 
 func (this FlowStatsReply) minSize() int {
-	return 12
+	return 16
 }
 
 func (this FlowStatsReply) Clone() (FlowStatsReply, error) {
@@ -8396,13 +11837,14 @@ func (this *FlowStatsReply) AddFlowStats(f FlowStats) {
 }
 
 func (this FlowStatsReply) FlowStatsOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
 func (this FlowStatsReply) FlowStatsSize() int {
 	offset := this.FlowStatsOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewAggregateStatsRequestWithBuf(b []byte) AggregateStatsRequest {
@@ -8410,7 +11852,7 @@ func NewAggregateStatsRequestWithBuf(b []byte) AggregateStatsRequest {
 }
 
 func NewAggregateStatsRequest() AggregateStatsRequest {
-	s := 16
+	s := 20
 	b := make([]byte, s)
 	p := AggregateStatsRequest{StatsRequest{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -8422,7 +11864,7 @@ type AggregateStatsRequest struct {
 }
 
 func (this AggregateStatsRequest) minSize() int {
-	return 16
+	return 20
 }
 
 func (this AggregateStatsRequest) Clone() (AggregateStatsRequest, error) {
@@ -8581,7 +12023,7 @@ func (this *AggregateStatsRequest) SetMatch(m Match) {
 }
 
 func (this AggregateStatsRequest) MatchOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -8606,7 +12048,7 @@ func (this *AggregateStatsRequest) SetTableId(t uint8) {
 }
 
 func (this AggregateStatsRequest) TableIdOffset() int {
-	offset := 12
+	offset := 16
 	offset += this.MatchSize()
 	return offset
 }
@@ -8624,7 +12066,7 @@ func (this *AggregateStatsRequest) SetPad(p uint8) {
 }
 
 func (this AggregateStatsRequest) PadOffset() int {
-	offset := 13
+	offset := 17
 	offset += this.MatchSize()
 	return offset
 }
@@ -8642,7 +12084,7 @@ func (this *AggregateStatsRequest) SetOutPort(o uint16) {
 }
 
 func (this AggregateStatsRequest) OutPortOffset() int {
-	offset := 14
+	offset := 18
 	offset += this.MatchSize()
 	return offset
 }
@@ -8652,7 +12094,7 @@ func NewAggregateStatsReplyWithBuf(b []byte) AggregateStatsReply {
 }
 
 func NewAggregateStatsReply() AggregateStatsReply {
-	s := 36
+	s := 40
 	b := make([]byte, s)
 	p := AggregateStatsReply{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -8664,7 +12106,7 @@ type AggregateStatsReply struct {
 }
 
 func (this AggregateStatsReply) minSize() int {
-	return 36
+	return 40
 }
 
 func (this AggregateStatsReply) Clone() (AggregateStatsReply, error) {
@@ -8816,7 +12258,7 @@ func (this *AggregateStatsReply) SetPacketCount(p uint64) {
 }
 
 func (this AggregateStatsReply) PacketCountOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -8833,7 +12275,7 @@ func (this *AggregateStatsReply) SetByteCount(b uint64) {
 }
 
 func (this AggregateStatsReply) ByteCountOffset() int {
-	offset := 20
+	offset := 24
 	return offset
 }
 
@@ -8850,7 +12292,7 @@ func (this *AggregateStatsReply) SetFlowCount(f uint32) {
 }
 
 func (this AggregateStatsReply) FlowCountOffset() int {
-	offset := 28
+	offset := 32
 	return offset
 }
 
@@ -8884,7 +12326,7 @@ func (this *AggregateStatsReply) SetPad(p [4]uint8) {
 }
 
 func (this AggregateStatsReply) PadOffset() int {
-	offset := 32
+	offset := 36
 	return offset
 }
 
@@ -8893,7 +12335,7 @@ func NewTableStatsWithBuf(b []byte) TableStats {
 }
 
 func NewTableStats() TableStats {
-	s := 76
+	s := 80
 	b := make([]byte, s)
 	p := TableStats{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -8905,7 +12347,7 @@ type TableStats struct {
 }
 
 func (this TableStats) minSize() int {
-	return 76
+	return 80
 }
 
 func (this TableStats) Clone() (TableStats, error) {
@@ -9057,7 +12499,7 @@ func (this *TableStats) SetTableId(t uint8) {
 }
 
 func (this TableStats) TableIdOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -9091,7 +12533,7 @@ func (this *TableStats) SetPad(p [3]uint8) {
 }
 
 func (this TableStats) PadOffset() int {
-	offset := 13
+	offset := 17
 	return offset
 }
 
@@ -9125,7 +12567,7 @@ func (this *TableStats) SetName(n [32]byte) {
 }
 
 func (this TableStats) NameOffset() int {
-	offset := 16
+	offset := 20
 	return offset
 }
 
@@ -9142,7 +12584,7 @@ func (this *TableStats) SetWildcards(w uint32) {
 }
 
 func (this TableStats) WildcardsOffset() int {
-	offset := 48
+	offset := 52
 	return offset
 }
 
@@ -9159,7 +12601,7 @@ func (this *TableStats) SetMaxEntries(m uint32) {
 }
 
 func (this TableStats) MaxEntriesOffset() int {
-	offset := 52
+	offset := 56
 	return offset
 }
 
@@ -9176,7 +12618,7 @@ func (this *TableStats) SetActiveCount(a uint32) {
 }
 
 func (this TableStats) ActiveCountOffset() int {
-	offset := 56
+	offset := 60
 	return offset
 }
 
@@ -9193,7 +12635,7 @@ func (this *TableStats) SetLookupCount(l uint64) {
 }
 
 func (this TableStats) LookupCountOffset() int {
-	offset := 60
+	offset := 64
 	return offset
 }
 
@@ -9210,7 +12652,7 @@ func (this *TableStats) SetMatchedCount(m uint64) {
 }
 
 func (this TableStats) MatchedCountOffset() int {
-	offset := 68
+	offset := 72
 	return offset
 }
 
@@ -9219,7 +12661,7 @@ func NewPortStatsRequestWithBuf(b []byte) PortStatsRequest {
 }
 
 func NewPortStatsRequest() PortStatsRequest {
-	s := 20
+	s := 24
 	b := make([]byte, s)
 	p := PortStatsRequest{StatsRequest{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -9231,7 +12673,7 @@ type PortStatsRequest struct {
 }
 
 func (this PortStatsRequest) minSize() int {
-	return 20
+	return 24
 }
 
 func (this PortStatsRequest) Clone() (PortStatsRequest, error) {
@@ -9383,7 +12825,7 @@ func (this *PortStatsRequest) SetPortNo(p uint16) {
 }
 
 func (this PortStatsRequest) PortNoOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -9417,7 +12859,7 @@ func (this *PortStatsRequest) SetPad(p [6]uint8) {
 }
 
 func (this PortStatsRequest) PadOffset() int {
-	offset := 14
+	offset := 18
 	return offset
 }
 
@@ -9426,7 +12868,7 @@ func NewPortStatsWithBuf(b []byte) PortStats {
 }
 
 func NewPortStats() PortStats {
-	s := 116
+	s := 120
 	b := make([]byte, s)
 	p := PortStats{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -9438,7 +12880,7 @@ type PortStats struct {
 }
 
 func (this PortStats) minSize() int {
-	return 116
+	return 120
 }
 
 func (this PortStats) Clone() (PortStats, error) {
@@ -9590,7 +13032,7 @@ func (this *PortStats) SetPortNo(p uint16) {
 }
 
 func (this PortStats) PortNoOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -9624,7 +13066,7 @@ func (this *PortStats) SetPad(p [6]uint8) {
 }
 
 func (this PortStats) PadOffset() int {
-	offset := 14
+	offset := 18
 	return offset
 }
 
@@ -9641,7 +13083,7 @@ func (this *PortStats) SetRxPackets(r uint64) {
 }
 
 func (this PortStats) RxPacketsOffset() int {
-	offset := 20
+	offset := 24
 	return offset
 }
 
@@ -9658,7 +13100,7 @@ func (this *PortStats) SetTxPackets(t uint64) {
 }
 
 func (this PortStats) TxPacketsOffset() int {
-	offset := 28
+	offset := 32
 	return offset
 }
 
@@ -9675,7 +13117,7 @@ func (this *PortStats) SetRxBytes(r uint64) {
 }
 
 func (this PortStats) RxBytesOffset() int {
-	offset := 36
+	offset := 40
 	return offset
 }
 
@@ -9692,7 +13134,7 @@ func (this *PortStats) SetTxBytes(t uint64) {
 }
 
 func (this PortStats) TxBytesOffset() int {
-	offset := 44
+	offset := 48
 	return offset
 }
 
@@ -9709,7 +13151,7 @@ func (this *PortStats) SetRxDropped(r uint64) {
 }
 
 func (this PortStats) RxDroppedOffset() int {
-	offset := 52
+	offset := 56
 	return offset
 }
 
@@ -9726,7 +13168,7 @@ func (this *PortStats) SetTxDropped(t uint64) {
 }
 
 func (this PortStats) TxDroppedOffset() int {
-	offset := 60
+	offset := 64
 	return offset
 }
 
@@ -9743,7 +13185,7 @@ func (this *PortStats) SetRxErrors(r uint64) {
 }
 
 func (this PortStats) RxErrorsOffset() int {
-	offset := 68
+	offset := 72
 	return offset
 }
 
@@ -9760,7 +13202,7 @@ func (this *PortStats) SetTxErrors(t uint64) {
 }
 
 func (this PortStats) TxErrorsOffset() int {
-	offset := 76
+	offset := 80
 	return offset
 }
 
@@ -9777,7 +13219,7 @@ func (this *PortStats) SetRxFrameErr(r uint64) {
 }
 
 func (this PortStats) RxFrameErrOffset() int {
-	offset := 84
+	offset := 88
 	return offset
 }
 
@@ -9794,7 +13236,7 @@ func (this *PortStats) SetRxOverErr(r uint64) {
 }
 
 func (this PortStats) RxOverErrOffset() int {
-	offset := 92
+	offset := 96
 	return offset
 }
 
@@ -9811,7 +13253,7 @@ func (this *PortStats) SetRxCrcErr(r uint64) {
 }
 
 func (this PortStats) RxCrcErrOffset() int {
-	offset := 100
+	offset := 104
 	return offset
 }
 
@@ -9828,7 +13270,7 @@ func (this *PortStats) SetCollisions(c uint64) {
 }
 
 func (this PortStats) CollisionsOffset() int {
-	offset := 108
+	offset := 112
 	return offset
 }
 
@@ -10686,7 +14128,8 @@ func (this PacketQueue) PropertiesOffset() int {
 
 func (this PacketQueue) PropertiesSize() int {
 	offset := this.PropertiesOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewQueueGetConfigRequestWithBuf(b []byte) QueueGetConfigRequest {
@@ -10886,7 +14329,8 @@ func (this QueueGetConfigRequest) PadOffset() int {
 
 func (this QueueGetConfigRequest) PadSize() int {
 	offset := this.PadOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewQueueGetConfigReplyWithBuf(b []byte) QueueGetConfigReply {
@@ -11132,7 +14576,8 @@ func (this QueueGetConfigReply) QueuesOffset() int {
 
 func (this QueueGetConfigReply) QueuesSize() int {
 	offset := this.QueuesOffset()
-	return this.Size() - offset
+	size := this.Size()
+	return size - offset
 }
 
 func NewQueueStatsRequestWithBuf(b []byte) QueueStatsRequest {
@@ -11140,7 +14585,7 @@ func NewQueueStatsRequestWithBuf(b []byte) QueueStatsRequest {
 }
 
 func NewQueueStatsRequest() QueueStatsRequest {
-	s := 20
+	s := 24
 	b := make([]byte, s)
 	p := QueueStatsRequest{StatsRequest{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -11152,7 +14597,7 @@ type QueueStatsRequest struct {
 }
 
 func (this QueueStatsRequest) minSize() int {
-	return 20
+	return 24
 }
 
 func (this QueueStatsRequest) Clone() (QueueStatsRequest, error) {
@@ -11304,7 +14749,7 @@ func (this *QueueStatsRequest) SetPortNo(p uint16) {
 }
 
 func (this QueueStatsRequest) PortNoOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -11338,7 +14783,7 @@ func (this *QueueStatsRequest) SetPad(p [2]uint8) {
 }
 
 func (this QueueStatsRequest) PadOffset() int {
-	offset := 14
+	offset := 18
 	return offset
 }
 
@@ -11355,7 +14800,7 @@ func (this *QueueStatsRequest) SetQueueId(q uint32) {
 }
 
 func (this QueueStatsRequest) QueueIdOffset() int {
-	offset := 16
+	offset := 20
 	return offset
 }
 
@@ -11364,7 +14809,7 @@ func NewQueueStatsWithBuf(b []byte) QueueStats {
 }
 
 func NewQueueStats() QueueStats {
-	s := 44
+	s := 48
 	b := make([]byte, s)
 	p := QueueStats{StatsReply{Header12{of.Header{packet.Packet{Buf: b}}}}}
 	p.Init()
@@ -11376,7 +14821,7 @@ type QueueStats struct {
 }
 
 func (this QueueStats) minSize() int {
-	return 44
+	return 48
 }
 
 func (this QueueStats) Clone() (QueueStats, error) {
@@ -11528,7 +14973,7 @@ func (this *QueueStats) SetPortNo(p uint16) {
 }
 
 func (this QueueStats) PortNoOffset() int {
-	offset := 12
+	offset := 16
 	return offset
 }
 
@@ -11562,7 +15007,7 @@ func (this *QueueStats) SetPad(p [2]uint8) {
 }
 
 func (this QueueStats) PadOffset() int {
-	offset := 14
+	offset := 18
 	return offset
 }
 
@@ -11579,7 +15024,7 @@ func (this *QueueStats) SetQueueId(q uint32) {
 }
 
 func (this QueueStats) QueueIdOffset() int {
-	offset := 16
+	offset := 20
 	return offset
 }
 
@@ -11596,7 +15041,7 @@ func (this *QueueStats) SetTxBytes(t uint64) {
 }
 
 func (this QueueStats) TxBytesOffset() int {
-	offset := 20
+	offset := 24
 	return offset
 }
 
@@ -11613,7 +15058,7 @@ func (this *QueueStats) SetTxPackets(t uint64) {
 }
 
 func (this QueueStats) TxPacketsOffset() int {
-	offset := 28
+	offset := 32
 	return offset
 }
 
@@ -11630,6 +15075,452 @@ func (this *QueueStats) SetTxErrors(t uint64) {
 }
 
 func (this QueueStats) TxErrorsOffset() int {
-	offset := 36
+	offset := 40
+	return offset
+}
+
+func NewRoleRequestWithBuf(b []byte) RoleRequest {
+	return RoleRequest{Header12{of.Header{packet.Packet{Buf: b}}}}
+}
+
+func NewRoleRequest() RoleRequest {
+	s := 24
+	b := make([]byte, s)
+	p := RoleRequest{Header12{of.Header{packet.Packet{Buf: b}}}}
+	p.Init()
+	return p
+}
+
+type RoleRequest struct {
+	Header12
+}
+
+func (this RoleRequest) minSize() int {
+	return 24
+}
+
+func (this RoleRequest) Clone() (RoleRequest, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewRoleRequest(), err
+	}
+
+	return NewRoleRequestWithBuf(newBuf.Bytes()), nil
+}
+
+type RoleRequestConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewRoleRequestConn(c net.Conn) RoleRequestConn {
+	return RoleRequestConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *RoleRequestConn) WriteRoleRequest(pkt RoleRequest) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *RoleRequestConn) WriteRoleRequests(pkts []RoleRequest) error {
+	for _, p := range pkts {
+		if err := c.WriteRoleRequest(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *RoleRequestConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *RoleRequestConn) ReadRoleRequest() (RoleRequest, error) {
+	pkts := make([]RoleRequest, 1)
+	_, err := c.ReadRoleRequests(pkts)
+	if err != nil {
+		return NewRoleRequest(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *RoleRequestConn) ReadRoleRequests(pkts []RoleRequest) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewRoleRequestWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *RoleRequest) Init() {
+	this.Header12.Init()
+	this.SetLength(uint16(this.minSize()))
+	// Invariants.
+	this.SetType(uint8(24))   // type
+	this.SetVersion(uint8(3)) // version
+}
+
+func (this RoleRequest) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.Length())
+	return size
+}
+
+func ToRoleRequest(p Header12) (RoleRequest, error) {
+	if !IsRoleRequest(p) {
+		return NewRoleRequestWithBuf(nil), errors.New("Cannot convert to of12.RoleRequest")
+	}
+
+	return NewRoleRequestWithBuf(p.Buf), nil
+}
+
+func IsRoleRequest(p Header12) bool {
+	return p.Type() == 24 && true
+}
+
+func (this RoleRequest) Role() uint32 {
+	offset := this.RoleOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *RoleRequest) SetRole(r uint32) {
+	offset := this.RoleOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], r)
+	offset += 4
+}
+
+func (this RoleRequest) RoleOffset() int {
+	offset := 8
+	return offset
+}
+
+func (this RoleRequest) Pad() [4]uint8 {
+	offset := this.PadOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *RoleRequest) SetPad(p [4]uint8) {
+	offset := this.PadOffset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this RoleRequest) PadOffset() int {
+	offset := 12
+	return offset
+}
+
+func (this RoleRequest) GenerationId() uint64 {
+	offset := this.GenerationIdOffset()
+	res := binary.BigEndian.Uint64(this.Buf[offset:])
+	return res
+}
+
+func (this *RoleRequest) SetGenerationId(g uint64) {
+	offset := this.GenerationIdOffset()
+	binary.BigEndian.PutUint64(this.Buf[offset:], g)
+	offset += 8
+}
+
+func (this RoleRequest) GenerationIdOffset() int {
+	offset := 16
+	return offset
+}
+
+func NewRoleReplyWithBuf(b []byte) RoleReply {
+	return RoleReply{Header12{of.Header{packet.Packet{Buf: b}}}}
+}
+
+func NewRoleReply() RoleReply {
+	s := 24
+	b := make([]byte, s)
+	p := RoleReply{Header12{of.Header{packet.Packet{Buf: b}}}}
+	p.Init()
+	return p
+}
+
+type RoleReply struct {
+	Header12
+}
+
+func (this RoleReply) minSize() int {
+	return 24
+}
+
+func (this RoleReply) Clone() (RoleReply, error) {
+	var newBuf bytes.Buffer
+	_, err := io.CopyN(&newBuf, bytes.NewBuffer(this.Buf), int64(this.Size()))
+	if err != nil {
+		return NewRoleReply(), err
+	}
+
+	return NewRoleReplyWithBuf(newBuf.Bytes()), nil
+}
+
+type RoleReplyConn struct {
+	net.Conn
+	w      *bufio.Writer
+	buf    []byte
+	offset int
+}
+
+func NewRoleReplyConn(c net.Conn) RoleReplyConn {
+	return RoleReplyConn{
+		Conn: c,
+		w:    bufio.NewWriter(c),
+		buf:  make([]byte, packet.DefaultBufSize),
+	}
+}
+
+func (c *RoleReplyConn) WriteRoleReply(pkt RoleReply) error {
+	s := pkt.Size()
+	b := pkt.Buffer()[:s]
+	n := 0
+	for s > 0 {
+		var err error
+		if n, err = c.w.Write(b); err != nil {
+			return fmt.Errorf("Error in write: %v", err)
+		}
+		s -= n
+	}
+
+	return nil
+}
+
+func (c *RoleReplyConn) WriteRoleReplys(pkts []RoleReply) error {
+	for _, p := range pkts {
+		if err := c.WriteRoleReply(p); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (c *RoleReplyConn) Flush() error {
+	return c.w.Flush()
+}
+
+func (c *RoleReplyConn) ReadRoleReply() (RoleReply, error) {
+	pkts := make([]RoleReply, 1)
+	_, err := c.ReadRoleReplys(pkts)
+	if err != nil {
+		return NewRoleReply(), err
+	}
+
+	return pkts[0], nil
+}
+
+func (c *RoleReplyConn) ReadRoleReplys(pkts []RoleReply) (int, error) {
+	if len(c.buf) == c.offset {
+		newSize := packet.DefaultBufSize
+		if newSize < len(c.buf) {
+			newSize = 2 * len(c.buf)
+		}
+
+		buf := make([]byte, newSize)
+		copy(buf, c.buf[:c.offset])
+		c.buf = buf
+	}
+
+	r, err := c.Conn.Read(c.buf[c.offset:])
+	if err != nil {
+		return 0, err
+	}
+
+	r += c.offset
+
+	s := 0
+	n := 0
+	for i := range pkts {
+		p := NewRoleReplyWithBuf(c.buf[s:])
+
+		pSize := p.Size()
+		if pSize == 0 || r < s+pSize {
+			break
+		}
+
+		pkts[i] = p
+		s += pSize
+		n++
+	}
+
+	c.offset = r - s
+	if c.offset < 0 {
+		panic("Invalid value for offset")
+	}
+
+	c.buf = c.buf[s:]
+	return n, nil
+}
+
+func (this *RoleReply) Init() {
+	this.Header12.Init()
+	this.SetLength(uint16(this.minSize()))
+	// Invariants.
+	this.SetType(uint8(25))   // type
+	this.SetVersion(uint8(3)) // version
+}
+
+func (this RoleReply) Size() int {
+	if len(this.Buf) < this.minSize() {
+		return 0
+	}
+
+	size := int(this.Length())
+	return size
+}
+
+func ToRoleReply(p Header12) (RoleReply, error) {
+	if !IsRoleReply(p) {
+		return NewRoleReplyWithBuf(nil), errors.New("Cannot convert to of12.RoleReply")
+	}
+
+	return NewRoleReplyWithBuf(p.Buf), nil
+}
+
+func IsRoleReply(p Header12) bool {
+	return p.Type() == 25 && true
+}
+
+func (this RoleReply) Role() uint32 {
+	offset := this.RoleOffset()
+	res := binary.BigEndian.Uint32(this.Buf[offset:])
+	return res
+}
+
+func (this *RoleReply) SetRole(r uint32) {
+	offset := this.RoleOffset()
+	binary.BigEndian.PutUint32(this.Buf[offset:], r)
+	offset += 4
+}
+
+func (this RoleReply) RoleOffset() int {
+	offset := 8
+	return offset
+}
+
+func (this RoleReply) Pad() [4]uint8 {
+	offset := this.PadOffset()
+	packet_size := this.Size()
+	size := packet_size - offset
+	count := 4
+	i := 0
+	var res [4]uint8
+	for size > 0 && count > 0 && packet_size > offset {
+		elem := uint8(this.Buf[offset])
+		if size < 1 {
+			break
+		}
+		size -= 1
+		offset += 1
+		count--
+		res[i] = elem
+		i++
+	}
+	return res
+}
+
+func (this *RoleReply) SetPad(p [4]uint8) {
+	offset := this.PadOffset()
+	for _, e := range p {
+		this.Buf[offset] = byte(e)
+		offset++
+	}
+}
+
+func (this RoleReply) PadOffset() int {
+	offset := 12
+	return offset
+}
+
+func (this RoleReply) GenerationId() uint64 {
+	offset := this.GenerationIdOffset()
+	res := binary.BigEndian.Uint64(this.Buf[offset:])
+	return res
+}
+
+func (this *RoleReply) SetGenerationId(g uint64) {
+	offset := this.GenerationIdOffset()
+	binary.BigEndian.PutUint64(this.Buf[offset:], g)
+	offset += 8
+}
+
+func (this RoleReply) GenerationIdOffset() int {
+	offset := 16
 	return offset
 }
