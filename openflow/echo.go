@@ -22,6 +22,7 @@ func doHandleEchoRequest(req of.Header, res of.Header, c *ofConn) error {
 	if err != nil {
 		return err
 	}
+	c.Flush()
 	glog.V(2).Infof("Sent echo reply to %v", c.node)
 	return nil
 }

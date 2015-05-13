@@ -21,10 +21,11 @@ func (c *ofConn) handshake() (ofDriver, error) {
 		return nil, err
 	}
 
-	glog.V(2).Info("%v received hello from a switch", c.ctx)
+	glog.V(2).Info("%v received hello from a switch with OFv%v", c.ctx,
+		h.Version())
 
 	version := of.OPENFLOW_1_0
-	if h.Version() > uint8(of.OPENFLOW_1_2) {
+	if h.Version() >= uint8(of.OPENFLOW_1_2) {
 		version = of.OPENFLOW_1_2
 	}
 	h.SetVersion(uint8(version))
@@ -133,6 +134,7 @@ func (d *of12Driver) handshake(c *ofConn) error {
 	if err := c.WriteHeader(freq.Header); err != nil {
 		return err
 	}
+	c.Flush()
 
 	glog.V(2).Info("Sent features request to the switch")
 
