@@ -61,6 +61,7 @@ func (d *of10Driver) handshake(c *ofConn) error {
 	if err := c.WriteHeader(freq.Header); err != nil {
 		return err
 	}
+
 	c.Flush()
 
 	glog.V(2).Info("%v sent features request to the switch", c.ctx)

@@ -8,7 +8,7 @@ import (
 )
 
 func RegisterNOMController(h bh.Hive) {
-	app := h.NewApp("NOMController")
+	app := h.NewApp("NOMController", bh.Persistent(3))
 
 	app.Handle(nom.NodeConnected{}, nodeConnectedHandler{})
 	app.Handle(nom.NodeDisconnected{}, nodeDisconnectedHandler{})
@@ -24,6 +24,7 @@ func RegisterNOMController(h bh.Hive) {
 	app.Handle(nom.AddTrigger{}, addTriggerHandler{})
 
 	app.Handle(nom.FlowStatsQueryResult{}, Consolidator{})
+	app.Handle(nom.Pong{}, HealthChecker{})
 	app.Handle(poll{}, Poller{})
 	app.Detached(bh.NewTimer(1*time.Second, func() {
 		h.Emit(poll{})

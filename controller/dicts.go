@@ -13,13 +13,20 @@ import (
 
 const (
 	driversDict  = "ND"
+	genDict      = "GD"
 	triggersDict = "TD"
 	flowsDict    = "FD"
 )
 
+type driverInfo struct {
+	nom.Driver           // The driver.
+	LastSeen   time.Time // The timestamp of the last pong.
+	OutPings   int       // Number of pings on the fly.
+}
+
 type nodeDrivers struct {
 	Node    nom.Node
-	Drivers []nom.Driver
+	Drivers []driverInfo
 	Ports   nom.Ports
 }
 
@@ -43,19 +50,19 @@ func (nd *nodeDrivers) JSONEncode() ([]byte, error) {
 	return json.Marshal(nd)
 }
 
-func (nd nodeDrivers) hasDriver(d nom.Driver) bool {
+func (nd nodeDrivers) driver(d nom.Driver) (driverInfo, bool) {
 	for _, e := range nd.Drivers {
-		if e == d {
-			return true
+		if e.BeeID == d.BeeID {
+			return e, true
 		}
 	}
 
-	return false
+	return driverInfo{}, false
 }
 
 func (nd *nodeDrivers) removeDriver(d nom.Driver) bool {
 	for i, e := range nd.Drivers {
-		if e == d {
+		if e.BeeID == d.BeeID {
 			nd.Drivers = append(nd.Drivers[:i], nd.Drivers[i+1:]...)
 			return true
 		}
@@ -63,9 +70,21 @@ func (nd *nodeDrivers) removeDriver(d nom.Driver) bool {
 	return false
 }
 
-func (nd *nodeDrivers) master() nom.Driver {
-	// FIXME(soheil)
+func (nd *nodeDrivers) master() driverInfo {
+	if len(nd.Drivers) == 0 {
+		return driverInfo{}
+	}
+
+	for _, d := range nd.Drivers {
+		if d.Role == nom.DriverRoleMaster {
+			return d
+		}
+	}
 	return nd.Drivers[0]
+}
+
+func (nd *nodeDrivers) isMaster(d nom.Driver) bool {
+	return nd.master().BeeID == d.BeeID
 }
 
 func nodeDriversMap(node nom.UID) bh.MappedCells {
@@ -185,6 +204,7 @@ func (nf *nodeFlows) maybeAddFlow(add nom.AddFlowEntry) bool {
 }
 
 func init() {
+	gob.Register(driverInfo{})
 	gob.Register(flow{})
 	gob.Register(nodeDrivers{})
 	gob.Register(nodeFlows{})

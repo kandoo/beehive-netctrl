@@ -3,6 +3,8 @@ package controller
 import (
 	"fmt"
 
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
+
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
 )
@@ -22,9 +24,10 @@ func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		return fmt.Errorf("NOMController: node %v not found", data.Port.Node)
 	}
 
-	if n.master() != data.Driver {
-		return fmt.Errorf("NOMController: %v is ignored, %v is not master, %v is",
+	if !n.isMaster(data.Driver) {
+		glog.Warningf("NOMController: %v ignored, %v is not master, master is %v",
 			data.Port, data.Driver, n.master())
+		return nil
 	}
 
 	if p, ok := n.Ports.GetPort(data.Port.UID()); ok {

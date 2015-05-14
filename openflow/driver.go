@@ -68,15 +68,22 @@ func (d *of12Driver) handlePkt(pkt of.Header, c *ofConn) error {
 		return d.handleErrorMsg(of12.NewErrorMsgWithBuf(pkt12.Buf), c)
 	case of12.IsStatsReply(pkt12):
 		return d.handleStatsReply(of12.NewStatsReplyWithBuf(pkt12.Buf), c)
+	case of12.IsRoleReply(pkt12):
+		return d.handleRoleReply(of12.NewRoleReplyWithBuf(pkt12.Buf), c)
 	default:
 		return fmt.Errorf("received unsupported packet: %v", pkt.Type())
 	}
 }
 
 func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
-	ofh, err := d.convToOF(msg)
+	ofh, err := d.convToOF(msg, c)
 	if err != nil {
 		return err
+	}
+
+	// Means we should ignore the OpenFlow header.
+	if ofh.Size() == 0 {
+		return nil
 	}
 
 	if err := c.WriteHeader(ofh); err != nil {
@@ -88,9 +95,14 @@ func (d *of10Driver) handleMsg(msg bh.Msg, c *ofConn) error {
 }
 
 func (d *of12Driver) handleMsg(msg bh.Msg, c *ofConn) error {
-	ofh, err := d.convToOF(msg)
+	ofh, err := d.convToOF(msg, c)
 	if err != nil {
 		return err
+	}
+
+	// Means we should ignore the OpenFlow header.
+	if ofh.Size() == 0 {
+		return nil
 	}
 
 	if err := c.WriteHeader(ofh); err != nil {
@@ -118,8 +130,19 @@ func emitNodeDisconnected(c *ofConn) {
 	})
 }
 
-func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
+func (d *of10Driver) convToOF(msg bh.Msg, c *ofConn) (of.Header, error) {
 	switch data := msg.Data().(type) {
+	case nom.Ping:
+		c.ctx.ReplyTo(msg, nom.Pong{})
+		return of.Header{}, nil
+
+	case nom.ChangeDriverRole:
+		if data.Role == nom.DriverRoleSlave {
+			return of.Header{}, errors.New("of10Driver: role slave is not supported")
+		}
+
+		return of.Header{}, nil
+
 	case nom.PacketOut:
 		buf := make([]byte, 256)
 		out := of10.NewPacketOutWithBuf(buf)
@@ -202,8 +225,25 @@ func (d *of10Driver) convToOF(msg bh.Msg) (of.Header, error) {
 	}
 }
 
-func (d *of12Driver) convToOF(msg bh.Msg) (of.Header, error) {
+func (d *of12Driver) convToOF(msg bh.Msg, c *ofConn) (of.Header, error) {
 	switch data := msg.Data().(type) {
+	case nom.Ping:
+		c.ctx.ReplyTo(msg, nom.Pong{})
+		return of.Header{}, nil
+
+	case nom.ChangeDriverRole:
+		rr := of12.NewRoleRequest()
+		rr.SetGenerationId(data.Generation)
+		switch data.Role {
+		case nom.DriverRoleDefault:
+			rr.SetRole(uint32(of12.ROLE_EQUAL))
+		case nom.DriverRoleMaster:
+			rr.SetRole(uint32(of12.ROLE_MASTER))
+		case nom.DriverRoleSlave:
+			rr.SetRole(uint32(of12.ROLE_SLAVE))
+		}
+		return rr.Header, nil
+
 	case nom.PacketOut:
 		buf := make([]byte, 256)
 		out := of12.NewPacketOutWithBuf(buf)

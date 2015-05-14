@@ -1,8 +1,15 @@
 package controller
 
 import (
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
+
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
+	"github.com/kandoo/beehive/gob"
+)
+
+const (
+	MaxPings = 3
 )
 
 type Consolidator struct{}
@@ -78,12 +85,37 @@ type poll struct{}
 type Poller struct{}
 
 func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
-	ctx.Dict(driversDict).ForEach(func(k string, v []byte) {
+	dict := ctx.Dict(driversDict)
+	dict.ForEach(func(k string, v []byte) {
 		node := nom.UID(k)
 		query := nom.FlowStatsQuery{
 			Node: node,
 		}
 		sendToMaster(query, node, ctx)
+
+		nd := nodeDrivers{}
+		if err := gob.Decode(&nd, v); err != nil {
+			glog.Warningf("error in decoding drivers: %v", err)
+			return
+		}
+
+		for i := range nd.Drivers {
+			// TODO(soheil): remove the hardcoded value.
+			if nd.Drivers[i].OutPings > MaxPings {
+				ctx.SendToBee(nom.NodeDisconnected{
+					Node:   nom.Node{ID: nom.NodeID(node)},
+					Driver: nd.Drivers[i].Driver,
+				}, ctx.ID())
+				continue
+			}
+
+			ctx.SendToBee(nom.Ping{}, nd.Drivers[i].BeeID)
+			nd.Drivers[i].OutPings++
+		}
+
+		if err := dict.PutGob(k, nd); err != nil {
+			glog.Warningf("error in encoding drivers: %v", err)
+		}
 	})
 	return nil
 }

@@ -1,6 +1,7 @@
 package nom
 
 import (
+	"encoding/gob"
 	"encoding/json"
 	"fmt"
 )
@@ -26,13 +27,6 @@ type NodeJoined Node
 // NodeLeft is a message emitted when a node disconnects from its driver. It is
 // always emitted after processing NodeDisconnected in the controller.
 type NodeLeft Node
-
-// NodeRoleChanged is a message emitted when a driver's role is changed for a
-// node.
-type DriverRoleChanged struct {
-	Node   UID
-	Driver Driver
-}
 
 // Node represents a forwarding element, such as switches and routers.
 type Node struct {
@@ -103,3 +97,10 @@ type NodeCapability uint32
 const (
 	CapDriverRole NodeCapability = 1 << iota // Node can set the driver's role.
 )
+
+func init() {
+	gob.Register(NodeConnected{})
+	gob.Register(NodeDisconnected{})
+	gob.Register(NodeLeft{})
+	gob.Register(NodeJoined{})
+}

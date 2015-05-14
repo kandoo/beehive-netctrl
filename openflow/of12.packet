@@ -1140,6 +1140,13 @@ packet QueueStats(StatsReply) {
   uint64 tx_errors;      # Number of packets dropped due to overrun.
 }
 
+# Controller roles.
+enum ControllerRole {
+    ROLE_NOCHANGE = 0,    # Don't change current role.
+    ROLE_EQUAL = 1,       # Default role, full access.
+    ROLE_MASTER = 2,      # Full access, at most one master.
+    ROLE_SLAVE = 3				# Read-only access.
+}
 
 # Role request and reply message.
 @type_selector(type = Type.PT_ROLE_REQUEST)
@@ -1158,13 +1165,3 @@ packet RoleReply(Header12) {
     uint8 pad;							# Align to 64 bits.
     uint64 generation_id;   # Master Election Generation Id.
 }
-
-
-# Controller roles.
-enum ControllerRole {
-    ROLE_NOCHANGE = 0,    # Don't change current role.
-    ROLE_EQUAL = 1,       # Default role, full access.
-    ROLE_MASTER = 2,      # Full access, at most one master.
-    ROLE_SLAVE = 3				# Read-only access.
-}
-
