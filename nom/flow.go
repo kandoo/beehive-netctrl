@@ -405,6 +405,11 @@ func (m Match) String() string {
 	return fmt.Sprintf("match(%v)", strings.Join(a, ","))
 }
 
+// AddField adds the field to the list of fields in the match.
+func (m *Match) AddField(f Field) {
+	m.Fields = append(m.Fields, f)
+}
+
 // Clone creates a copy of the match.
 func (m Match) Clone() Match {
 	clone := Match{
