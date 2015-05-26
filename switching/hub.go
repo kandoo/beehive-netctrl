@@ -23,3 +23,10 @@ func (h Hub) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 func (h Hub) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
 	return bh.MappedCells{{"N", string(msg.Data().(nom.PacketIn).Node)}}
 }
+
+// RegisterHub registers the hub application on the given
+// hive with the provided options.
+func RegisterHub(h bh.Hive, opts ...bh.AppOption) {
+	app := h.NewApp("Hub", opts...)
+	app.Handle(nom.PacketIn{}, Hub{})
+}

@@ -79,3 +79,10 @@ func (h LearningSwitch) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	ctx.ReplyTo(msg, out)
 	return nil
 }
+
+// RegisterSwitch registers the learning switch application on the given
+// hive with the provided options.
+func RegisterSwitch(h bh.Hive, opts ...bh.AppOption) {
+	app := h.NewApp("Switch", opts...)
+	app.Handle(nom.PacketIn{}, LearningSwitch{})
+}
