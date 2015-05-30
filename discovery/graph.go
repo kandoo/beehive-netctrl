@@ -40,9 +40,11 @@ func (b GraphBuilderCentralized) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	k := string(nf)
 	links := make(map[nom.UID][]nom.Link)
-	dict.GetGob(k, &links)
+	if v, err := dict.Get(k); err == nil {
+		links = v.(map[nom.UID][]nom.Link)
+	}
 	links[nt.UID()] = append(links[nt.UID()], link)
-	return dict.PutGob(k, &links)
+	return dict.Put(k, links)
 }
 
 func (b GraphBuilderCentralized) Map(msg bh.Msg,
@@ -89,7 +91,9 @@ func ShortestPathCentralized(from, to nom.UID, ctx bh.RcvContext) (
 			continue
 		}
 		nodeLinks := make(map[nom.UID][]nom.Link)
-		dict.GetGob(string(nd.Node), &nodeLinks)
+		if v, err := dict.Get(string(nd.Node)); err == nil {
+			nodeLinks = v.(map[nom.UID][]nom.Link)
+		}
 		nd.Dist = visited[nd.Node].Dist
 		for _, links := range nodeLinks {
 			for _, l := range links {
@@ -126,11 +130,13 @@ func ShortestPathCentralized(from, to nom.UID, ctx bh.RcvContext) (
 // Note that this method should be used only when the GraphBuilderCentralized is
 // in use.
 func LinksCentralized(node nom.UID, ctx bh.RcvContext) (links []nom.Link) {
-	nodeLinks := make(map[nom.UID][]nom.Link)
 	dict := ctx.Dict(GraphDict)
-	if err := dict.GetGob(string(node), &nodeLinks); err != nil {
+	v, err := dict.Get(string(node))
+	if err != nil {
 		return nil
 	}
+	nodeLinks := v.(map[nom.UID][]nom.Link)
+
 	for _, nl := range nodeLinks {
 		links = append(links, nl...)
 	}
@@ -142,7 +148,7 @@ func LinksCentralized(node nom.UID, ctx bh.RcvContext) (links []nom.Link) {
 // Note that this methods should be used only when the GraphBuilderCentralized
 // is in use.
 func NodesCentralized(ctx bh.RcvContext) (nodes []nom.UID) {
-	ctx.Dict(GraphDict).ForEach(func(k string, v []byte) {
+	ctx.Dict(GraphDict).ForEach(func(k string, v interface{}) {
 		nodes = append(nodes, nom.UID(k))
 	})
 	return nodes

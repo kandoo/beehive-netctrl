@@ -40,7 +40,7 @@ func addFlowEntriesForPath(sub bh.AppCellKey, path nom.Path,
 		Timestamp:  time.Now(),
 	}
 	d := ctx.Dict(dictPath)
-	if err := d.PutGob(path.ID, &pf); err != nil {
+	if err := d.Put(path.ID, pf); err != nil {
 		glog.Fatalf("error in storing path entry: %v", err)
 	}
 
@@ -56,10 +56,13 @@ func addFlowEntriesForPath(sub bh.AppCellKey, path nom.Path,
 
 func confirmFlowEntryForPath(flow nom.FlowEntry, ctx bh.RcvContext) error {
 	d := ctx.Dict(dictPath)
-	var pf pathAndFlows
-	if err := d.GetGob(flow.ID, &pf); err != nil {
+
+	v, err := d.Get(flow.ID)
+	if err != nil {
 		return fmt.Errorf("path: flow not found: %v", err)
 	}
+
+	pf := v.(pathAndFlows)
 
 	for i := range pf.Flows {
 		if pf.Flows[i].Flow.Equals(flow) {
@@ -76,7 +79,7 @@ func confirmFlowEntryForPath(flow nom.FlowEntry, ctx bh.RcvContext) error {
 		ctx.SendToCell(nom.PathAdded{Path: pf.Path}, pf.Subscriber.App,
 			pf.Subscriber.Cell())
 	}
-	return d.PutGob(flow.ID, &pf)
+	return d.Put(flow.ID, pf)
 }
 
 func delFlowEntryFromPath(flow nom.FlowEntry, ctx bh.RcvContext) error {

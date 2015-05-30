@@ -1,6 +1,9 @@
 package nom
 
-import "strings"
+import (
+	"encoding/gob"
+	"strings"
+)
 
 // UID is a unique ID of a NOM object. Unlike UUID/GUID, this ID contains
 // redundant information about the object. For example a port's UID contains its
@@ -22,4 +25,8 @@ func UIDJoin(ids ...string) UID {
 // UIDSplit splits a UID into its smaller IDs.
 func UIDSplit(id UID) []string {
 	return strings.Split(string(id), UIDSeparator)
+}
+
+func init() {
+	gob.Register(UID(""))
 }

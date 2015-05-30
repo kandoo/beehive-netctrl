@@ -27,23 +27,30 @@ func (h LearningSwitch) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	d := ctx.Dict("mac2port")
 	srck := src.Key()
-	var p nom.UID
-	if err := d.GetGob(srck, &p); err != nil || p != in.InPort {
-		if err == nil {
+	update := false
+	if v, err := d.Get(srck); err == nil {
+		p := v.(nom.UID)
+		if p != in.InPort {
+			update = true
 			// TODO(soheil): maybe add support for multi ports.
 			glog.Infof("%v is moved from port %v to port %v", src, p, in.InPort)
 		}
+	} else {
+		update = true
+	}
 
-		if err = d.PutGob(srck, &in.InPort); err != nil {
+	if update {
+		if err := d.Put(srck, in.InPort); err != nil {
 			glog.Fatalf("cannot serialize port: %v", err)
 		}
 	}
 
 	dstk := dst.Key()
-	err := d.GetGob(dstk, &p)
+	v, err := d.Get(dstk)
 	if err != nil {
 		return h.Hub.Rcv(msg, ctx)
 	}
+	p := v.(nom.UID)
 
 	add := nom.AddFlowEntry{
 		Flow: nom.FlowEntry{

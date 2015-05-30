@@ -34,14 +34,6 @@ func (nd *nodeDrivers) UID() nom.UID {
 	return nd.Node.UID()
 }
 
-func (nd *nodeDrivers) GoDecode(b []byte) error {
-	return nom.ObjGoDecode(nd, b)
-}
-
-func (nd *nodeDrivers) GoEncode() ([]byte, error) {
-	return nom.ObjGoEncode(nd)
-}
-
 func (nd *nodeDrivers) JSONDecode(b []byte) error {
 	return json.Unmarshal(b, nd)
 }
@@ -93,13 +85,14 @@ func nodeDriversMap(node nom.UID) bh.MappedCells {
 
 func sendToMaster(msg interface{}, node nom.UID, ctx bh.RcvContext) error {
 	d := ctx.Dict(driversDict)
-	var nd nodeDrivers
-	if err := d.GetGob(string(node), &nd); err != nil {
+	v, err := d.Get(string(node))
+	if err != nil {
 		if err == state.ErrNoSuchKey {
 			return fmt.Errorf("nom: cannot find node %s", node)
 		}
 		return err
 	}
+	nd := v.(nodeDrivers)
 	ctx.SendToBee(msg, nd.master().BeeID)
 	return nil
 }

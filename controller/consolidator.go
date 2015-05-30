@@ -5,7 +5,6 @@ import (
 
 	bh "github.com/kandoo/beehive"
 	"github.com/kandoo/beehive-netctrl/nom"
-	"github.com/kandoo/beehive/gob"
 )
 
 const (
@@ -17,9 +16,13 @@ type Consolidator struct{}
 func (c Consolidator) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	res := msg.Data().(nom.FlowStatsQueryResult)
 	var nf nodeFlows
-	ctx.Dict(flowsDict).GetGob(string(res.Node), &nf)
+	if v, err := ctx.Dict(flowsDict).Get(string(res.Node)); err == nil {
+		nf = v.(nodeFlows)
+	}
 	var nt nodeTriggers
-	ctx.Dict(triggersDict).GetGob(string(res.Node), &nt)
+	if v, err := ctx.Dict(triggersDict).Get(string(res.Node)); err == nil {
+		nt = v.(nodeTriggers)
+	}
 	found := false
 	matchedFlows := make(map[int]struct{})
 	for _, stat := range res.Stats {
@@ -73,7 +76,7 @@ func (c Consolidator) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		}
 	}
 
-	return ctx.Dict(flowsDict).PutGob(string(res.Node), &nf)
+	return ctx.Dict(flowsDict).Put(string(res.Node), nf)
 }
 
 func (c Consolidator) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
@@ -86,19 +89,14 @@ type Poller struct{}
 
 func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	dict := ctx.Dict(driversDict)
-	dict.ForEach(func(k string, v []byte) {
+	dict.ForEach(func(k string, v interface{}) {
 		node := nom.UID(k)
 		query := nom.FlowStatsQuery{
 			Node: node,
 		}
 		sendToMaster(query, node, ctx)
 
-		nd := nodeDrivers{}
-		if err := gob.Decode(&nd, v); err != nil {
-			glog.Warningf("error in decoding drivers: %v", err)
-			return
-		}
-
+		nd := v.(nodeDrivers)
 		for i := range nd.Drivers {
 			// TODO(soheil): remove the hardcoded value.
 			if nd.Drivers[i].OutPings > MaxPings {
@@ -113,7 +111,7 @@ func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			nd.Drivers[i].OutPings++
 		}
 
-		if err := dict.PutGob(k, nd); err != nil {
+		if err := dict.Put(k, nd); err != nil {
 			glog.Warningf("error in encoding drivers: %v", err)
 		}
 	})

@@ -17,9 +17,11 @@ func (h nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	ddict := ctx.Dict(driversDict)
 	k := string(nc.Node.ID)
-	n := nodeDrivers{}
-	if err := nom.DictGet(ddict, k, &n); err != nil {
-		n.Node = nc.Node
+	n := nodeDrivers{
+		Node: nc.Node,
+	}
+	if v, err := ddict.Get(k); err == nil {
+		n = v.(nodeDrivers)
 	}
 
 	if _, ok := n.driver(nc.Driver); ok {
@@ -28,7 +30,9 @@ func (h nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	gdict := ctx.Dict(genDict)
 	gen := uint64(0)
-	gdict.GetGob("gen", &gen)
+	if v, err := gdict.Get("gen"); err == nil {
+		gen = v.(uint64)
+	}
 	gen++
 
 	db := nc.Driver.BeeID
@@ -51,8 +55,8 @@ func (h nodeConnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		Generation: gen,
 	}, db)
 
-	gdict.PutGob("gen", gen)
-	return ddict.PutGob(k, &n)
+	gdict.Put("gen", gen)
+	return ddict.Put(k, n)
 }
 
 func (h nodeConnectedHandler) Map(msg bh.Msg,
@@ -68,11 +72,12 @@ func (h nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	dc := msg.Data().(nom.NodeDisconnected)
 	d := ctx.Dict(driversDict)
 	k := string(dc.Node.ID)
-	nd := nodeDrivers{}
-	if err := d.GetGob(k, &nd); err != nil {
+	v, err := d.Get(k)
+	if err != nil {
 		return fmt.Errorf("driver %v disconnects from %v before connecting",
 			dc.Driver, dc.Node)
 	}
+	nd := v.(nodeDrivers)
 
 	ndd, ok := nd.driver(dc.Driver)
 	if !ok {
@@ -90,7 +95,9 @@ func (h nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		// TODO(soheil): Maybe a smarter load balacning technique.
 		gdict := ctx.Dict(genDict)
 		gen := uint64(0)
-		gdict.GetGob("gen", &gen)
+		if v, err := gdict.Get("gen"); err == nil {
+			gen = v.(uint64)
+		}
 		gen++
 
 		nd.Drivers[0].Role = nom.DriverRoleMaster
@@ -101,7 +108,7 @@ func (h nodeDisconnectedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		}, nd.master().BeeID)
 	}
 
-	return d.PutGob(k, &nd)
+	return d.Put(k, nd)
 }
 
 func (h nodeDisconnectedHandler) Map(msg bh.Msg,
@@ -118,10 +125,11 @@ func (h roleUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	ddict := ctx.Dict(driversDict)
 	k := string(ru.Node)
-	n := nodeDrivers{}
-	if err := nom.DictGet(ddict, k, &n); err != nil {
+	v, err := ddict.Get(k)
+	if err != nil {
 		return fmt.Errorf("role update received before node %v connects", ru.Node)
 	}
+	n := v.(nodeDrivers)
 
 	found := false
 	for i := range n.Drivers {
@@ -139,9 +147,11 @@ func (h roleUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	gdict := ctx.Dict(genDict)
 	gen := uint64(0)
-	gdict.GetGob("gen", &gen)
+	if v, err := gdict.Get("gen"); err == nil {
+		gen = v.(uint64)
+	}
 	if ru.Generation > gen {
-		gdict.PutGob("gen", ru.Generation)
+		gdict.Put("gen", ru.Generation)
 	}
 
 	return nil

@@ -60,16 +60,6 @@ func ParseNodeUID(id UID) NodeID {
 	return NodeID(s[0])
 }
 
-// GoDecode decodes the node from b using Gob.
-func (n *Node) GoDecode(b []byte) error {
-	return ObjGoDecode(n, b)
-}
-
-// GoEncode encodes the node into a byte array using Gob.
-func (n *Node) GoEncode() ([]byte, error) {
-	return ObjGoEncode(n)
-}
-
 // JSONDecode decodes the node from a byte array using JSON.
 func (n *Node) JSONDecode(b []byte) error {
 	return json.Unmarshal(b, n)

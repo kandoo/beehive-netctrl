@@ -81,12 +81,14 @@ func (h *nodeJoinedHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	n := nom.Node(joined)
 	k := string(n.UID())
 	var np nodePortsAndLinks
-	if err := d.GetGob(k, &np); err != nil {
+	if v, err := d.Get(k); err != nil {
 		glog.Warningf("%v rejoins", n)
+	} else {
+		np = v.(nodePortsAndLinks)
 	}
 	np.N = n
 	// TODO(soheil): Add a flow entry to forward lldp packets to the controller.
-	return d.PutGob(k, &np)
+	return d.Put(k, np)
 }
 
 func (h *nodeJoinedHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
@@ -120,13 +122,14 @@ func (h *portUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	p := nom.Port(msg.Data().(nom.PortUpdated))
 	d := ctx.Dict(nodeDict)
 	k := string(p.Node)
-	var np nodePortsAndLinks
-	if err := d.GetGob(k, &np); err != nil {
+	v, err := d.Get(k)
+	if err != nil {
 		glog.Warningf("%v added before its node", p)
 		ctx.Snooze(1 * time.Second)
 		return nil
 	}
 
+	np := v.(nodePortsAndLinks)
 	if np.hasPort(p) {
 		glog.Warningf("%v readded")
 		np.removePort(p)
@@ -135,7 +138,7 @@ func (h *portUpdateHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	sendLLDPPacket(np.N, p, ctx)
 
 	np.P = append(np.P, p)
-	return d.PutGob(k, &np)
+	return d.Put(k, np)
 }
 
 func (h *portUpdateHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {
@@ -150,12 +153,8 @@ type timeoutHandler struct{}
 
 func (h *timeoutHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	d := ctx.Dict(nodeDict)
-	d.ForEach(func(k string, v []byte) {
-		var np nodePortsAndLinks
-		if err := nom.ObjGoDecode(&np, v); err != nil {
-			glog.Errorf("Error in decoding value: %v", err)
-			return
-		}
+	d.ForEach(func(k string, v interface{}) {
+		np := v.(nodePortsAndLinks)
 		for _, p := range np.P {
 			sendLLDPPacket(np.N, p, ctx)
 		}
@@ -183,8 +182,7 @@ func (h *pktInHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 	d := ctx.Dict(nodeDict)
 	k := string(pin.Node)
-	var np nodePortsAndLinks
-	if err := d.GetGob(k, &np); err != nil {
+	if _, err := d.Get(k); err != nil {
 		return fmt.Errorf("Node %v not found", pin.Node)
 	}
 
@@ -222,10 +220,11 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	n, _ := nom.ParsePortUID(l.From)
 	d := ctx.Dict(nodeDict)
 	k := string(n)
-	var np nodePortsAndLinks
-	if err := d.GetGob(k, &np); err != nil {
+	v, err := d.Get(k)
+	if err != nil {
 		return err
 	}
+	np := v.(nodePortsAndLinks)
 
 	if oldl, ok := np.linkFrom(l.From); ok {
 		if oldl.UID() == l.UID() {
@@ -238,7 +237,7 @@ func (h *newLinkHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	glog.V(2).Infof("Link detected %v", l)
 	ctx.Emit(nom.LinkAdded(l))
 	np.L = append(np.L, l)
-	return d.PutGob(k, &np)
+	return d.Put(k, np)
 }
 
 func (h *newLinkHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {

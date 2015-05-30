@@ -10,7 +10,9 @@ type addFlowHandler struct{}
 func (h addFlowHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	add := msg.Data().(nom.AddFlowEntry)
 	var nf nodeFlows
-	ctx.Dict(flowsDict).GetGob(string(add.Flow.Node), &nf)
+	if v, err := ctx.Dict(flowsDict).Get(string(add.Flow.Node)); err == nil {
+		nf = v.(nodeFlows)
+	}
 	added := nom.FlowEntryAdded{Flow: add.Flow}
 	if nf.maybeAddFlow(add) {
 		ctx.Emit(added)
@@ -19,7 +21,7 @@ func (h addFlowHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	if !add.Subscriber.IsNil() {
 		ctx.SendToCell(added, add.Subscriber.App, add.Subscriber.Cell())
 	}
-	return ctx.Dict(flowsDict).PutGob(string(add.Flow.Node), &nf)
+	return ctx.Dict(flowsDict).Put(string(add.Flow.Node), nf)
 }
 
 func (h addFlowHandler) Map(msg bh.Msg, ctx bh.MapContext) bh.MappedCells {

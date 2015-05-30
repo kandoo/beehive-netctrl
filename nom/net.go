@@ -22,16 +22,6 @@ func ParseNetworkUID(id UID) NetworkID {
 	return NetworkID(id)
 }
 
-// GoDecode decodes the network from the byte slice using Gob.
-func (n *Network) GoDecode(b []byte) error {
-	return ObjGoDecode(n, b)
-}
-
-// GoEncode encodes the network into a byte slice using Gob.
-func (n *Network) GoEncode() ([]byte, error) {
-	return ObjGoEncode(n)
-}
-
 // JSONDecode decodes the network from a byte slice using JSON.
 func (n *Network) JSONDecode(b []byte) error {
 	return json.Unmarshal(b, n)

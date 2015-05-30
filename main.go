@@ -30,8 +30,10 @@ func main() {
 	controller.RegisterNOMController(h)
 	discovery.RegisterDiscovery(h)
 
-	// app := h.NewApp("Hub", bh.NonTransactional())
-	// app.Handle(nom.PacketIn{}, &switching.Hub{})
+	// Register a switch:
+	// switching.RegisterSwitch(h, bh.Persistent(1))
+	// or a hub:
+	// switching.RegisterHub(h, bh.NonTransactional())
 
 	h.Start()
 }

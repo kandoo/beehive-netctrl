@@ -34,16 +34,6 @@ func ParseLinkUID(id UID) (NodeID, PortID, LinkID) {
 	return NodeID(s[0]), PortID(s[1]), LinkID(s[2])
 }
 
-// GoDecode decodes the link from b using Gob.
-func (l *Link) GoDecode(b []byte) error {
-	return ObjGoDecode(l, b)
-}
-
-// GoEncode encodes the node into a byte array using Gob.
-func (l *Link) GoEncode() ([]byte, error) {
-	return ObjGoEncode(l)
-}
-
 // JSONDecode decodes the node from a byte array using JSON.
 func (l *Link) JSONDecode(b []byte) error {
 	return json.Unmarshal(b, l)

@@ -23,7 +23,9 @@ func (d Detector) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	res := msg.Data().(nom.FlowStatsQueryResult)
 
 	var flows []flow
-	ctx.Dict("Switches").GetGob(string(res.Node), &flows)
+	if v, err := ctx.Dict("Switches").Get(string(res.Node)); err == nil {
+		flows = v.([]flow)
+	}
 
 	for _, s1 := range res.Stats {
 		// Find the previous stats.
@@ -60,7 +62,7 @@ func (d Detector) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		}
 	}
 
-	return ctx.Dict("Switches").PutGob(string(res.Node), &flows)
+	return ctx.Dict("Switches").Put(string(res.Node), flows)
 }
 
 // Adder adds a node to the dictionary when it joins the network.
@@ -71,7 +73,7 @@ type Adder struct {
 func (a Adder) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	joined := msg.Data().(nom.NodeJoined)
 
-	return ctx.Dict("Switches").PutGob(string(nom.Node(joined).UID()), []flow{})
+	return ctx.Dict("Switches").Put(string(nom.Node(joined).UID()), []flow{})
 }
 
 // Poller polls the switches.
@@ -80,7 +82,7 @@ type Poller struct {
 }
 
 func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
-	ctx.Dict("Switches").ForEach(func(k string, v []byte) {
+	ctx.Dict("Switches").ForEach(func(k string, v interface{}) {
 		fmt.Printf("poller: polling switch %v\n", k)
 		ctx.Emit(nom.FlowStatsQuery{
 			Node: nom.UID(k),

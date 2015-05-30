@@ -19,10 +19,11 @@ func (h portStatusHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	data := msg.Data().(nom.PortStatusChanged)
 	dict := ctx.Dict(driversDict)
 	k := string(data.Port.Node)
-	n := nodeDrivers{}
-	if err := dict.GetGob(k, &n); err != nil {
+	v, err := dict.Get(k)
+	if err != nil {
 		return fmt.Errorf("NOMController: node %v not found", data.Port.Node)
 	}
+	n := v.(nodeDrivers)
 
 	if !n.isMaster(data.Driver) {
 		glog.Warningf("NOMController: %v ignored, %v is not master, master is %v",

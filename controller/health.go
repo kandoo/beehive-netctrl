@@ -6,7 +6,6 @@ import (
 	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 
 	bh "github.com/kandoo/beehive"
-	"github.com/kandoo/beehive/gob"
 )
 
 type HealthChecker struct{}
@@ -15,13 +14,8 @@ func (h HealthChecker) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	db := msg.From()
 	dict := ctx.Dict(driversDict)
 
-	dict.ForEach(func(k string, v []byte) {
-		nd := nodeDrivers{}
-		if err := gob.Decode(&nd, v); err != nil {
-			glog.Warningf("error in decoding drivers: %v", err)
-			return
-		}
-
+	dict.ForEach(func(k string, v interface{}) {
+		nd := v.(nodeDrivers)
 		updated := false
 		for i := range nd.Drivers {
 			if nd.Drivers[i].BeeID == db {
@@ -37,7 +31,7 @@ func (h HealthChecker) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			return
 		}
 
-		if err := dict.PutGob(k, nd); err != nil {
+		if err := dict.Put(k, nd); err != nil {
 			glog.Warningf("error in encoding drivers: %v", err)
 		}
 	})

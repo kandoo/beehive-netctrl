@@ -54,16 +54,6 @@ func NodeFromPortUID(port UID) (node UID) {
 	return n.UID()
 }
 
-// GoDecode decodes the port from b using Gob.
-func (p *Port) GoDecode(b []byte) error {
-	return ObjGoDecode(p, b)
-}
-
-// GoEncode encodes the port into a byte array using Gob.
-func (p *Port) GoEncode() ([]byte, error) {
-	return ObjGoEncode(p)
-}
-
 // JSONDecode decodes the port from a byte array using JSON.
 func (p *Port) JSONDecode(b []byte) error {
 	return json.Unmarshal(b, p)
