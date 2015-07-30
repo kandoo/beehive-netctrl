@@ -1,5 +1,5 @@
-Beehive Network Controller
-==========================
+# Beehive Network Controller ![Travis Build Status](https://api.travis-ci.org/kandoo/beehive-netctrl.svg?branch=master)
+
 This is a distributed SDN controller built on top of
 [Beehive](http://github.com/kandoo/beehive). It supports
 OpenFlow but can be easily extended for other southbound protocols.
