@@ -89,7 +89,9 @@ type Poller struct{}
 
 func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	dict := ctx.Dict(driversDict)
-	dict.ForEach(func(k string, v interface{}) {
+
+	var nds []nodeDrivers
+	dict.ForEach(func(k string, v interface{}) bool {
 		node := nom.UID(k)
 		query := nom.FlowStatsQuery{
 			Node: node,
@@ -97,6 +99,7 @@ func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		sendToMaster(query, node, ctx)
 
 		nd := v.(nodeDrivers)
+		updated := false
 		for i := range nd.Drivers {
 			// TODO(soheil): remove the hardcoded value.
 			if nd.Drivers[i].OutPings > MaxPings {
@@ -109,12 +112,21 @@ func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 
 			ctx.SendToBee(nom.Ping{}, nd.Drivers[i].BeeID)
 			nd.Drivers[i].OutPings++
+			updated = true
 		}
 
-		if err := dict.Put(k, nd); err != nil {
+		if updated {
+			nds = append(nds, nd)
+		}
+
+		return true
+	})
+
+	for _, nd := range nds {
+		if err := dict.Put(string(nd.Node.ID), nd); err != nil {
 			glog.Warningf("error in encoding drivers: %v", err)
 		}
-	})
+	}
 	return nil
 }
 

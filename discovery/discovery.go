@@ -153,11 +153,12 @@ type timeoutHandler struct{}
 
 func (h *timeoutHandler) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 	d := ctx.Dict(nodeDict)
-	d.ForEach(func(k string, v interface{}) {
+	d.ForEach(func(k string, v interface{}) bool {
 		np := v.(nodePortsAndLinks)
 		for _, p := range np.P {
 			sendLLDPPacket(np.N, p, ctx)
 		}
+		return true
 	})
 	return nil
 }

@@ -148,8 +148,9 @@ func LinksCentralized(node nom.UID, ctx bh.RcvContext) (links []nom.Link) {
 // Note that this methods should be used only when the GraphBuilderCentralized
 // is in use.
 func NodesCentralized(ctx bh.RcvContext) (nodes []nom.UID) {
-	ctx.Dict(GraphDict).ForEach(func(k string, v interface{}) {
+	ctx.Dict(GraphDict).ForEach(func(k string, v interface{}) bool {
 		nodes = append(nodes, nom.UID(k))
+		return true
 	})
 	return nodes
 }

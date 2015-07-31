@@ -82,11 +82,12 @@ type Poller struct {
 }
 
 func (p Poller) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
-	ctx.Dict("Switches").ForEach(func(k string, v interface{}) {
+	ctx.Dict("Switches").ForEach(func(k string, v interface{}) bool {
 		fmt.Printf("poller: polling switch %v\n", k)
 		ctx.Emit(nom.FlowStatsQuery{
 			Node: nom.UID(k),
 		})
+		return true
 	})
 	return nil
 }
