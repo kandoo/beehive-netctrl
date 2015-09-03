@@ -50,7 +50,7 @@ func SetReadBufLen(rlen int) Option {
 // OpenFlow configuration that can be set through command line arguments.
 func StartOpenFlow(hive bh.Hive, options ...Option) error {
 	app := hive.NewApp("OFDriver",
-		bh.LimitOutRate(bucket.Rate(*maxConnRate), 10*uint64(*maxConnRate)))
+		bh.OutRate(bucket.Rate(*maxConnRate), 10*uint64(*maxConnRate)))
 	l := &ofListener{
 		proto:      *proto,
 		addr:       *addr,
