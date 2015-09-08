@@ -70,7 +70,7 @@ func (h LearningSwitch) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			},
 		},
 	}
-	ctx.ReplyTo(msg, add)
+	ctx.Reply(msg, add)
 
 	out := nom.PacketOut{
 		Node:     in.Node,
@@ -83,7 +83,7 @@ func (h LearningSwitch) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 			},
 		},
 	}
-	ctx.ReplyTo(msg, out)
+	ctx.Reply(msg, out)
 	return nil
 }
 

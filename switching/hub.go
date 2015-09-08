@@ -16,7 +16,7 @@ func (h Hub) Rcv(msg bh.Msg, ctx bh.RcvContext) error {
 		Packet:   in.Packet,
 		Actions:  []nom.Action{nom.ActionFlood{}},
 	}
-	ctx.ReplyTo(msg, out)
+	ctx.Reply(msg, out)
 	return nil
 }
 

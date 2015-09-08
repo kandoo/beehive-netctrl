@@ -133,7 +133,7 @@ func emitNodeDisconnected(c *ofConn) {
 func (d *of10Driver) convToOF(msg bh.Msg, c *ofConn) (of.Header, error) {
 	switch data := msg.Data().(type) {
 	case nom.Ping:
-		c.ctx.ReplyTo(msg, nom.Pong{})
+		c.ctx.Reply(msg, nom.Pong{})
 		return of.Header{}, nil
 
 	case nom.ChangeDriverRole:
@@ -228,7 +228,7 @@ func (d *of10Driver) convToOF(msg bh.Msg, c *ofConn) (of.Header, error) {
 func (d *of12Driver) convToOF(msg bh.Msg, c *ofConn) (of.Header, error) {
 	switch data := msg.Data().(type) {
 	case nom.Ping:
-		c.ctx.ReplyTo(msg, nom.Pong{})
+		c.ctx.Reply(msg, nom.Pong{})
 		return of.Header{}, nil
 
 	case nom.ChangeDriverRole:
