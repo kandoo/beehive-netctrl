@@ -47,7 +47,8 @@ func (d *of10Driver) handlePkt(pkt of.Header, c *ofConn) error {
 	case of10.IsStatsReply(pkt10):
 		return d.handleStatsReply(of10.NewStatsReplyWithBuf(pkt10.Buf), c)
 	default:
-		return fmt.Errorf("Received unsupported packet: %v", pkt.Type())
+		glog.Errorf("Received unsupported packet: %v", pkt.Type())
+		return nil
 	}
 }
 
@@ -71,7 +72,8 @@ func (d *of12Driver) handlePkt(pkt of.Header, c *ofConn) error {
 	case of12.IsRoleReply(pkt12):
 		return d.handleRoleReply(of12.NewRoleReplyWithBuf(pkt12.Buf), c)
 	default:
-		return fmt.Errorf("received unsupported packet: %v", pkt.Type())
+		glog.Errorf("received unsupported packet: %v", pkt.Type())
+		return nil
 	}
 }
 
