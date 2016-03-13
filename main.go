@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"log"
 	"os"
 	"runtime/pprof"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/kandoo/beehive-netctrl/controller"
 	"github.com/kandoo/beehive-netctrl/discovery"
 	"github.com/kandoo/beehive-netctrl/openflow"
+	"github.com/kandoo/beehive/Godeps/_workspace/src/github.com/golang/glog"
 )
 
 var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to file")
@@ -19,7 +19,7 @@ func main() {
 	if *cpuprofile != "" {
 		f, err := os.Create(*cpuprofile)
 		if err != nil {
-			log.Fatal(err)
+			glog.Fatal(err)
 		}
 		pprof.StartCPUProfile(f)
 		defer pprof.StopCPUProfile()
